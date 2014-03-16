@@ -65,6 +65,8 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         """ Setup shot info tab """
         self.bEditShotInfoTab.clicked.connect(self.uiActions.on_editShotInfoTab)
         self.bCancelShotInfoTab.clicked.connect(self.uiActions.on_cancelShotInfoTab)
+        self.bOpenAssetWorkDir.clicked.connect(self.uiActions.on_openShotInfoWorkDir)
+        self.bOpenShotWorkDir.clicked.connect(self.uiActions.on_openShotInfoWorkDir)
 
     def windowInit(self):
         """ Main ui inititialize """
@@ -212,7 +214,6 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
             twTree = self.twProjectStep
         return twTree
 
-print 'toto'
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

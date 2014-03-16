@@ -332,8 +332,8 @@ class PopulateProjectTrees(object):
             dataFile = os.path.join(dataPath, '%s.py' % kwargs['nodeName'])
             newItem._dataPath = dataPath
             newItem._dataFile = dataFile
-            # if os.path.exists(dataFile):
-            #     for k, v in self.pm.readFile(dataFile).iteritems():
-            #         if k.startswith('asset') or k.startswith('shot'):
-            #             setattr(newItem, k, v)
+            if os.path.exists(dataFile):
+                for k, v in self.pm.readFile(dataFile).iteritems():
+                    if k.startswith('asset') or k.startswith('shot'):
+                        setattr(newItem, k, v)
         return newItem

@@ -408,7 +408,7 @@ class UiActions(object):
     def on_openProjectWorkDir(self):
         """ Command launch when bOpenProjectWorkDir is clicked """
         if self.pm.projectWorkDir == '':
-            root = os.path.join('F:', os.sep)
+            root = prodManager.rootDisk
         else:
             root = self.pm.projectWorkDir
         self.fdProjectWorkDir = dialog.fileDialog(fdRoot=root, fdCmd=self.ud_projectWorkDir)
@@ -509,8 +509,9 @@ class UiActions(object):
     def initShotInfoTab(self):
         """ Initialize Shot Info tab """
         self.mainUi.lShotNodeLabel.setText('')
-        self.mainUi.qfShotType.setVisible(False)
         self.mainUi.qfAssetType.setVisible(False)
+        self.mainUi.qfShotType.setVisible(False)
+        self.mainUi.bEditShotInfoTab.setEnabled(False)
         self.rf_shotInfoTabVis()
 
     def rf_shotInfoTabVis(self, state=False):
@@ -518,6 +519,9 @@ class UiActions(object):
             @param state: (bool) : Visibility state """
         #-- Init Project Label --#
         self.mainUi.bCancelShotInfoTab.setVisible(state)
+        #-- Init Asset Info --#
+        self.mainUi.leAssetWorkDir.setEnabled(state)
+        self.mainUi.bOpenAssetWorkDir.setEnabled(state)
         #-- Init Shot Info --#
         self.mainUi.leShotWorkDir.setEnabled(state)
         self.mainUi.bOpenShotWorkDir.setEnabled(state)
@@ -533,6 +537,7 @@ class UiActions(object):
         selItems = self.mainUi.twProject.selectedItems()
         if not selItems:
             self.initShotInfoTab()
+            self.mainUi.bEditShotInfoTab.setEnabled(False)
         else:
             item = selItems[0]
             checkState = self.mainUi.rbMainAsset.isChecked()
@@ -540,12 +545,16 @@ class UiActions(object):
             self.mainUi.qfShotType.setVisible(not checkState)
             if not item.nodeType in ['asset', 'shot']:
                 self.initShotInfoTab()
+                self.mainUi.bEditShotInfoTab.setEnabled(False)
             else:
                 self.mainUi.lShotNodeLabel.setText(item.nodeName)
+                self.mainUi.bEditShotInfoTab.setEnabled(True)
                 if checkState:
                     self.rf_defaultAssetParams(item)
+                    self.rf_dataAssetParams(self._getShotNodeParams(item))
                 else:
                     self.rf_defaultShotParams(item)
+                    self.rf_dataShotParams(self._getShotNodeParams(item))
 
     def rf_defaultAssetParams(self, item):
         """ Refresh default asset attributes
@@ -554,6 +563,12 @@ class UiActions(object):
         self.mainUi.lAssetNameVal.setText(item.nodeName)
         self.mainUi.lAssetTypeVal.setText('/'.join(item.nodePath.split('/')[:-1]))
 
+    def rf_dataAssetParams(self, nodeParams):
+        """ Refresh Asset data attributes
+            @param nodeParams: (dict) : Tree node data attributes
+                                        template.DefaultTemplete().assetNodeAttr(**kwargs)"""
+        self.mainUi.leAssetWorkDir.setText(nodeParams['assetWorkDir'])
+
     def rf_defaultShotParams(self, item):
         """ Refresh default shot attributes
             @param item: (object) : Selected main QTreeWidgetItem """
@@ -561,6 +576,36 @@ class UiActions(object):
         self.mainUi.lShotSeqVal.setText(item.nodePath.split('/')[-2])
         self.mainUi.lShotShotVal.setText(item.nodeLabel)
         self.mainUi.lShotNameVal.setText(item.nodeName)
+
+    def rf_dataShotParams(self, nodeParams):
+        """ Refresh shot data attributes
+            @param nodeParams: (dict) : Tree node data attributes
+                                        template.DefaultTemplete().shotNodeAttr(**kwargs)"""
+        self.mainUi.leShotWorkDir.setText(nodeParams['shotWorkDir'])
+        self.mainUi.sbShotIn.setValue(nodeParams['shotIn'])
+        self.mainUi.sbShotOut.setValue(nodeParams['shotOut'])
+        self.mainUi.sbShotHandleIn.setValue(nodeParams['shotHandleIn'])
+        self.mainUi.sbShotHandleOut.setValue(nodeParams['shotHandleOut'])
+        self.mainUi.sbShotFocal.setValue(nodeParams['shotFocal'])
+
+    def _getShotNodeParams(self, item):
+        """ Get node params from given QTreeWidgetItem
+            @param item: (object) : Selected Main QTreeWidgetItem
+            @return: (dict) : Node params """
+        if not os.path.exists(item._dataFile):
+            if item.nodeType == 'shot':
+                nodeParams = self.defaultTemplate.shotNodeAttr('', 0, 0, 0, 0, 0)
+            else:
+                nodeParams = self.defaultTemplate.assetNodeAttr('')
+        else:
+            nodeParams = self.pm.readFile(item._dataFile)
+        dataPath = os.path.join(self.pm._projectPath, 'tree', item.nodeType)
+        for fld in item.nodePath.split('/'):
+            dataPath = os.path.join(dataPath, fld)
+        dataFile = os.path.join(dataPath, '%s.py' % item.nodeName)
+        nodeParams['_dataPath'] = dataPath
+        nodeParams['_dataFile'] = dataFile
+        return nodeParams
 
     def on_editShotInfoTab(self):
         """ Command launch when bEditShotInfoTab is clicked """
@@ -572,9 +617,12 @@ class UiActions(object):
             selItems = self.mainUi.twProject.selectedItems()
             if selItems:
                 if self.mainUi.rbMainAsset.isChecked():
-                    self.pm.assetTreeObj.writeNode(selItems[0].nodeName)
+                    treeNode = self.pm.assetTreeObj.getNodeByName(selItems[0].nodeName)
+                    self.ud_treeNodeParamsFromUi('asset', treeNode)
                 else:
-                    self.pm.shotTreeObj.writeNode(selItems[0].nodeName)
+                    treeNode = self.pm.shotTreeObj.getNodeByName(selItems[0].nodeName)
+                    self.ud_treeNodeParamsFromUi('shot', treeNode)
+                treeNode.writeNode()
         self.rf_shotInfoTabVis(state=checkState)
 
     def on_cancelShotInfoTab(self):
@@ -585,12 +633,49 @@ class UiActions(object):
             self.mainUi.bEditShotInfoTab.setChecked(False)
         self.rf_shotInfoTabVis()
 
-# def _getShotNodeParams(self, item):
-#     """ Get node params from given QTreeWidgetItem
-#         @param item: (object) : Selected Main QTreeWidgetItem
-#         @return: (dict) : Node params """
-#     if not os.path.exists(item._dataFile):
-#         nodeParams = self.defaultTemplate.shotNodeAttr('', 0, 0, 0, 0, 0)
-#     else:
-#         nodeParams = self.pm.readFile(item._dataFile)
-#     return nodeParams
+    def ud_treeNodeParamsFromUi(self, treeType, treeNode):
+        """ Update tree node object attributes
+            @param treeType: (str) : 'asset' or 'shot'
+            @param treeNode: (object) : Tree Node """
+        if treeType == 'asset':
+            treeNode.assetWorkDir = str(self.mainUi.leAssetWorkDir.text())
+        else:
+            treeNode.shotWorkDir = str(self.mainUi.leShotWorkDir.text())
+            treeNode.shotIn = self.mainUi.sbShotIn.value()
+            treeNode.shotOut = self.mainUi.sbShotOut.value()
+            treeNode.shotHandleIn = self.mainUi.sbShotHandleIn.value()
+            treeNode.shotHandleOut = self.mainUi.sbShotHandleOut.value()
+            treeNode.shotFocal = self.mainUi.sbShotFocal.value()
+
+    def on_openShotInfoWorkDir(self):
+        """ Command launch when bOpenAssetWorkDir or bOpenShotWorkDir is clicked """
+        selItems = self.mainUi.twProject.selectedItems()
+        if selItems:
+            item = selItems[0]
+            if self.mainUi.rbMainAsset.isChecked():
+                if hasattr(item, 'assetWorkDir'):
+                    root = item.assetWorkDir
+                else:
+                    root = ''
+            else:
+                if hasattr(item, 'shotWorkDir'):
+                    root = item.shotWorkDir
+                else:
+                    root = ''
+            if root == '':
+                if self.pm.projectWorkDir == '':
+                    root = prodManager.rootDisk
+                else:
+                    root = self.pm.projectWorkDir
+            self.fdShotInfoWorkDir = dialog.fileDialog(fdRoot=root, fdCmd=self.ud_shotInfoWorkDir)
+            self.fdShotInfoWorkDir.setFileMode(QtGui.QFileDialog.DirectoryOnly)
+            self.fdShotInfoWorkDir.exec_()
+
+    def ud_shotInfoWorkDir(self):
+        """ Update Shot Work dir with selected path from dialog """
+        selPath = self.fdShotInfoWorkDir.selectedFiles()
+        if self.mainUi.rbMainAsset.isChecked():
+            self.mainUi.leAssetWorkDir.setText(str(selPath[0]))
+        else:
+            self.mainUi.leShotWorkDir.setText(str(selPath[0]))
+

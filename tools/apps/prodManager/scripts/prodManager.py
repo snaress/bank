@@ -127,13 +127,20 @@ class ProdManager(object):
             treeObj = getattr(self, '%sObj' % treeType)
             treeDict = self.readFile(treeFile)
             for node in treeDict['treeOrder']:
-                if node['nodeType'] in ['shot', 'asset']:
+                #-- Add _Data Params --#
+                if node['nodeType'] in ['asset', 'shot']:
                     dataPath = os.path.join(self._projectPath, 'tree', node['nodeType'])
                     for fld in node['nodePath'].split('/'):
                         dataPath = os.path.join(dataPath, fld)
                     dataFile = os.path.join(dataPath, '%s.py' % node['nodeName'])
                     node['_dataPath'] = dataPath
                     node['_dataFile'] = dataFile
+                    #-- Add Node Params --#
+                    if os.path.exists(dataFile):
+                        nodeParams = self.readFile(dataFile)
+                        for k, v in nodeParams.iteritems():
+                            if k.startswith('asset') or k.startswith('shot'):
+                                node[k] = v
                 treeObj.addNode(**node)
 
     def buildStepFromUi(self, mainUi):
@@ -289,22 +296,13 @@ class TreeObj(object):
         if node is not None:
             return node.getParams
 
-    def writeNode(self, nodeName):
-        """ Write node params file in data base
-            @param nodeName: (str) : Asset name (ex: 'asterix') or shot name (ex: 's001_p001') """
-        node = self.getNodeByName(nodeName)
-        if node is not None:
-            dataFile = node._dataFile
-            if not os.path.exists(dataFile):
-                if pmCore.createDataPath(dataFile):
-                    print dataFile
-
     def printTree(self):
         """ Print given tree object """
         print "#" * 60
         print "#-- Tree Object --#"
         for node in self.treeOrder:
             Ntab = len(node.nodePath.split('/')) - 1
+            print '-' * 100
             print "%s%s" % ('\t'*Ntab, node.nodePath)
             for k, v in node.getParams.iteritems():
                 print "%s%s = %s" % ('\t'*(Ntab+1), k, v)
@@ -334,8 +332,13 @@ class TreeNode(object):
         """ Get node params
             @return: (dict) : Node params """
         params = {}
+        starts = ['node', '_data', 'asset', 'shot']
         for k, v in self.__dict__.iteritems():
-            if k.startswith('node') or k.startswith('_data'):
+            check = False
+            for s in starts:
+                if k.startswith(s):
+                    check = True
+            if check:
                 params[k] = v
         return params
 
@@ -344,3 +347,23 @@ class TreeNode(object):
             @param key: (str) : Attribute name
             @return: Value of given attribute """
         return getattr(self, key)
+
+    def writeNode(self):
+        """ Write node params file in data base """
+        dataFile = getattr(self, '_dataFile')
+        check = True
+        if not os.path.exists(dataFile):
+            check = pmCore.createDataPath(dataFile)
+        if check:
+            dataTxt = []
+            for k, v in self.getParams.iteritems():
+                if k.startswith('asset') or k.startswith('shot'):
+                    if isinstance(k, str):
+                        dataTxt.append("%s = %r" % (k, v))
+                    else:
+                        dataTxt.append("%s = %s" % (k, v))
+            try:
+                pFile.writeFile(dataFile, '\n'.join(dataTxt))
+                print "Writing %s node" % getattr(self, 'nodeName')
+            except:
+                print "!!! Error: Can't write %s node !!!" % getattr(self, 'nodeName')

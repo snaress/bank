@@ -3,7 +3,12 @@ from tools.apps.prodManager.scripts import prodManager
 
 pm = prodManager.ProdManager()
 pm.loadProject('asterix', 'ddd')
-pm.assetTreeObj.printTree()
+pm.shotTreeObj.printTree()
+treeNode = pm.shotTreeObj.getNodeByName('s001_p001')
+print treeNode.shotIn
+treeNode.shotIn = 1
+print treeNode.shotIn
+treeNode.writeNode()
 
 # node = pm.shotTreeObj.getNodeByName('s001_p001')
 # print node.nodeName

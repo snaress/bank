@@ -28,8 +28,15 @@ class DefaultTemplate(object):
         return {'stepType': stepType, 'stepLabel': stepLabel, 'stepParent': stepParent}
 
     @staticmethod
+    def assetNodeAttr(assetWorkDir):
+        """ Get asset node data attributes
+            @param assetWorkDir: str) : Asset work directory
+            @return: (dict) : QTreeWidgetItem attributes """
+        return {'assetWorkDir': assetWorkDir}
+
+    @staticmethod
     def shotNodeAttr(shotWorkDir, shotIn, shotOut, shotFocal, shotHdlIn, shotHdlOut):
-        """ Get default shot node attributes
+        """ Get shot node data attributes
             @param shotWorkDir: (str) : Shot work directory
             @param shotIn: (int) : Shot start frame
             @param shotOut: (int) : Shot end frame

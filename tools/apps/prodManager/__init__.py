@@ -9,6 +9,7 @@ toolPack = __package__
 #-- Global Var --#
 user = os.environ.get('username')
 station = os.environ.get('computername')
+rootDisk = os.path.join('F:', os.sep)
 libPath = os.path.join(toolPath, '_lib')
 binPath = os.path.join('G:', os.sep, 'rndBin', toolName)
 
