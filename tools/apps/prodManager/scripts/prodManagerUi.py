@@ -212,6 +212,7 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
             twTree = self.twProjectStep
         return twTree
 
+print 'toto'
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
