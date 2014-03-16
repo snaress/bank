@@ -1,0 +1,84 @@
+#! C:/Program Files (x86)/Nuke5.0v2/Nuke5.0.exe -nx
+version 5.0200
+define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
+<layout version="1.0">
+    <window x="-8" y="-8" w="1616" h="886" screen="0">
+        <splitter orientation="1">
+            <split size="1012"></split>
+            <splitter orientation="1">
+                <split size="40"></split>
+                <dock id="" hideTitles="1" activePageId="Toolbar.1">
+                    <page id="Toolbar.1"></page>
+                </dock>
+                <split size="970"></split>
+                <splitter orientation="2">
+                    <split size="410"></split>
+                    <dock id="" activePageId="Viewer.1">
+                        <page id="Viewer.1"></page>
+                    </dock>
+                    <split size="410"></split>
+                    <dock id="" activePageId="DAG.1">
+                        <page id="DAG.1"></page>
+                        <page id="Curve Editor.1"></page>
+                    </dock>
+                </splitter>
+            </splitter>
+            <split size="586"></split>
+            <dock id="" activePageId="Properties.1">
+                <page id="Properties.1"></page>
+            </dock>
+        </splitter>
+    </window>
+</layout>
+}
+Root {
+ inputs 0
+ name F:/rnd/workspace/bank/lib/nuke/_lib/nkFiles/icone.nk
+ format "640 480 0 0 640 480 1 PC_Video"
+ proxy_type scale
+ proxy_format "640 480 0 0 640 480 1 PC_Video"
+}
+BackdropNode {
+ inputs 0
+ name ProdManager
+ xpos -324
+ ypos -155
+ bdwidth 208
+ bdheight 250
+}
+Constant {
+ inputs 0
+ channels rgb
+ color {0.05 0.05 0.05 0}
+ format "300 150 0 0 300 150 1 ima_300x150"
+ name Constant1
+ xpos -267
+ ypos -106
+}
+Text {
+ message "Prod Manager"
+ Font 1
+ font C:/Windows/Fonts/Arial.ttf
+ size 25
+ xjustify center
+ yjustify center
+ translate {150 75}
+ color {0.5 0.5 0.5 1}
+ name Text1
+ xpos -267
+ ypos -10
+}
+Write {
+ file F:/rnd/workspace/bank/tools/apps/prodManager/_lib/ima/prodManager.png
+ views {main}
+ file_type png
+ name Write1
+ xpos -267
+ ypos 38
+}
+Viewer {
+ frame 1
+ name Viewer1
+ xpos 107
+ ypos 49
+}
