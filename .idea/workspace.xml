@@ -24,28 +24,95 @@
   <component name="DaemonCodeAnalyzer">
     <disable_hints />
   </component>
+  <component name="DockManager">
+    <window id="1">
+      <content type="file-editors">
+        <state>
+          <leaf>
+            <file leaf-file-name="prodManager.py" pinned="false" current="false" current-in-tab="false">
+              <entry file="file://$PROJECT_DIR$/../_archive/tools/apps/prodManager/2014_03_02__16_02_39/scripts/prodManager.py">
+                <provider selected="true" editor-type-id="text-editor">
+                  <state line="173" column="8" selection-start="6923" selection-end="6988" vertical-scroll-proportion="0.0" vertical-offset="2941" max-vertical-offset="6035">
+                    <folding />
+                  </state>
+                </provider>
+              </entry>
+            </file>
+            <file leaf-file-name="cmds.py" pinned="false" current="false" current-in-tab="true">
+              <entry file="file://$PROJECT_DIR$/../_archive/tools/apps/prodManager/2014_03_02__16_02_39/scripts/cmds.py">
+                <provider selected="true" editor-type-id="text-editor">
+                  <state line="727" column="8" selection-start="32644" selection-end="32679" vertical-scroll-proportion="0.27856365" vertical-offset="2345" max-vertical-offset="3264">
+                    <folding />
+                  </state>
+                </provider>
+              </entry>
+            </file>
+            <file leaf-file-name="sats.py" pinned="false" current="false" current-in-tab="false">
+              <entry file="file://$PROJECT_DIR$/../_archive/tools/apps/prodManager/2014_03_02__16_02_39/scripts/sats.py">
+                <provider selected="true" editor-type-id="text-editor">
+                  <state line="255" column="0" selection-start="14931" selection-end="15658" vertical-scroll-proportion="0.0" vertical-offset="4335" max-vertical-offset="6290">
+                    <folding />
+                  </state>
+                </provider>
+              </entry>
+            </file>
+            <file leaf-file-name="template.py" pinned="false" current="false" current-in-tab="false">
+              <entry file="file://$PROJECT_DIR$/../_archive/tools/apps/prodManager/2014_03_02__16_02_39/scripts/template.py">
+                <provider selected="true" editor-type-id="text-editor">
+                  <state line="94" column="0" selection-start="1694" selection-end="2608" vertical-scroll-proportion="0.0" vertical-offset="1598" max-vertical-offset="1700">
+                    <folding />
+                  </state>
+                </provider>
+              </entry>
+            </file>
+            <file leaf-file-name="core.py" pinned="false" current="false" current-in-tab="false">
+              <entry file="file://$PROJECT_DIR$/../_archive/tools/apps/prodManager/2014_03_02__16_02_39/scripts/core.py">
+                <provider selected="true" editor-type-id="text-editor">
+                  <state line="142" column="0" selection-start="5638" selection-end="6096" vertical-scroll-proportion="0.0" vertical-offset="2414" max-vertical-offset="2737">
+                    <folding />
+                  </state>
+                </provider>
+              </entry>
+            </file>
+          </leaf>
+        </state>
+      </content>
+    </window>
+  </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FavoritesManager">
     <favorites_list name="bank" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.4610513">
+    <splitter split-orientation="horizontal" split-proportion="0.50474983">
       <split-first>
         <leaf>
-          <file leaf-file-name="prodManagerUi.py" pinned="false" current="false" current-in-tab="true">
+          <file leaf-file-name="prodManagerUi.py" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/prodManagerUi.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="213" column="0" selection-start="10721" selection-end="10721" vertical-scroll-proportion="1.0864745" vertical-offset="224" max-vertical-offset="952">
+                <state line="10" column="58" selection-start="426" selection-end="426" vertical-scroll-proportion="0.0" vertical-offset="170" max-vertical-offset="3893">
                   <folding />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="uiCmds.py" pinned="false" current="false" current-in-tab="false">
+          <file leaf-file-name="uiCmds.py" pinned="false" current="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/uiCmds.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="575" column="21" selection-start="25684" selection-end="25684" vertical-scroll-proportion="0.0" vertical-offset="9775" max-vertical-offset="10217">
-                  <folding />
+                <state line="515" column="0" selection-start="22975" selection-end="22975" vertical-scroll-proportion="4.362832" vertical-offset="0" max-vertical-offset="2533">
+                  <folding>
+                    <element signature="e#3047#3193#1" expanded="false" />
+                    <element signature="e#5146#5353#1" expanded="false" />
+                    <element signature="e#9953#10180#1" expanded="false" />
+                    <element signature="e#20258#20417#1" expanded="false" />
+                    <element signature="e#21029#21276#1" expanded="false" />
+                    <element signature="e#21907#22089#1" expanded="false" />
+                    <element signature="e#25314#25507#1" expanded="false" />
+                    <element signature="e#26033#26224#1" expanded="false" />
+                    <element signature="e#26765#26912#1" expanded="false" />
+                    <element signature="e#27145#27303#1" expanded="false" />
+                    <element signature="e#29436#29583#1" expanded="false" />
+                  </folding>
                 </state>
               </provider>
             </entry>
@@ -53,7 +120,7 @@
           <file leaf-file-name="sats.py" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/sats.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="332" column="15" selection-start="13983" selection-end="13983" vertical-scroll-proportion="0.0" vertical-offset="5644" max-vertical-offset="5865">
+                <state line="239" column="35" selection-start="9757" selection-end="9757" vertical-scroll-proportion="0.0" vertical-offset="4063" max-vertical-offset="5865">
                   <folding />
                 </state>
               </provider>
@@ -62,7 +129,7 @@
           <file leaf-file-name="test.py" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/_lib/tmp/test.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="15" column="44" selection-start="570" selection-end="570" vertical-scroll-proportion="0.0" vertical-offset="255" max-vertical-offset="459">
+                <state line="10" column="19" selection-start="284" selection-end="284" vertical-scroll-proportion="0.0" vertical-offset="170" max-vertical-offset="544">
                   <folding />
                 </state>
               </provider>
@@ -75,7 +142,7 @@
           <file leaf-file-name="prodManager.py" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/prodManager.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="293" column="95" selection-start="12238" selection-end="12238" vertical-scroll-proportion="0.0" vertical-offset="4981" max-vertical-offset="5984">
+                <state line="369" column="0" selection-start="14912" selection-end="14912" vertical-scroll-proportion="0.0" vertical-offset="6273" max-vertical-offset="6375">
                   <folding />
                 </state>
               </provider>
@@ -84,7 +151,7 @@
           <file leaf-file-name="template.py" pinned="false" current="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/template.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="30" column="85" selection-start="1403" selection-end="1403" vertical-scroll-proportion="0.0" vertical-offset="510" max-vertical-offset="1377">
+                <state line="30" column="22" selection-start="1340" selection-end="1340" vertical-scroll-proportion="0.0" vertical-offset="510" max-vertical-offset="1496">
                   <folding />
                 </state>
               </provider>
@@ -93,7 +160,7 @@
           <file leaf-file-name="core.py" pinned="false" current="true" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/core.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state line="121" column="0" selection-start="5043" selection-end="5043" vertical-scroll-proportion="0.6407982" vertical-offset="0" max-vertical-offset="451">
+                <state line="121" column="0" selection-start="5043" selection-end="5043" vertical-scroll-proportion="0.6393805" vertical-offset="0" max-vertical-offset="452">
                   <folding />
                 </state>
               </provider>
@@ -129,7 +196,6 @@
         <option value="$PROJECT_DIR$/tools/apps/grapher/scripts/nodeEditor.py" />
         <option value="$PROJECT_DIR$/tools/apps/grapher/scripts/gpCore.py" />
         <option value="$PROJECT_DIR$/tools/apps/prodManager/scripts/pmCmds.py" />
-        <option value="$PROJECT_DIR$/tools/apps/prodManager/__init__.py" />
         <option value="$PROJECT_DIR$/tools/apps/prodManager2/__init__.py" />
         <option value="$PROJECT_DIR$/tools/apps/prodManager2/scripts/template.py" />
         <option value="$PROJECT_DIR$/tools/apps/prodManager2/scripts/prodManager2.py" />
@@ -146,13 +212,14 @@
         <option value="$PROJECT_DIR$/lib/qt/scripts/procQt.py" />
         <option value="$PROJECT_DIR$/lib/system/scripts/procFile.py" />
         <option value="$PROJECT_DIR$/lib/system/scripts/procMath.py" />
-        <option value="$PROJECT_DIR$/tools/apps/prodManager/scripts/template.py" />
-        <option value="$PROJECT_DIR$/tools/apps/prodManager/scripts/sats.py" />
-        <option value="$PROJECT_DIR$/tools/apps/prodManager/scripts/uiCmds.py" />
-        <option value="$PROJECT_DIR$/tools/apps/prodManager/scripts/prodManager.py" />
         <option value="$PROJECT_DIR$/tools/apps/prodManager/scripts/core.py" />
+        <option value="$PROJECT_DIR$/tools/apps/prodManager/scripts/sats.py" />
         <option value="$PROJECT_DIR$/tools/apps/prodManager/_lib/tmp/test.py" />
+        <option value="$PROJECT_DIR$/tools/apps/prodManager/__init__.py" />
         <option value="$PROJECT_DIR$/tools/apps/prodManager/scripts/prodManagerUi.py" />
+        <option value="$PROJECT_DIR$/tools/apps/prodManager/scripts/prodManager.py" />
+        <option value="$PROJECT_DIR$/tools/apps/prodManager/scripts/template.py" />
+        <option value="$PROJECT_DIR$/tools/apps/prodManager/scripts/uiCmds.py" />
       </list>
     </option>
   </component>
@@ -210,7 +277,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -295,6 +361,32 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="ui" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="bank" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="bank" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="tools" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="apps" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="prodManager" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="scripts" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -313,8 +405,49 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="bank" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="bank" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="lib" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="env" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="bank" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="bank" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="lib" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="env" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="scripts" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -385,42 +518,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="bank" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tools/apps/prodManager/_lib/tmp/test.py" />
-      <option name="PARAMETERS" value="" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method />
-    </configuration>
-    <configuration default="false" name="player" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tools/apps/prodManager/_lib/tmp" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="bank" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tools/apps/prodManager/_lib/tmp/player.py" />
-      <option name="PARAMETERS" value="" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method />
-    </configuration>
-    <configuration default="false" name="prodManager" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tools/apps/prodManager/scripts" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="bank" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tools/apps/prodManager/scripts/prodManager.py" />
       <option name="PARAMETERS" value="" />
       <RunnerSettings RunnerId="PythonRunner" />
       <ConfigurationWrapper RunnerId="PythonRunner" />
@@ -547,18 +644,14 @@
       <option name="USE_PATTERN" value="false" />
       <method />
     </configuration>
-    <list size="4">
+    <list size="2">
       <item index="0" class="java.lang.String" itemvalue="Python.prodManagerUi" />
       <item index="1" class="java.lang.String" itemvalue="Python.test" />
-      <item index="2" class="java.lang.String" itemvalue="Python.player" />
-      <item index="3" class="java.lang.String" itemvalue="Python.prodManager" />
     </list>
     <recent_temporary>
-      <list size="4">
+      <list size="2">
         <item index="0" class="java.lang.String" itemvalue="Python.prodManagerUi" />
         <item index="1" class="java.lang.String" itemvalue="Python.test" />
-        <item index="2" class="java.lang.String" itemvalue="Python.prodManager" />
-        <item index="3" class="java.lang.String" itemvalue="Python.player" />
       </list>
     </recent_temporary>
   </component>
@@ -629,7 +722,19 @@
       <created>1394952203872</created>
       <updated>1394952203872</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="test2">
+      <created>1394952411882</created>
+      <updated>1394952411882</updated>
+    </task>
+    <task id="LOCAL-00011" summary="prodManager: update shot info tab">
+      <created>1394990919744</created>
+      <updated>1394990919744</updated>
+    </task>
+    <task id="LOCAL-00012" summary="prodManager: update mainUi&#10;&#10;Update shotInfoTab (rf_shotTotalFrame)">
+      <created>1394995108774</created>
+      <updated>1394995108774</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -656,8 +761,7 @@
     <frame x="-8" y="-8" width="1616" height="886" extended-state="6" />
     <editor active="false" />
     <layout>
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32968536" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32831737" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3269494" sideWeight="0.50031704" order="10" side_tool="false" content_ui="tabs" x="-822" y="271" width="803" height="526" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32831737" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.13869537" sideWeight="0.33289298" order="2" side_tool="true" content_ui="tabs" />
@@ -669,11 +773,12 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32831737" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -696,14 +801,16 @@
     <MESSAGE value="test3" />
     <MESSAGE value="test1" />
     <MESSAGE value="test2" />
-    <option name="LAST_COMMIT_MESSAGE" value="test2" />
+    <MESSAGE value="prodManager: update shot info tab" />
+    <MESSAGE value="prodManager: update mainUi&#10;&#10;Update shotInfoTab (rf_shotTotalFrame)" />
+    <option name="LAST_COMMIT_MESSAGE" value="prodManager: update mainUi&#10;&#10;Update shotInfoTab (rf_shotTotalFrame)" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="18" />
+      <option name="time" value="19" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -844,11 +951,6 @@
         <state line="63" column="72" selection-start="2161" selection-end="2225" vertical-scroll-proportion="0.093023255" vertical-offset="374" max-vertical-offset="1394" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="27" column="0" selection-start="814" selection-end="814" vertical-scroll-proportion="0.627907" vertical-offset="0" max-vertical-offset="850" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../_archive/tools/apps/prodManager/2014_02_25__17_28_59/scripts/prodManager.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="-0.16703057" vertical-offset="153" max-vertical-offset="1173" />
@@ -914,76 +1016,103 @@
         <state line="24" column="31" selection-start="857" selection-end="857" vertical-scroll-proportion="0.16879432" vertical-offset="0" max-vertical-offset="705" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../_archive/tools/apps/prodManager/2014_03_02__16_02_39/scripts/sats.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="249" column="0" selection-start="15554" selection-end="15635" vertical-scroll-proportion="0.0" vertical-offset="611" max-vertical-offset="1530" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../_archive/tools/apps/prodManager/2014_03_02__16_02_39/scripts/prodManager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="173" column="8" selection-start="6923" selection-end="6988" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="935" />
+        <state line="173" column="8" selection-start="6923" selection-end="6988" vertical-scroll-proportion="0.0" vertical-offset="332" max-vertical-offset="1275">
+          <folding />
+        </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../_archive/tools/apps/prodManager/2014_03_02__16_02_39/scripts/cmds.py">
+    <entry file="file://$PROJECT_DIR$/../_archive/tools/apps/prodManager/2014_03_02__16_02_39/scripts/sats.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="720" column="45" selection-start="32311" selection-end="32311" vertical-scroll-proportion="0.0" vertical-offset="2175" max-vertical-offset="3094" />
+        <state line="255" column="0" selection-start="14931" selection-end="15658" vertical-scroll-proportion="0.0" vertical-offset="372" max-vertical-offset="1292">
+          <folding />
+        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../_archive/tools/apps/prodManager/2014_03_02__16_02_39/scripts/template.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="39" column="0" selection-start="1694" selection-end="2608" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="782" />
+        <state line="94" column="0" selection-start="1694" selection-end="2608" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="493">
+          <folding />
+        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../_archive/tools/apps/prodManager/2014_03_02__16_02_39/scripts/core.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="142" column="0" selection-start="5638" selection-end="6096" vertical-scroll-proportion="0.61044616" vertical-offset="0" max-vertical-offset="919" />
+        <state line="142" column="0" selection-start="5638" selection-end="6096" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="442">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="10" column="40" selection-start="243" selection-end="243" vertical-scroll-proportion="0.19910847" vertical-offset="36" max-vertical-offset="867" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/sats.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="332" column="15" selection-start="13983" selection-end="13983" vertical-scroll-proportion="0.0" vertical-offset="1108" max-vertical-offset="1802">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/uiCmds.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="575" column="21" selection-start="25684" selection-end="25684" vertical-scroll-proportion="0.0" vertical-offset="2383" max-vertical-offset="3349">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/prodManager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="293" column="95" selection-start="12238" selection-end="12238" vertical-scroll-proportion="0.0" vertical-offset="1011" max-vertical-offset="1955">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/template.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="30" column="85" selection-start="1403" selection-end="1403" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="544">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/core.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="121" column="0" selection-start="5043" selection-end="5043" vertical-scroll-proportion="0.6407982" vertical-offset="0" max-vertical-offset="451">
+        <state line="239" column="35" selection-start="9757" selection-end="9757" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="680">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/_lib/tmp/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="15" column="44" selection-start="570" selection-end="570" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="459">
+        <state line="10" column="19" selection-start="284" selection-end="284" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="544">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/prodManager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="369" column="0" selection-start="14912" selection-end="14912" vertical-scroll-proportion="0.0" vertical-offset="704" max-vertical-offset="1411">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/template.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="30" column="22" selection-start="1340" selection-end="1340" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="595">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/prodManagerUi.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="213" column="0" selection-start="10721" selection-end="10721" vertical-scroll-proportion="1.0864745" vertical-offset="224" max-vertical-offset="952">
+        <state line="10" column="58" selection-start="426" selection-end="426" vertical-scroll-proportion="0.0" vertical-offset="5" max-vertical-offset="952">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/uiCmds.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="515" column="0" selection-start="22975" selection-end="22975" vertical-scroll-proportion="4.362832" vertical-offset="0" max-vertical-offset="2533">
+          <folding>
+            <element signature="e#3047#3193#1" expanded="false" />
+            <element signature="e#5146#5353#1" expanded="false" />
+            <element signature="e#9953#10180#1" expanded="false" />
+            <element signature="e#20258#20417#1" expanded="false" />
+            <element signature="e#21029#21276#1" expanded="false" />
+            <element signature="e#21907#22089#1" expanded="false" />
+            <element signature="e#25314#25507#1" expanded="false" />
+            <element signature="e#26033#26224#1" expanded="false" />
+            <element signature="e#26765#26912#1" expanded="false" />
+            <element signature="e#27145#27303#1" expanded="false" />
+            <element signature="e#29436#29583#1" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../_archive/tools/apps/prodManager/2014_03_02__16_02_39/scripts/cmds.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="727" column="8" selection-start="32644" selection-end="32679" vertical-scroll-proportion="0.27856365" vertical-offset="2345" max-vertical-offset="3264">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tools/apps/prodManager/scripts/core.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="121" column="0" selection-start="5043" selection-end="5043" vertical-scroll-proportion="0.6393805" vertical-offset="0" max-vertical-offset="452">
           <folding />
         </state>
       </provider>
