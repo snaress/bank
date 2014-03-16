@@ -587,6 +587,17 @@ class UiActions(object):
         self.mainUi.sbShotHandleIn.setValue(nodeParams['shotHandleIn'])
         self.mainUi.sbShotHandleOut.setValue(nodeParams['shotHandleOut'])
         self.mainUi.sbShotFocal.setValue(nodeParams['shotFocal'])
+        self.rf_shotTotalFrames(nodeParams['shotIn'], nodeParams['shotOut'])
+
+    def rf_shotTotalFrames(self, shotIn, shotOut):
+        """ Refresh shot total frames attributes
+            @param shotIn: (int) : Shot start frame
+            @param shotOut: (int) : Shot End frame """
+        if shotIn == 0 and shotOut == 0:
+            totalFrames = 0
+        else:
+            totalFrames = (shotOut-shotIn)+1
+        self.mainUi.sbShotFrames.setValue(totalFrames)
 
     def _getShotNodeParams(self, item):
         """ Get node params from given QTreeWidgetItem
@@ -622,8 +633,10 @@ class UiActions(object):
                 else:
                     treeNode = self.pm.shotTreeObj.getNodeByName(selItems[0].nodeName)
                     self.ud_treeNodeParamsFromUi('shot', treeNode)
+                    self.rf_shotTotalFrames(treeNode.shotIn, treeNode.shotOut)
                 treeNode.writeNode()
         self.rf_shotInfoTabVis(state=checkState)
+        self.mainUi.twProject.setEnabled(not checkState)
 
     def on_cancelShotInfoTab(self):
         """ Command launch when bCancelShotInfoTab is clicked """
@@ -632,6 +645,7 @@ class UiActions(object):
             self.mainUi.bEditShotInfoTab.setText("Edit")
             self.mainUi.bEditShotInfoTab.setChecked(False)
         self.rf_shotInfoTabVis()
+        self.mainUi.twProject.setEnabled(True)
 
     def ud_treeNodeParamsFromUi(self, treeType, treeNode):
         """ Update tree node object attributes
