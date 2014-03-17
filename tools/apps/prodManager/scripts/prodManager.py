@@ -350,20 +350,23 @@ class TreeNode(object):
 
     def writeNode(self):
         """ Write node params file in data base """
-        dataFile = getattr(self, '_dataFile')
-        check = True
-        if not os.path.exists(dataFile):
-            check = pmCore.createDataPath(dataFile)
-        if check:
-            dataTxt = []
-            for k, v in self.getParams.iteritems():
-                if k.startswith('asset') or k.startswith('shot'):
-                    if isinstance(k, str):
-                        dataTxt.append("%s = %r" % (k, v))
-                    else:
-                        dataTxt.append("%s = %s" % (k, v))
-            try:
-                pFile.writeFile(dataFile, '\n'.join(dataTxt))
-                print "Writing %s node" % getattr(self, 'nodeName')
-            except:
-                print "!!! Error: Can't write %s node !!!" % getattr(self, 'nodeName')
+        if getattr(self, 'nodeType') in ['asset', 'shot']:
+            dataFile = getattr(self, '_dataFile')
+            check = True
+            if not os.path.exists(dataFile):
+                check = pmCore.createDataPath(dataFile)
+            if check:
+                dataTxt = []
+                for k, v in self.getParams.iteritems():
+                    if k.startswith('asset') or k.startswith('shot'):
+                        if isinstance(k, str):
+                            dataTxt.append("%s = %r" % (k, v))
+                        else:
+                            dataTxt.append("%s = %s" % (k, v))
+                try:
+                    pFile.writeFile(dataFile, '\n'.join(dataTxt))
+                    print "Writing %s node" % getattr(self, 'nodeName')
+                except:
+                    print "!!! Error: Can't write %s node !!!" % getattr(self, 'nodeName')
+        else:
+            print "!!! Error: Nothing to write from containers !!!"

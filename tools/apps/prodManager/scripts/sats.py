@@ -287,6 +287,17 @@ class PopulateProjectTrees(object):
                 self.mainUi.twProject.addTopLevelItem(newItem)
             else:
                 parentItem.addChild(newItem)
+                if newItem.nodeType == 'asset':
+                    stepOrder = self.pm.projectAssetSteps['stepOrder']
+                elif newItem.nodeType == 'shot':
+                    stepOrder = self.pm.projectShotSteps['stepOrder']
+                else:
+                    stepOrder = []
+                for step in stepOrder:
+                    stepPath = os.path.join(newItem.nodePath, step)
+                    stepParams = self.defaultTemplate.projectTreeNodeAttr('step', step, step, stepPath)
+                    newStep = self.newMainItem(**stepParams)
+                    newItem.addChild(newStep)
 
     @staticmethod
     def newTreeItem(**kwargs):
