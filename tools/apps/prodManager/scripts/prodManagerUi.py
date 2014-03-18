@@ -43,6 +43,7 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         """ Setup main window """
         self.rbMainAsset.clicked.connect(self.uiActions.rf_mainTree)
         self.rbMainShot.clicked.connect(self.uiActions.rf_mainTree)
+        self.cbStepTree.clicked.connect(self.uiActions.rf_mainTree)
         self.twProject.itemClicked.connect(self.uiActions.rf_shotInfoTab)
 
     def _setupProject(self):

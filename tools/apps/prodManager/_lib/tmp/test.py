@@ -24,3 +24,4 @@ treeNode.writeNode()
 # pm.assetTreeObj.addNode(**params2)
 # pm.assetTreeObj.addNode(**params3)
 # pm.printTreeObj('assetTree')
+

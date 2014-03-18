@@ -279,6 +279,14 @@ class PopulateProjectTrees(object):
         """ Populate main ui tree
             @param treeType: (str) : 'assetTree' or 'shotTree' """
         treeObj = getattr(self.pm, '%sObj' % treeType)
+        if not self.mainUi.cbStepTree.isChecked():
+            self._shotTree(treeObj)
+        else:
+            self._stepTree(treeType, treeObj)
+
+    def _shotTree(self, treeObj):
+        """ Populate main ui with shotTree mode
+            @param treeObj: (object) : Tree node object """
         for node in treeObj.treeOrder:
             newItem = self.newMainItem(**node.getParams)
             parentItem = self.mainUi.getParentTreeItemFromNodePath(self.mainUi.twProject,
@@ -298,6 +306,30 @@ class PopulateProjectTrees(object):
                     stepParams = self.defaultTemplate.projectTreeNodeAttr('step', step, step, stepPath)
                     newStep = self.newMainItem(**stepParams)
                     newItem.addChild(newStep)
+
+    def _stepTree(self, treeType, treeObj):
+        """ Populate main ui with stepTree mode
+            @param treeType: (str) : 'assetTree' or 'shotTree'
+            @param treeObj: (object) : Tree node object """
+        if treeType == 'assetTree':
+            stepOrder = self.pm.projectAssetSteps['stepOrder']
+        elif treeType == 'shotTree':
+            stepOrder = self.pm.projectShotSteps['stepOrder']
+        else:
+            stepOrder = []
+        for step in stepOrder:
+            stepParams = self.defaultTemplate.projectTreeNodeAttr('step', step, step, step)
+            newStep = self.newMainItem(**stepParams)
+            self.mainUi.twProject.addTopLevelItem(newStep)
+            for node in treeObj.treeOrder:
+                newItem = self.newMainItem(**node.getParams)
+                newItem.nodePath = '%s/%s' % (newStep.nodePath, newItem.nodePath)
+                parentItem = self.mainUi.getParentTreeItemFromNodePath(self.mainUi.twProject,
+                                                                       newItem.nodePath)
+                if parentItem is None:
+                    newStep.addChild(newItem)
+                else:
+                    parentItem.addChild(newItem)
 
     @staticmethod
     def newTreeItem(**kwargs):
