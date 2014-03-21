@@ -237,6 +237,14 @@ class EditProjectTreeUi(editProjectTreeClass, editProjectTreeUiClass):
         return nodeLabel, nodeName, nodeParent
 
 
+lineTestWidgetClass, lineTestWidgetUiClass = uic.loadUiType(prodManager.uiList['lineTestWidget'])
+class LineTestWidget(lineTestWidgetClass, lineTestWidgetUiClass):
+
+    def __init__(self):
+        super(LineTestWidget, self).__init__()
+        self.setupUi(self)
+
+
 class PopulateProjectTrees(object):
     """ Populate ProjectTree and ProjectStep QTreeWidget
         @param mainUi: (object) : ProdManager QMainWindow """
@@ -289,8 +297,7 @@ class PopulateProjectTrees(object):
             @param treeObj: (object) : Tree node object """
         for node in treeObj.treeOrder:
             newItem = self.newMainItem(**node.getParams)
-            parentItem = self.mainUi.getParentTreeItemFromNodePath(self.mainUi.twProject,
-                                                                   newItem.nodePath)
+            parentItem = self.mainUi.getParentTreeItemFromNodePath(self.mainUi.twProject, newItem.nodePath)
             if parentItem is None:
                 self.mainUi.twProject.addTopLevelItem(newItem)
             else:
@@ -302,8 +309,9 @@ class PopulateProjectTrees(object):
                 else:
                     stepOrder = []
                 for step in stepOrder:
-                    stepPath = os.path.join(newItem.nodePath, step)
-                    stepParams = self.defaultTemplate.projectTreeNodeAttr('step', step, step, stepPath)
+                    stepPath = '%s/%s' % (newItem.nodePath, step)
+                    nodeName = '%s_%s' % (newItem.nodePath.split('/')[-1], step)
+                    stepParams = self.defaultTemplate.projectTreeNodeAttr('step', step, nodeName, stepPath)
                     newStep = self.newMainItem(**stepParams)
                     newItem.addChild(newStep)
 

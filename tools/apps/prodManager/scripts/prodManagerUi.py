@@ -27,6 +27,7 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self._setupMainWindow()
         self._setupProject()
         self._setupShotInfo()
+        self._setupLineTest()
         self.windowInit()
 
     def _setupMenu(self):
@@ -68,6 +69,10 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.bCancelShotInfoTab.clicked.connect(self.uiActions.on_cancelShotInfoTab)
         self.bOpenAssetWorkDir.clicked.connect(self.uiActions.on_openShotInfoWorkDir)
         self.bOpenShotWorkDir.clicked.connect(self.uiActions.on_openShotInfoWorkDir)
+
+    def _setupLineTest(self):
+        """ Setup lineTest tab """
+        self.pop_lineTestMenu()
 
     def windowInit(self):
         """ Main ui inititialize """
@@ -168,6 +173,22 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
             self.miNewShotStep.setEnabled(not checkState)
             self.miNewShotSubstep.setEnabled(not checkState)
             self.menuProjectStep.exec_(self.twProjectStep.mapToGlobal(point))
+
+    def pop_lineTestMenu(self):
+        """ Create lineTest QTreeWidget popupMenu """
+        self.tbLineTestMenu = QtGui.QToolBar()
+        self.miNewLineTest = self.tbLineTestMenu.addAction("New LineTest",
+                                                           self.menuActions.on_newLinetest)
+        self.twLineTest.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.connect(self.twLineTest,
+                     QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'),
+                     self.on_popLineTestMenu)
+        self.menuLineTest = QtGui.QMenu(self)
+        self.menuLineTest.addAction(self.miNewLineTest)
+
+    def on_popLineTestMenu(self, point):
+        """ Create lineTest tree popupMenu launcher """
+        self.menuLineTest.exec_(self.twLineTest.mapToGlobal(point))
 
     @property
     def _getPreviewAttr(self):

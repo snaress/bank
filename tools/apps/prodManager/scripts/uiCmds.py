@@ -239,6 +239,15 @@ class MenuActions(object):
         """ Command launch when 'Cancel' of promptDialog is clicked """
         self.newProjectStepDial.close()
 
+    #======================================= LINETEST TAB ========================================#
+
+    def on_newLinetest(self):
+        """ Command launch when miNewLineTest is clicked """
+        newItem = QtGui.QTreeWidgetItem()
+        newLt = pmSats.LineTestWidget()
+        self.mainUi.twLineTest.addTopLevelItem(newItem)
+        self.mainUi.twLineTest.setItemWidget(newItem, 0, newLt)
+
     #=========================================== HELP ============================================#
 
     def helpTreeObj(self, treeType):
@@ -543,18 +552,33 @@ class UiActions(object):
             checkState = self.mainUi.rbMainAsset.isChecked()
             self.mainUi.qfAssetType.setVisible(checkState)
             self.mainUi.qfShotType.setVisible(not checkState)
-            if not item.nodeType in ['asset', 'shot']:
+            if not item.nodeType in ['asset', 'shot', 'step']:
                 self.initShotInfoTab()
                 self.mainUi.bEditShotInfoTab.setEnabled(False)
             else:
-                self.mainUi.lShotNodeLabel.setText(item.nodeName)
-                self.mainUi.bEditShotInfoTab.setEnabled(True)
-                if checkState:
-                    self.rf_defaultAssetParams(item)
-                    self.rf_dataAssetParams(self._getShotNodeParams(item))
+                if item.nodeType ==  'step':
+                    if self.mainUi.cbStepTree.isChecked():
+                        self.initShotInfoTab()
+                        self.mainUi.bEditShotInfoTab.setEnabled(False)
+                    else:
+                        item = self.mainUi.getParentTreeItemFromNodePath(self.mainUi.twProject,
+                                                                         item.nodePath)
+                        self._rfShotTabInfo(item, checkState)
                 else:
-                    self.rf_defaultShotParams(item)
-                    self.rf_dataShotParams(self._getShotNodeParams(item))
+                    self._rfShotTabInfo(item, checkState)
+
+    def _rfShotTabInfo(self, item, checkState):
+        """ Refresh shotInfo tab with given item
+            @param item: (object) : QTreeWidgetItem
+            @param checkState: rbMainAsset checkState """
+        self.mainUi.lShotNodeLabel.setText(item.nodeName)
+        self.mainUi.bEditShotInfoTab.setEnabled(True)
+        if checkState:
+            self.rf_defaultAssetParams(item)
+            self.rf_dataAssetParams(self._getShotNodeParams(item))
+        else:
+            self.rf_defaultShotParams(item)
+            self.rf_dataShotParams(self._getShotNodeParams(item))
 
     def rf_defaultAssetParams(self, item):
         """ Refresh default asset attributes
