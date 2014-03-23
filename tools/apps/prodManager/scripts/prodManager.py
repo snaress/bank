@@ -135,13 +135,18 @@ class ProdManager(object):
                     dataFile = os.path.join(dataPath, '%s.py' % node['nodeName'])
                     node['_dataPath'] = dataPath
                     node['_dataFile'] = dataFile
+                    node['_dataLtPath'] = os.path.join(dataPath, 'lt')
+                    node['_dataLtFile'] = os.path.join(node['_dataLtPath'],
+                                                       "lt--%s.py" % node['nodeName'])
                     #-- Add Node Params --#
                     if os.path.exists(dataFile):
                         nodeParams = self.readFile(dataFile)
                         for k, v in nodeParams.iteritems():
                             if k.startswith('asset') or k.startswith('shot'):
                                 node[k] = v
-                treeObj.addNode(**node)
+                newNode = treeObj.addNode(**node)
+                if node['nodeType'] in ['asset', 'shot']:
+                    newNode.buildLtFromFile()
 
     def buildStepFromUi(self, mainUi):
         """ Build step attribute from ui
@@ -275,8 +280,9 @@ class TreeObj(object):
             @param kwargs: New node params
             @return: (bool) : Check state """
         if self._checkNewNode(kwargs['nodePath']):
-            self.treeOrder.append(TreeNode(**kwargs))
-            return True
+            newNode = TreeNode(**kwargs)
+            self.treeOrder.append(newNode)
+            return newNode
         else:
             return False
 
@@ -305,7 +311,20 @@ class TreeObj(object):
             print '-' * 100
             print "%s%s" % ('\t'*Ntab, node.nodePath)
             for k, v in node.getParams.iteritems():
-                print "%s%s = %s" % ('\t'*(Ntab+1), k, v)
+                #-- Print LineTest Tree Start --#
+                if k == 'ltTreeObj':
+                    print "%s%s = " % ('\t'*(Ntab+1), k)
+                    if v.hasLt:
+                        for step, ltList in v.__dict__.iteritems():
+                            if step.startswith('lt'):
+                                print "%s%s =" % ('\t'*(Ntab+3), step)
+                                for lt in ltList:
+                                    print '%s%s' % ('\t'*(Ntab+5), '- ' * 45)
+                                    for ltK, ltV in lt.__dict__.iteritems():
+                                        print "%s%s = %s" % ('\t'*(Ntab+5), ltK, ltV)
+                #-- Print LineTest Tree End --#
+                else:
+                    print "%s%s = %s" % ('\t'*(Ntab+1), k, v)
         print "#" * 60
 
     def _checkNewNode(self, nodePath):
@@ -326,13 +345,24 @@ class TreeNode(object):
     def __init__(self, **kwargs):
         for k, v in kwargs.iteritems():
             setattr(self, k, v)
+        if kwargs['nodeType'] in ['asset', 'shot']:
+            self.ltTreeObj = LtTreeObj()
+
+    def buildLtFromFile(self):
+        if hasattr(self, '_dataLtFile'):
+            ltFile = getattr(self, '_dataLtFile')
+            if os.path.exists(ltFile):
+                for k, v in pFile.readPyFile(getattr(self, '_dataLtFile')).iteritems():
+                    if k.startswith('lt'):
+                        for lt in v:
+                            self.ltTreeObj.newLineTest(**lt)
 
     @property
     def getParams(self):
         """ Get node params
             @return: (dict) : Node params """
         params = {}
-        starts = ['node', '_data', 'asset', 'shot']
+        starts = ['node', '_data', 'asset', 'shot', 'lt']
         for k, v in self.__dict__.iteritems():
             check = False
             for s in starts:
@@ -370,3 +400,77 @@ class TreeNode(object):
                     print "!!! Error: Can't write %s node !!!" % getattr(self, 'nodeName')
         else:
             print "!!! Error: Nothing to write from containers !!!"
+
+
+class LtTreeObj(object):
+    """ LineTest tree object class """
+
+    def __init__(self):
+        self.hasLt = False
+        self._ltDataFile = None
+
+    def _initParams(self, **kwargs):
+        """ Initialize LtTreeObj params
+            @param kwargs: (dict) : LineTest params list """
+        if not self.hasLt:
+            for step in kwargs['ltStepList']:
+                if not step == 'stepOrder':
+                    setattr(self, 'lt_%s' % step, [])
+            self.hasLt = True
+            self._ltDataFile = kwargs['ltDataFile']
+        else:
+            if not hasattr(self, 'lt_%s' % kwargs['ltStep']):
+                setattr(self, 'lt_%s' % kwargs['ltStep'], [])
+            self._ltDataFile = kwargs['ltDataFile']
+
+    def newLineTest(self, **kwargs):
+        """ Add new lineTest to tree
+            @param kwargs: New lineTest params
+            @return: (object) : New lineTest node """
+        self._initParams(**kwargs)
+        ltList = getattr(self, 'lt_%s' % kwargs['ltStep'])
+        newLtObj = LtTreeNode(**kwargs)
+        ltList.insert(0, newLtObj)
+        setattr(self, 'lt_%s' % kwargs['ltStep'], ltList)
+        return newLtObj
+
+    def writeLineTest(self):
+        """ Write lineTest params file in data base """
+        if self._ltDataFile is not None:
+            check = True
+            if not os.path.exists(self._ltDataFile):
+                check = pmCore.createDataPath(self._ltDataFile)
+            if check:
+                dataTxt = []
+                for step, ltList in self.__dict__.iteritems():
+                    if step.startswith('lt'):
+                        print step
+                        ltDictList = []
+                        for lt in ltList:
+                            print lt.getParams
+                            ltDictList.append(lt.getParams)
+                        dataTxt.append("%s = %s" % (step, ltDictList))
+                try:
+                    pFile.writeFile(self._ltDataFile, '\n'.join(dataTxt))
+                    print "Writing lineTest in %s" % self._ltDataFile
+                except:
+                    print "!!! Error: Can't write lineTest in %s !!!" % self._ltDataFile
+
+
+class LtTreeNode(object):
+    """ LineTest tree node object class
+        @param kwargs: LineTest node params """
+
+    def __init__(self, **kwargs):
+        for k, v in kwargs.iteritems():
+            setattr(self, k, v)
+
+    @property
+    def getParams(self):
+        """ Get lineTest node params
+            @return: (dict) : LineTest node params """
+        params = {}
+        for k, v in self.__dict__.iteritems():
+            if k.startswith('lt'):
+                params[k] = v
+        return params

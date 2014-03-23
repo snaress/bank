@@ -42,10 +42,9 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
 
     def _setupMainWindow(self):
         """ Setup main window """
-        self.rbMainAsset.clicked.connect(self.uiActions.rf_mainTree)
-        self.rbMainShot.clicked.connect(self.uiActions.rf_mainTree)
-        self.cbStepTree.clicked.connect(self.uiActions.rf_mainTree)
-        self.twProject.itemClicked.connect(self.uiActions.rf_shotInfoTab)
+        self.rbMainAsset.clicked.connect(self.on_mainTreeType)
+        self.rbMainShot.clicked.connect(self.on_mainTreeType)
+        self.twProject.itemClicked.connect(self.tabRefresh)
 
     def _setupProject(self):
         """ Setup project tab """
@@ -72,18 +71,32 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
 
     def _setupLineTest(self):
         """ Setup lineTest tab """
-        self.pop_lineTestMenu()
+        self.twLtSteps.clicked.connect(self.uiActions.rf_lineTestTree)
+        self.bNewLineTest.clicked.connect(self.uiActions.on_newLineTest)
 
     def windowInit(self):
         """ Main ui inititialize """
         self.uiActions.initMainUi()
         self.uiActions.initProjectTab()
         self.uiActions.initShotInfoTab()
+        self.uiActions.initLineTestTab()
 
     def windowRefresh(self):
         """ Main ui updates """
         self.uiActions.rf_maiUi()
         self.uiActions.rf_projectTab()
+
+    def on_mainTreeType(self):
+        self.uiActions.rf_mainTree()
+        self.tabRefresh()
+
+    def tabRefresh(self):
+        """ Refresh active tab """
+        tab = self.tabProdManager.tabText(self.tabProdManager.currentIndex())
+        if tab == 'Shot Info':
+            self.uiActions.rf_shotInfoTab()
+        elif tab == 'Linetest':
+           self.uiActions.rf_ltStepsTree()
 
     def loadProject(self, projectName, projectAlias):
         """ Load given project
@@ -173,22 +186,6 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
             self.miNewShotStep.setEnabled(not checkState)
             self.miNewShotSubstep.setEnabled(not checkState)
             self.menuProjectStep.exec_(self.twProjectStep.mapToGlobal(point))
-
-    def pop_lineTestMenu(self):
-        """ Create lineTest QTreeWidget popupMenu """
-        self.tbLineTestMenu = QtGui.QToolBar()
-        self.miNewLineTest = self.tbLineTestMenu.addAction("New LineTest",
-                                                           self.menuActions.on_newLinetest)
-        self.twLineTest.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.connect(self.twLineTest,
-                     QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'),
-                     self.on_popLineTestMenu)
-        self.menuLineTest = QtGui.QMenu(self)
-        self.menuLineTest.addAction(self.miNewLineTest)
-
-    def on_popLineTestMenu(self, point):
-        """ Create lineTest tree popupMenu launcher """
-        self.menuLineTest.exec_(self.twLineTest.mapToGlobal(point))
 
     @property
     def _getPreviewAttr(self):

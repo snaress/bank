@@ -1,6 +1,6 @@
 import os
 from functools import partial
-from PyQt4 import QtGui, uic
+from PyQt4 import QtGui, uic, QtCore
 from lib.qt.scripts import dialog
 from tools.apps import prodManager
 from lib.qt.scripts import procQt as pQt
@@ -242,11 +242,17 @@ class LineTestWidget(lineTestWidgetClass, lineTestWidgetUiClass):
 
     def __init__(self):
         super(LineTestWidget, self).__init__()
+        self._setupUi()
+
+    def _setupUi(self):
+        """ Setup main widget """
         self.setupUi(self)
+        self.leLtTitle.setStyleSheet("background: Tomato")
+        self.dtLtDate.setStyleSheet("background: Tomato")
 
 
 class PopulateProjectTrees(object):
-    """ Populate ProjectTree and ProjectStep QTreeWidget
+    """ Populate Project tab trees QTreeWidget
         @param mainUi: (object) : ProdManager QMainWindow """
 
     def __init__(self, mainUi):
@@ -287,14 +293,6 @@ class PopulateProjectTrees(object):
         """ Populate main ui tree
             @param treeType: (str) : 'assetTree' or 'shotTree' """
         treeObj = getattr(self.pm, '%sObj' % treeType)
-        if not self.mainUi.cbStepTree.isChecked():
-            self._shotTree(treeObj)
-        else:
-            self._stepTree(treeType, treeObj)
-
-    def _shotTree(self, treeObj):
-        """ Populate main ui with shotTree mode
-            @param treeObj: (object) : Tree node object """
         for node in treeObj.treeOrder:
             newItem = self.newMainItem(**node.getParams)
             parentItem = self.mainUi.getParentTreeItemFromNodePath(self.mainUi.twProject, newItem.nodePath)
@@ -302,48 +300,12 @@ class PopulateProjectTrees(object):
                 self.mainUi.twProject.addTopLevelItem(newItem)
             else:
                 parentItem.addChild(newItem)
-                if newItem.nodeType == 'asset':
-                    stepOrder = self.pm.projectAssetSteps['stepOrder']
-                elif newItem.nodeType == 'shot':
-                    stepOrder = self.pm.projectShotSteps['stepOrder']
-                else:
-                    stepOrder = []
-                for step in stepOrder:
-                    stepPath = '%s/%s' % (newItem.nodePath, step)
-                    nodeName = '%s_%s' % (newItem.nodePath.split('/')[-1], step)
-                    stepParams = self.defaultTemplate.projectTreeNodeAttr('step', step, nodeName, stepPath)
-                    newStep = self.newMainItem(**stepParams)
-                    newItem.addChild(newStep)
-
-    def _stepTree(self, treeType, treeObj):
-        """ Populate main ui with stepTree mode
-            @param treeType: (str) : 'assetTree' or 'shotTree'
-            @param treeObj: (object) : Tree node object """
-        if treeType == 'assetTree':
-            stepOrder = self.pm.projectAssetSteps['stepOrder']
-        elif treeType == 'shotTree':
-            stepOrder = self.pm.projectShotSteps['stepOrder']
-        else:
-            stepOrder = []
-        for step in stepOrder:
-            stepParams = self.defaultTemplate.projectTreeNodeAttr('step', step, step, step)
-            newStep = self.newMainItem(**stepParams)
-            self.mainUi.twProject.addTopLevelItem(newStep)
-            for node in treeObj.treeOrder:
-                newItem = self.newMainItem(**node.getParams)
-                newItem.nodePath = '%s/%s' % (newStep.nodePath, newItem.nodePath)
-                parentItem = self.mainUi.getParentTreeItemFromNodePath(self.mainUi.twProject,
-                                                                       newItem.nodePath)
-                if parentItem is None:
-                    newStep.addChild(newItem)
-                else:
-                    parentItem.addChild(newItem)
 
     @staticmethod
     def newTreeItem(**kwargs):
         """ Create new project tree QTreeWidgetItem
-            @param kwargs: New node params
-                           template.DefaultTemplete().projectTreeNodeAttr(**kwargs)
+            @param kwargs: (dict) : New node params
+                                    template.DefaultTemplete().projectTreeNodeAttr(**kwargs)
             @return: (object) : New QTreeWidgetItem """
         newItem = QtGui.QTreeWidgetItem()
         if kwargs['nodeType'] in ['assetFld', 'shotFld']:
@@ -383,8 +345,70 @@ class PopulateProjectTrees(object):
             dataFile = os.path.join(dataPath, '%s.py' % kwargs['nodeName'])
             newItem._dataPath = dataPath
             newItem._dataFile = dataFile
+            newItem._dataLtPath = os.path.join(dataPath, 'lt')
+            newItem._dataLtFile = os.path.join(newItem._dataLtPath, "lt--%s.py" % newItem.nodeName)
             if os.path.exists(dataFile):
                 for k, v in self.pm.readFile(dataFile).iteritems():
                     if k.startswith('asset') or k.startswith('shot'):
                         setattr(newItem, k, v)
         return newItem
+
+
+class PopulateLineTestTrees(object):
+    """ Populate LineTest tab Trees QTreeWidget
+        @param mainUi: (object) : ProdManager QMainWindow """
+
+    def __init__(self, mainUi):
+        self.mainUi = mainUi
+        self.pm = self.mainUi.pm
+
+    def populateSteps(self, treeType):
+        """ Populate linetest steps tree
+            @param treeType: (str) : 'assetTree' or 'shotTree' """
+        if treeType == 'assetTree':
+            steps = self.pm.projectAssetSteps['stepOrder']
+        else:
+            steps = self.pm.projectShotSteps['stepOrder']
+        for step in steps:
+            newItem = self.newStepItem(step)
+            self.mainUi.twLtSteps.addTopLevelItem(newItem)
+
+    def populateLineTest(self, item, step):
+        """ Populate linetest steps tree """
+        if os.path.exists(item._dataLtFile):
+            fileParams = self.pm.readFile(item._dataLtFile)
+            ltList = fileParams['lt_%s' % step.stepName]
+            for lt in ltList:
+                newItem, newWidget = self.newLineTestItem(**lt)
+                self.mainUi.twLineTest.insertTopLevelItems(0, [newItem])
+                self.mainUi.twLineTest.setItemWidget(newItem, 0, newWidget)
+
+    @staticmethod
+    def newStepItem(step):
+        """ Create new lineTest step QTreeWidgetItem
+            @param step: (str) : Step Name
+            @return: (object) : New QTreeWidgetItem """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setText(0, step)
+        newItem.stepName = step
+        return newItem
+
+    @staticmethod
+    def newLineTestItem(**kwargs):
+        """ Create new lineTest item QTreeWidgetItem
+            @param kwargs: (dict) : LineTest params
+                                    template.DefaultTemplete().lineTestAttr(**kwargs)
+            @return: (object): New QTreeWidgetItem, (object) : New QWidget """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setBackground(0, QtGui.QBrush(QtGui.QColor("Tomato")))
+        newLt = LineTestWidget()
+        newLt.leLtTitle.setText(kwargs['ltTitle'])
+        newLt.lLtUserValue.setText(kwargs['ltUser'])
+        newDate = QtCore.QDate(int(kwargs['ltDate'].split('/')[0]),
+                               int(kwargs['ltDate'].split('/')[1]),
+                               int(kwargs['ltDate'].split('/')[2]))
+        newTime = QtCore.QTime(int(kwargs['ltTime'].split(':')[0]),
+                               int(kwargs['ltTime'].split(':')[1]),
+                               int(kwargs['ltTime'].split(':')[2]))
+        newLt.dtLtDate.setDateTime(QtCore.QDateTime(newDate, newTime))
+        return newItem, newLt

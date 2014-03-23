@@ -1,4 +1,5 @@
 import os
+import time
 from functools import partial
 from PyQt4 import QtGui, QtCore
 from lib.qt.scripts import dialog
@@ -238,15 +239,6 @@ class MenuActions(object):
     def newProjectStepDialCancel(self):
         """ Command launch when 'Cancel' of promptDialog is clicked """
         self.newProjectStepDial.close()
-
-    #======================================= LINETEST TAB ========================================#
-
-    def on_newLinetest(self):
-        """ Command launch when miNewLineTest is clicked """
-        newItem = QtGui.QTreeWidgetItem()
-        newLt = pmSats.LineTestWidget()
-        self.mainUi.twLineTest.addTopLevelItem(newItem)
-        self.mainUi.twLineTest.setItemWidget(newItem, 0, newLt)
 
     #=========================================== HELP ============================================#
 
@@ -552,33 +544,18 @@ class UiActions(object):
             checkState = self.mainUi.rbMainAsset.isChecked()
             self.mainUi.qfAssetType.setVisible(checkState)
             self.mainUi.qfShotType.setVisible(not checkState)
-            if not item.nodeType in ['asset', 'shot', 'step']:
+            if not item.nodeType in ['asset', 'shot']:
                 self.initShotInfoTab()
                 self.mainUi.bEditShotInfoTab.setEnabled(False)
             else:
-                if item.nodeType ==  'step':
-                    if self.mainUi.cbStepTree.isChecked():
-                        self.initShotInfoTab()
-                        self.mainUi.bEditShotInfoTab.setEnabled(False)
-                    else:
-                        item = self.mainUi.getParentTreeItemFromNodePath(self.mainUi.twProject,
-                                                                         item.nodePath)
-                        self._rfShotTabInfo(item, checkState)
+                self.mainUi.lShotNodeLabel.setText(item.nodeName)
+                self.mainUi.bEditShotInfoTab.setEnabled(True)
+                if checkState:
+                    self.rf_defaultAssetParams(item)
+                    self.rf_dataAssetParams(self._getShotNodeParams(item))
                 else:
-                    self._rfShotTabInfo(item, checkState)
-
-    def _rfShotTabInfo(self, item, checkState):
-        """ Refresh shotInfo tab with given item
-            @param item: (object) : QTreeWidgetItem
-            @param checkState: rbMainAsset checkState """
-        self.mainUi.lShotNodeLabel.setText(item.nodeName)
-        self.mainUi.bEditShotInfoTab.setEnabled(True)
-        if checkState:
-            self.rf_defaultAssetParams(item)
-            self.rf_dataAssetParams(self._getShotNodeParams(item))
-        else:
-            self.rf_defaultShotParams(item)
-            self.rf_dataShotParams(self._getShotNodeParams(item))
+                    self.rf_defaultShotParams(item)
+                    self.rf_dataShotParams(self._getShotNodeParams(item))
 
     def rf_defaultAssetParams(self, item):
         """ Refresh default asset attributes
@@ -717,3 +694,78 @@ class UiActions(object):
         else:
             self.mainUi.leShotWorkDir.setText(str(selPath[0]))
 
+    #========================================= LINETEST ==========================================#
+
+    def initLineTestTab(self):
+        """ Initialize LineTest Info tab """
+        self.mainUi.twLtSteps.setHeaderHidden(False)
+        self.mainUi.twLineTest.setHeaderHidden(False)
+        self.mainUi.bNewLineTest.setEnabled(False)
+
+    def rf_ltStepsTree(self):
+        """ Refresh linetest steps tree """
+        selItems = self.mainUi.twProject.selectedItems()
+        selSteps = self.mainUi.twLtSteps.selectedItems()
+        self.mainUi.twLtSteps.clear()
+        self.mainUi.twLineTest.clear()
+        if selItems and selItems[0].nodeType in ['asset', 'shot']:
+            populate = pmSats.PopulateLineTestTrees(self.mainUi)
+            if self.mainUi.rbMainAsset.isChecked():
+                populate.populateSteps('assetTree')
+            else:
+                populate.populateSteps('shotTree')
+        self.mainUi.bNewLineTest.setEnabled(False)
+        if selSteps:
+            self._reselectStep(selSteps[0].stepName)
+            self.rf_lineTestTree()
+
+    def _reselectStep(self, stepName):
+        """ Reselect last selected step
+            @param stepName: (str) : Step name """
+        allItems = pQt.getAllItems(self.mainUi.twLtSteps)
+        for item in allItems:
+            if item.stepName == stepName:
+                self.mainUi.twLtSteps.setCurrentItem(item)
+
+    def rf_lineTestTree(self):
+        """ Refresh linetest tree """
+        selItems = self.mainUi.twProject.selectedItems()
+        selSteps = self.mainUi.twLtSteps.selectedItems()
+        self.mainUi.twLineTest.clear()
+        if selItems and selSteps:
+            self.mainUi.bNewLineTest.setEnabled(True)
+            pmSats.PopulateLineTestTrees(self.mainUi).populateLineTest(selItems[0], selSteps[0])
+        else:
+            self.mainUi.bNewLineTest.setEnabled(False)
+
+    def on_newLineTest(self):
+        """ Command launch when bNewLineTest is clicked """
+        item = self.mainUi.twProject.selectedItems()[0]
+        step = self.mainUi.twLtSteps.selectedItems()[0]
+        ltTitle = 'New_LineTest_1'
+        ltUser = prodManager.user
+        ltDate = time.strftime("%Y/%m/%d", time.localtime())
+        ltTime = time.strftime("%H:%M:%S", time.localtime())
+        if item.nodeType == 'asset':
+            ltStepList = self.pm.projectAssetSteps.keys()
+            node = self.pm.assetTreeObj.getNodeByName(item.nodeName)
+            if os.path.exists(item._dataFile):
+                ltWorkDir = item.assetWorkDir
+            else:
+                ltWorkDir = None
+        else:
+            ltStepList = self.pm.projectShotSteps.keys()
+            node = self.pm.shotTreeObj.getNodeByName(item.nodeName)
+            if os.path.exists(item._dataFile):
+                ltWorkDir = item.shotWorkDir
+            else:
+                ltWorkDir = None
+        ltDataFile = item._dataLtFile
+        ltStep = step.stepName
+        ltParams = self.defaultTemplate.lineTestAttr(ltTitle, ltUser, ltDate, ltTime, [],
+                                                     ltWorkDir, ltDataFile, ltStep, ltStepList)
+        node.ltTreeObj.newLineTest(**ltParams)
+        node.ltTreeObj.writeLineTest()
+        newItem, newLt = pmSats.PopulateLineTestTrees(self.mainUi).newLineTestItem(**ltParams)
+        self.mainUi.twLineTest.insertTopLevelItems(0, [newItem])
+        self.mainUi.twLineTest.setItemWidget(newItem, 0, newLt)

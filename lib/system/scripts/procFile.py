@@ -7,10 +7,24 @@ def readFile(filePath):
     """ Get text from file
         @param filePath: (str) : File absolut path
         @return: (list) : Text line by line """
-    fileId = open(filePath, 'r')
-    getText = fileId.readlines()
-    fileId.close()
-    return getText
+    if os.path.exists(filePath):
+        fileId = open(filePath, 'r')
+        getText = fileId.readlines()
+        fileId.close()
+        return getText
+    else:
+        print "!!! Error: Can't read, file doesn't exists !!!"
+
+def readPyFile(filePath):
+    """ Get text from pyFile
+        @param filePath: (str) : Python file absolut path
+        @return: (dict) : File dict """
+    if os.path.exists(filePath):
+        params = {}
+        execfile(filePath, params)
+        return params
+    else:
+        print "!!! Error: Can't read, file doesn't exists !!!"
 
 def writeFile(filePath, textToWrite, add=False):
     """ Create and edit text file. If file already exists, it is overwritten

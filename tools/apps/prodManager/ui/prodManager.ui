@@ -360,13 +360,6 @@
         </layout>
        </item>
        <item>
-        <widget class="QCheckBox" name="cbStepTree">
-         <property name="text">
-          <string>Step Tree</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QTreeWidget" name="twProject">
          <property name="minimumSize">
           <size>
@@ -403,7 +396,7 @@
     <item row="0" column="2">
      <widget class="QTabWidget" name="tabProdManager">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tiProject">
        <attribute name="title">
@@ -2065,16 +2058,100 @@
         <string>Linetest</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
+        <property name="margin">
+         <number>1</number>
+        </property>
+        <property name="spacing">
+         <number>1</number>
+        </property>
         <item row="0" column="0">
-         <widget class="QTreeWidget" name="twLineTest">
-          <attribute name="headerVisible">
-           <bool>false</bool>
-          </attribute>
-          <column>
-           <property name="text">
-            <string notr="true">1</string>
+         <widget class="QSplitter" name="splitter">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <widget class="QTreeWidget" name="twLtSteps">
+           <property name="maximumSize">
+            <size>
+             <width>150</width>
+             <height>16777215</height>
+            </size>
            </property>
-          </column>
+           <property name="indentation">
+            <number>1</number>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+           <property name="headerHidden">
+            <bool>false</bool>
+           </property>
+           <attribute name="headerVisible">
+            <bool>false</bool>
+           </attribute>
+           <column>
+            <property name="text">
+             <string>Steps</string>
+            </property>
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+              <underline>true</underline>
+             </font>
+            </property>
+            <property name="textAlignment">
+             <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+            </property>
+           </column>
+          </widget>
+          <widget class="QWidget" name="">
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <property name="spacing">
+             <number>1</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="bNewLineTest">
+              <property name="minimumSize">
+               <size>
+                <width>80</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>80</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>New LineTest</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTreeWidget" name="twLineTest">
+              <attribute name="headerVisible">
+               <bool>false</bool>
+              </attribute>
+              <column>
+               <property name="text">
+                <string notr="true">LineTests</string>
+               </property>
+               <property name="font">
+                <font>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                 <underline>true</underline>
+                </font>
+               </property>
+               <property name="textAlignment">
+                <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+               </property>
+              </column>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
        </layout>

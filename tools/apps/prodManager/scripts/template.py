@@ -80,3 +80,20 @@ class DefaultTemplate(object):
     @property
     def shotSteps(self):
         return self._shotSteps()
+
+    @staticmethod
+    def lineTestAttr(ltTitle, ltUser, ltDate, ltTime, ltComments,
+                     ltWorkDir, ltDataFile, ltStep, ltStepList):
+        """ Get lineTest node attributes
+            @param ltTitle: (str) : LineTest title
+            @param ltUser: (str) : LineTest creation user name
+            @param ltDate: (str) : LineTest creation date
+            @param ltTime: (str) : LineTest creation time
+            @param ltComments: (list) : LineTest comments list
+            @param ltWorkDir: (str) : Asset or Shot work directory (setted in shotInfo tab)
+            @param ltDataFile: (str) : LineTest data file absolut path
+            @param ltStep: (str) : Step name
+            @return: (dict) : QTreeWidgetItem attributes """
+        return {'ltTitle': ltTitle, 'ltUser': ltUser, 'ltDate': ltDate, 'ltTime': ltTime,
+                'ltComments': ltComments, 'ltWorkDir': ltWorkDir, 'ltDataFile': ltDataFile,
+                'ltStep': ltStep, 'ltStepList': ltStepList}

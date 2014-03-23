@@ -119,3 +119,20 @@ def createDataPath(dataFile):
             return False
     else:
         return True
+
+def createLtDataPath(ltDataFile):
+    """ Create folders in lineTest data bdd
+        @param ltDataFile: (str) : LineTest data node file absolut path
+        @return: (bool) : True is success, False if failed """
+    print "Create lineTest node data folders ..."
+    dataPath = os.sep.join(ltDataFile.split(os.sep)[:-1])
+    if not os.path.exists(dataPath):
+        try:
+            os.makedirs(dataPath)
+            print "Data path folders successfully created:\n%s" % dataPath
+            return True
+        except:
+            print "!!! Error: Data path folders creation failed !!!\n!!! %s !!!" % dataPath
+            return False
+    else:
+        return True
