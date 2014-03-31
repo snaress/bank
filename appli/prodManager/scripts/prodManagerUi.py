@@ -2,6 +2,7 @@ import sys
 from appli import prodManager
 from functools import partial
 from PyQt4 import QtGui, QtCore, uic
+from lib.qt.scripts import procQt as pQt
 from appli.prodManager.scripts import prodManager as pm
 from appli.prodManager.scripts import uiCmds as pmUiCmds
 from appli.prodManager.scripts import uiRefresh as pmRefresh
@@ -47,6 +48,8 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
                                                      self.twProjectTrees, 'up'))
         self.bProjectTreesDn.clicked.connect(partial(self.uiCmds_projectTab.on_moveTreeItem,
                                                      self.twProjectTrees, 'down'))
+        self.twProjectTrees.clicked.connect(self.uiRf_projectTab.rf_projectTree)
+        self.uiRf_projectTab.pop_projectTreeMenu()
 
     def windowInit(self):
         """ Main ui inititialize """
@@ -65,6 +68,40 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
             @param projectAlias: (str) : Project Alias """
         self.pm.loadProject(projectName, projectAlias)
         self.windowRefresh()
+
+    def on_popProjectTreeMenu(self, point):
+        """ Create project tree popupMenu launcher """
+        if self.bEditProjectTab.isChecked():
+            self.menuProjectTree.exec_(self.twProjectTree.mapToGlobal(point))
+
+    @staticmethod
+    def treeToDict(twTree):
+        """ Convert QTreeWidget to dict list
+            @param twTree: (object) : QTreeWidget
+            @return: (list) : Tree dict list """
+        nodeList = []
+        items = pQt.getAllItems(twTree)
+        for item in items:
+            nodeDict = {}
+            for k, v in item.__dict__.iteritems():
+                nodeDict[k] = v
+            nodeList.append(nodeDict)
+        return nodeList
+
+    @staticmethod
+    def getParentItemFromNodePath(twTree, nodePath):
+        """ Get project tree QTreeWidgetItem with given nodePath
+            @param twTree: (object) : QTreeWidget
+            @param nodePath: (str) : Node path
+            @return: (object) : Parent QTreeWidgetItem """
+        if not nodePath.split('/') > 1:
+            return None
+        else:
+            path = '/'.join(nodePath.split('/')[:-1])
+            allItems = pQt.getAllItems(twTree)
+            for item in allItems:
+                if item.nodePath == path:
+                    return item
 
 
 

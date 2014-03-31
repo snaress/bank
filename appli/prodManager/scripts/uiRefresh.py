@@ -1,4 +1,5 @@
 import os
+from functools import partial
 from PyQt4 import QtGui, QtCore
 from appli.prodManager.scripts import template as pmTemplate
 
@@ -113,6 +114,35 @@ class ProjectTab(object):
         self.mainUi.twProjectStep.clear()
         self.populate.projectTrees()
 
+    def rf_projectTree(self):
+        """ Refresh projectTree """
+        self.mainUi.twProjectTree.clear()
+        selTree = self.mainUi.twProjectTrees.selectedItems()
+        if selTree:
+            self.populate.projectTree()
+
+    def ud_projectTreesItem(self, treeItem):
+        """ Update projectTrees QTreeWidgetItem.treeNodes
+            @param treeItem: (object) : QTreeWidgetItem """
+        treeDict = self.mainUi.treeToDict(self.mainUi.twProjectTree)
+        treeItem.treeNodes = treeDict
+
+    def pop_projectTreeMenu(self):
+        """ Create project tree QTreeWidget popupMenu """
+        self.mainUi.tbProjectTreeMenu = QtGui.QToolBar()
+        self.mainUi.miNewContainer = self.mainUi.tbProjectTreeMenu.addAction("New Container",
+                                     partial(self.mainUi.uiCmds_menu.on_newProjectTreeItem, 'container'))
+        self.mainUi.miNewNode = self.mainUi.tbProjectTreeMenu.addAction("New Node",
+                                partial(self.mainUi.uiCmds_menu.on_newProjectTreeItem, 'node'))
+        self.mainUi.twProjectTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.mainUi.connect(self.mainUi.twProjectTree,
+                            QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'),
+                            self.mainUi.on_popProjectTreeMenu)
+        self.mainUi.menuProjectTree = QtGui.QMenu(self.mainUi)
+        self.mainUi.menuProjectTree.setTearOffEnabled(True)
+        self.mainUi.menuProjectTree.addAction(self.mainUi.miNewContainer)
+        self.mainUi.menuProjectTree.addAction(self.mainUi.miNewNode)
+
 
 class PopulateTrees(object):
     """ Populate prodManager trees QTreeWidget
@@ -126,16 +156,48 @@ class PopulateTrees(object):
         """ Populate projectTrees QTreeWidget """
         trees = []
         for tree in self.pm.project.projectTrees:
-            newTree = self.newProjectTreesItem(tree)
+            treeObj = getattr(self.pm, '%sTree' % tree)
+            newTree = self.newProjectTreesItem(tree, treeNodes=treeObj.treeNodes)
             trees.append(newTree)
         self.mainUi.twProjectTrees.addTopLevelItems(trees)
 
+    def projectTree(self):
+        """ Populate projectTree QTreeWidget """
+        selTree = self.mainUi.twProjectTrees.selectedItems()
+        for nodeDict in selTree[0].treeNodes:
+            parent = self.mainUi.getParentItemFromNodePath(self.mainUi.twProjectTree,
+                                                           nodeDict['nodePath'])
+            newItem = self.newProjectTreeItem(**nodeDict)
+            if parent is None:
+                self.mainUi.twProjectTree.addTopLevelItem(newItem)
+            else:
+                parent.addChild(newItem)
+
     @staticmethod
-    def newProjectTreesItem(treeName):
+    def newProjectTreesItem(treeName, treeNodes=None):
         """ Create new project tree QTreeWidgetItem
             @param treeName: (str) : New tree name (ex: 'asset', 'shot')
+            @param treeNodes: (list) : List of nodes dict
             @return: (object) : New QTreeWidgetItem """
         newItem = QtGui.QTreeWidgetItem()
         newItem.setText(0, treeName)
         newItem.setText(1, '%sTree' % treeName)
+        newItem.treeName = treeName
+        newItem.treeLabel = '%sTree' % treeName
+        if treeNodes is None:
+            newItem.treeNodes = []
+        else:
+            newItem.treeNodes = treeNodes
+        return newItem
+
+    @staticmethod
+    def newProjectTreeItem(**kwargs):
+        """ Create new project tree QTreeWidgetItem
+            @param kwargs: (dict) : Item default params
+            @return: (object) : New QTreeWidgetItem """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setText(0, kwargs['nodeName'])
+        for k, v in kwargs.iteritems():
+            if k.startswith('node'):
+                setattr(newItem, k, v)
         return newItem

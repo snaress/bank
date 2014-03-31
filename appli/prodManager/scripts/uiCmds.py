@@ -1,9 +1,11 @@
 from PyQt4 import QtGui
 from appli import prodManager
+from functools import partial
 from lib.qt.scripts import dialog
 from lib.qt.scripts import procQt as pQt
 from appli.prodManager.scripts import uiWindow as pmWindow
 from appli.prodManager.scripts import uiRefresh as pmRefresh
+from appli.prodManager.scripts import template as pmTemplate
 
 
 class MenuCmds(object):
@@ -13,6 +15,10 @@ class MenuCmds(object):
     def __init__(self, mainUi):
         self.mainUi = mainUi
         self.pm = self.mainUi.pm
+        self.defaultTemplate = pmTemplate.DefaultTemplate
+        self.populate = pmRefresh.PopulateTrees(self.mainUi)
+
+    #========================================= MENU MAIN =========================================#
 
     def newProject(self):
         """ Launch new project dialog """
@@ -31,6 +37,116 @@ class MenuCmds(object):
     def printProjectParams(self):
         """ Print project attributes """
         self.pm.project.printParams()
+
+    #================================== POPUP MENU PROJECT TAB ===================================#
+
+    def on_newProjectTreeItem(self, itemType):
+        """ Command launch when miNewContainer is clicked
+            @param itemType: (str) : 'container' or 'node' """
+        selTree = self.mainUi.twProjectTrees.selectedItems()
+        selNode = self.mainUi.twProjectTree.selectedItems()
+        create = True
+        warn = ""
+        if not selTree:
+            warn = "!!! Warning: Select a tree to add new items !!!"
+            create = False
+        else:
+            if itemType == 'node' and not selNode:
+                warn = "!!! Warning: Select container to add new node !!!"
+                create = False
+            elif itemType == 'node' and selNode and selNode[0].nodeType in self.pm.project.projectTrees:
+                warn = "!!! Warning: New node can only be child of container !!!"
+                create = False
+        if not create:
+            self.warnDial0 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept0])
+            self.warnDial0.show()
+        else:
+            mess = self._getDialMessage(itemType)
+            if selNode:
+                mess.append("New item's parent: %s" % selNode[0].nodePath)
+            else:
+                mess.append("New item's parent: world")
+            if itemType == 'node':
+                self.pdNewProjectTree = pmWindow.EditProjectTreeItem(self.mainUi, itemType)
+            else:
+                self.pdNewProjectTree = dialog.PromptDialog('\n'.join(mess),
+                                                            partial(self.newProjectTreeItem, itemType),
+                                                            self.newProjectTreeCancel)
+            self.pdNewProjectTree.show()
+
+    @staticmethod
+    def _getDialMessage(itemType):
+        """ Get dialog message
+            @param itemType: (str) : 'container' or 'node'
+            @return: (list) : Message """
+        mess = []
+        if itemType == 'container':
+            mess = ["Enter new container name,", "Don't use special caracter or space."]
+        elif itemType == 'node':
+            mess = ["Enter new node name,", "Don't use special caracter or space."]
+        return mess
+
+    def on_dialAccept0(self):
+        """ Command launch when Qbutton 'Ok' of dialog is clicked """
+        self.warnDial0.close()
+
+    def newProjectTreeItem(self, itemType, itemName=None, itemLabel=None):
+        """ Command launch when 'Ok' of confirmDialog is clicked
+            @param itemType: (str) : 'container' or 'node' """
+        selTrees = self.mainUi.twProjectTrees.selectedItems()
+        selItems = self.mainUi.twProjectTree.selectedItems()
+        if selTrees:
+            treeName = selTrees[0].treeName
+            if not itemType == 'node':
+                nodeName = str(self.pdNewProjectTree.leUserValue.text())
+                nodeLabel = nodeName
+                nodeType = '%sCtnr' % treeName
+            else:
+                nodeName = itemName
+                nodeLabel = itemLabel
+                nodeType = treeName
+            checkNewNode, nodePath = self._getProjectTreePath(nodeName)
+            if checkNewNode:
+                params = self.defaultTemplate.projectTreeNodeAttr(nodeType, nodeLabel,
+                                                                  nodeName, nodePath)
+                newItem = self.populate.newProjectTreeItem(**params)
+                if selItems:
+                    selItems[0].addChild(newItem)
+                else:
+                    self.mainUi.twProjectTree.addTopLevelItem(newItem)
+                self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
+            else:
+                warn = "!!! Warning !!!\n%s\nalready exists" % nodePath
+                self.warnDial1 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept1])
+                self.warnDial1.exec_()
+
+    def _getProjectTreePath(self, nodeName):
+        """ Get parent item params
+            @param nodeName: (str) : New item name
+            @return: (bool) : NewName valide, (str) : node path """
+        selItems = self.mainUi.twProjectTree.selectedItems()
+        if selItems:
+            nodePath = '%s/%s' % (selItems[0].nodePath, nodeName)
+        else:
+            nodePath = nodeName
+        allItems = pQt.getAllItems(self.mainUi.twProjectTree)
+        check = True
+        for item in allItems:
+            if item.nodePath == nodePath:
+                check = False
+                print "!!! Warning: Node path already exists: %s !!!" % nodePath
+            if item.nodeName == nodeName:
+                check = False
+                print "!!! Warning: Node name already exists: %s !!!" % nodeName
+        return check, nodePath
+
+    def on_dialAccept1(self):
+        """ Command launch when Qbutton 'Ok' of dialog is clicked """
+        self.warnDial1.close()
+
+    def newProjectTreeCancel(self):
+        """ Command launch when 'Cancel' of confirmDialog is clicked """
+        self.pdNewProjectTree.close()
 
 
 class ProjectTab(object):
@@ -51,6 +167,9 @@ class ProjectTab(object):
             self.mainUi.bEditProjectTab.setText("Edit")
             self.ud_projectTabParams()
             self.pm.project.writeProjectFile()
+            for tree in self.pm.project.projectTrees:
+                treeObj = getattr(self.pm, '%sTree' % tree)
+                treeObj.writeTreeToFile()
         self.mainUi.uiRf_projectTab.rf_projectTabVis(state=checkState)
 
     def on_cancelProjectTab(self):
@@ -152,7 +271,7 @@ class ProjectTab(object):
     def _moveChildItem(item, side):
         """ Move child item
             @param item: (object) : QTreeWidgetItem
-            @param direction: (str) : 'up' or 'down'
+            @param side: (str) : 'up' or 'down'
             @return: (object) : Moved QTreeWidgetItem """
         movedItem = None
         parent = item.parent()
@@ -173,10 +292,8 @@ class ProjectTab(object):
         self.pm.project.projectStart = str(self.mainUi.deProjectStart.text())
         self.pm.project.projectEnd = str(self.mainUi.deProjectEnd.text())
         self.pm.project.projectWorkDir = str(self.mainUi.leProjectWorkDir.text())
-        trees = []
         for item in pQt.getAllItems(self.mainUi.twProjectTrees):
-            trees.append(str(item.text(0)))
-        self.pm.project.projectTrees = trees
-        for tree in trees:
-            if not hasattr(self.pm, '%sTree' % tree):
-                self.pm.project.addTree(tree)
+            if not hasattr(self.pm, '%sTree' % item.treeName):
+                self.pm.project.addTree(item.treeName)
+            treeObj = getattr(self.pm, '%sTree' % item.treeName)
+            treeObj.buildTreeFromUi(item.treeNodes)

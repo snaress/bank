@@ -82,3 +82,37 @@ class LoadProjectUi(loadProjectClass, loadProjectUiClass):
         if selItems:
             self.mainUi.loadProject(selItems[0].projectName, selItems[0].projectAlias)
             self.close()
+
+
+editProjectTreeItemClass, editProjectTreeItemUiClass = uic.loadUiType(prodManager.uiList['newTreeItem'])
+class EditProjectTreeItem(editProjectTreeItemClass, editProjectTreeItemUiClass):
+    """ Load Project dialog setup class
+        @param mainUi: (object) : ProdManager QMainWindow
+        @param itemType: (str) : 'container' or 'node' """
+
+    def __init__(self, mainUi, itemType):
+        self.mainUi = mainUi
+        self.itemType = itemType
+        super(EditProjectTreeItem, self).__init__()
+        self._setupUi()
+
+    def _setupUi(self):
+        """ Setup editProjectTreeItem dialog """
+        self.setupUi(self)
+        self.bCreate.clicked.connect(self.on_create)
+        self.bCancel.clicked.connect(self.close)
+
+    def on_create(self):
+        """ Command launch when Qbutton 'Create' is clicked """
+        name = str(self.leItemName.text())
+        label = str(self.leItemLabel.text())
+        if not name == '' and not label == '':
+            self.mainUi.uiCmds_menu.newProjectTreeItem(self.itemType, itemName=name, itemLabel=label)
+        else:
+            mess = "!!! Warning: Both name and label should be edited !!!"
+            self.confUi = dialog.ConfirmDialog(mess, btns=['Ok'], cmds=[self.on_dialogAccept])
+            self.confUi.exec_()
+
+    def on_dialogAccept(self):
+        """ Command launch when Qbutton 'Ok' of dialog is clicked """
+        self.confUi.close()

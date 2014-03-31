@@ -55,7 +55,8 @@ class ProdManager(object):
             #-- Project Trees --#
             trees = getattr(self.project, 'projectTrees')
             for tree in trees:
-                self.project.addTree(tree)
+                newTree = self.project.addTree(tree)
+                newTree.buildTreeFromFile()
         else:
             print "Error: Project doesn't exists (%s--%s) !!!" % (projectName, projectAlias)
 

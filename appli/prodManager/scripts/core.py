@@ -98,3 +98,22 @@ def createProjectFile(projectBinPath, projectName, projectAlias):
         return projectFile
     except:
         return None
+
+#============================================= DATA ===============================================#
+
+def createDataPath(dataFile):
+    """ Create folders in data bdd
+        @param dataFile: (str) : Data node file absolut path
+        @return: (bool) : True is success, False if failed """
+    print "Create node data folders ..."
+    dataPath = os.sep.join(dataFile.split(os.sep)[:-1])
+    if not os.path.exists(dataPath):
+        try:
+            os.makedirs(dataPath)
+            print "Data path folders successfully created:\n%s" % dataPath
+            return True
+        except:
+            print "!!! Error: Data path folders creation failed !!!\n!!! %s !!!" % dataPath
+            return False
+    else:
+        return True
