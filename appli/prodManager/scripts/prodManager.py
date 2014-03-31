@@ -60,9 +60,48 @@ class ProdManager(object):
         else:
             print "Error: Project doesn't exists (%s--%s) !!!" % (projectName, projectAlias)
 
-    def printParams(self):
+    @property
+    def getProjects(self):
+        """ Get all projects in dataBase
+            @return: (list) : Project list """
+        rootPath = os.path.join(prodManager.binPath, 'project')
+        projects = os.listdir(rootPath) or []
+        projectList = []
+        for project in projects:
+            projectPath = os.path.join(rootPath, project)
+            if (not project.startswith('.') and not project.startswith('_')
+                and os.path.isdir(projectPath)):
+                projectList.append(project)
+        return projectList
+
+    @property
+    def getProjectParams(self):
+        """ Get project params
+            @return: (dict) : Project params """
+        return self.project.getParams
+
+    def getTreeFromTreeName(self, treeName):
+        """ Get tree object from treeName
+            @param treeName: (str) : Tree name (ex: 'asset', 'shot')
+            @return: (object) : Tree object """
+        tree = None
+        if hasattr(self, '%sTree' % treeName):
+            tree = getattr(self, '%sTree' % treeName)
+        return tree
+
+    def printProjects(self):
+        """ Print project list """
         print '#' * 100
-        print "#----- PROD MANAGER PARAMS -----#"
-        for k, v in self.__dict__.iteritems():
-            print k, '=', v
+        print "#----- PROJECTS -----#"
+        print '\n'.join(self.getProjects)
         print '#' * 100
+
+    def printProjectParams(self):
+        """ Print project params """
+        self.project.printParams()
+
+    def printTreeParams(self, treeName):
+        """ Print given tree params
+            @param treeName: (str) : Tree name (ex: 'asset', 'shot') """
+        tree = self.getTreeFromTreeName(treeName)
+        tree.printParams()

@@ -32,7 +32,7 @@ class MenuCmds(object):
 
     def printProdManagerParams(self):
         """ Print project attributes """
-        self.pm.printParams()
+        self.pm.printProjectParams()
 
     def printProjectParams(self):
         """ Print project attributes """

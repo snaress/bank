@@ -1,6 +1,5 @@
 import os
 from lib.system.scripts import procFile as pFile
-from appli.prodManager.scripts import core as pmCore
 
 
 class DefaultTemplate(object):
@@ -95,7 +94,7 @@ class ProjectTemplate(object):
     @property
     def getParams(self):
         """ Get project params and value
-        @return: (dict) : Project params and value """
+            @return: (dict) : Project params and value """
         params = {}
         for k, v in  self.__dict__.iteritems():
             params[k] = v
@@ -123,6 +122,24 @@ class TreeTemplate(object):
         self._treeLabel = '%sTree' % self._treeName
         self._treeFile = os.path.join(self.pm.project._projectPath, 'data', '%s.py' % self._treeLabel)
 
+    def addNode(self, updateTreeNodes=True, **kwargs):
+        """ Add new node to tree
+            @param updateTreeNodes: (bool) : Update param 'treeNodes'
+            @param kwargs: (dict) : New node params
+                           @keyword nodeType: (str) : '$treeName' or '$treeNameCtnr'
+                           @keyword nodeLabel: (str) : Display node name
+                           @keyword nodeName: (str) : Id node name
+                           @keyword nodePath: (str) : Node tree path
+            @return: (object) : New node object if success, (bool) : False if fail """
+        if self._checkNewNode(kwargs['nodePath'], kwargs['nodeName']):
+            newNode = TreeNode(self, **kwargs)
+            self.treeOrder.append(newNode)
+            if updateTreeNodes:
+                self.treeNodes.append(kwargs)
+            return newNode
+        else:
+            return False
+
     def buildTreeFromFile(self):
         """ Build tree from given file """
         self.treeNodes = []
@@ -130,9 +147,9 @@ class TreeTemplate(object):
         if os.path.exists(self._treeFile):
             print "Building %s ..." % self._treeLabel
             tree = pFile.readPyFile(self._treeFile)
-            self.treeNodes = tree['treeNodes']
+            # self.treeNodes = tree['treeNodes']
             for node in tree['treeNodes']:
-                self.treeOrder.append(TreeNode(self, **node))
+                self.addNode(**node)
 
     def buildTreeFromUi(self, treeNodes):
         """ Build tree obj from ui
@@ -140,17 +157,47 @@ class TreeTemplate(object):
         self.treeNodes = treeNodes
         self.treeOrder = []
         for nodeDict in self.treeNodes:
-            self.treeOrder.append(TreeNode(self, **nodeDict))
+            self.addNode(updateTreeNodes=False, **nodeDict)
 
     def writeTreeToFile(self):
         """ Write tree object to file """
-        if pmCore.createDataPath(self._treeFile):
-            treeTxt = ["treeNodes = %s" % self.treeNodes]
-            try:
-                pFile.writeFile(self._treeFile, '\n'.join(treeTxt))
-                print "Writing %s file" % self._treeLabel
-            except:
-                print "!!! Error: Can't write %s file !!!" % self._treeLabel
+        treeTxt = ["treeNodes = %s" % self.treeNodes]
+        try:
+            pFile.writeFile(self._treeFile, '\n'.join(treeTxt))
+            print "Writing %s file" % self._treeLabel
+        except:
+            print "!!! Error: Can't write %s file !!!" % self._treeLabel
+
+    @property
+    def getParams(self):
+        """ Get tree params and value
+            @return: (dict) : Tree params and value """
+        params = {}
+        for k, v in  self.__dict__.iteritems():
+            params[k] = v
+        return params
+
+    def printParams(self):
+        """ Print tree params """
+        print '#' * 100
+        print "#----- %s TREE PARAMS -----#" % self._treeName.upper()
+        for k, v in  self.getParams.iteritems():
+            print k, '=', v
+        print '#' * 100
+
+    def _checkNewNode(self, nodePath, nodeName):
+        """ Check if new node already exists
+            @param nodePath: (str) : Node path
+            @param nodeName: (str) : Node name
+            @return: (bool) : Check state """
+        for node in self.treeOrder:
+            if node.nodePath == nodePath:
+                print "!!! Warning: %s already exists !!!" % nodePath
+                return False
+            elif node.nodeName == nodeName:
+                print "!!! Warning: %s already exists !!!" % nodeName
+                return False
+        return True
 
 
 class TreeNode(object):
@@ -162,3 +209,20 @@ class TreeNode(object):
         self.tree = tree
         for k, v in kwargs.iteritems():
             setattr(self, k, v)
+
+    @property
+    def getParams(self):
+        """ Get tree node params and value
+            @return: (dict) : Tree node params and value """
+        params = {}
+        for k, v in  self.__dict__.iteritems():
+            params[k] = v
+        return params
+
+    def printParams(self):
+        """ Print tree params """
+        print '#' * 100
+        print "#----- %s TREE NODE PARAMS -----#" % getattr(self, 'nodeName')
+        for k, v in  self.getParams.iteritems():
+            print k, '=', v
+        print '#' * 100
