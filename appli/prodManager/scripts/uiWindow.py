@@ -2,6 +2,7 @@ import os
 from appli import prodManager
 from lib.qt.scripts import dialog
 from PyQt4 import QtGui, uic
+from appli.prodManager.scripts import template as pmTemplate
 
 
 newProjectClass, newProjectUiClass = uic.loadUiType(prodManager.uiList['newProject'])
@@ -116,3 +117,62 @@ class EditProjectTreeItem(editProjectTreeItemClass, editProjectTreeItemUiClass):
     def on_dialogAccept(self):
         """ Command launch when Qbutton 'Ok' of dialog is clicked """
         self.confUi.close()
+
+
+editProjectTreeClass, editProjectTreeUiClass = uic.loadUiType(prodManager.uiList['editProjectTree'])
+class EditProjectTreeUi(editProjectTreeClass, editProjectTreeUiClass):
+    """ Load Project dialog setup class
+        @param mainUi: (object) : ProdManager QMainWindow
+        @param mess: (str) : Information text
+        @param itemType: (str) : 'container' or 'node' """
+
+    def __init__(self, mainUi, mess, itemType):
+        self.mainUi = mainUi
+        self.mess = mess
+        self.itemType = itemType
+        self.defaultTemplate = pmTemplate.DefaultTemplate()
+        super(EditProjectTreeUi, self).__init__()
+        self._setupUi()
+
+    def _setupUi(self):
+        """ Setup Load Project dialog """
+        self.setupUi(self)
+        self.lMessage.setText(self.mess)
+        if self.itemType == 'container':
+            self.lShotPrefix.setVisible(False)
+            self.leShotPrefix.setVisible(False)
+        else:
+            self.lShotPrefix.setVisible(True)
+            self.leShotPrefix.setVisible(True)
+        self.bCreate.clicked.connect(self.on_create)
+        self.bCancel.clicked.connect(self.close)
+
+    def on_create(self):
+        """ Command launch when Qbutton 'Create' of tree editor is clicked """
+        nodeList = self._getNodeList(**self._getListParams)
+        print nodeList
+
+    @property
+    def _getListParams(self):
+        """ Get list params from ui
+            @return: (dict) : Ui params """
+        return {'start': int(self.sbStart.value()),
+                'stop': int(self.sbStop.value()),
+                'step': int(self.sbStep.value()),
+                'padd': int(self.sbPadding.value()),
+                'prefixe': str(self.lePrefixe.text()),
+                'suffixe': str(self.leSuffixe.text()),
+                'shotPrefix': str(self.leShotPrefix.text())}
+
+    @staticmethod
+    def _getNodeList(**kwargs):
+        """ Get node list from params
+            @param kwargs: List params from ui ---> self._getListParams
+            @return: (dict) : Node name and label list """
+        nodeList = {}
+        for n in range(kwargs['start'], kwargs['stop']+1, kwargs['step']):
+            nodeLabel = '%s%s%s' % (kwargs['prefixe'], padd, kwargs['suffixe'])
+            nodeName = '%s%s' % (kwargs['shotPrefix'], nodeLabel)
+            padd = str(n).zfill(kwargs['padd'])
+            nodeList[nodeName] = nodeLabel
+        return nodeList

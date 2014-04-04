@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>243</width>
+    <width>329</width>
     <height>99</height>
    </rect>
   </property>
@@ -17,6 +17,27 @@
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="hlItemName">
      <item>
+      <widget class="QLabel" name="lItemLabel">
+       <property name="text">
+        <string>Item Label: </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="leItemLabel"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="lExLabel">
+       <property name="text">
+        <string>(ex: 'p001')</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="hlItemLabel">
+     <item>
       <widget class="QLabel" name="lItemName">
        <property name="text">
         <string>Item Name: </string>
@@ -26,19 +47,12 @@
      <item>
       <widget class="QLineEdit" name="leItemName"/>
      </item>
-    </layout>
-   </item>
-   <item row="1" column="0">
-    <layout class="QHBoxLayout" name="hlItemLabel">
      <item>
-      <widget class="QLabel" name="lItemLabel">
+      <widget class="QLabel" name="lExName">
        <property name="text">
-        <string>Item Label: </string>
+        <string>(ex: 's001_p001')</string>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="leItemLabel"/>
      </item>
     </layout>
    </item>
@@ -77,10 +91,6 @@
     </layout>
    </item>
   </layout>
-  <zorder>layoutWidget</zorder>
-  <zorder>layoutWidget_2</zorder>
-  <zorder>layoutWidget_3</zorder>
-  <zorder>lItemLabel</zorder>
  </widget>
  <resources/>
  <connections/>

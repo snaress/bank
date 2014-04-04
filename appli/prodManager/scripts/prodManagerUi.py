@@ -49,6 +49,10 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.bProjectTreesDn.clicked.connect(partial(self.uiCmds_projectTab.on_moveTreeItem,
                                                      self.twProjectTrees, 'down'))
         self.twProjectTrees.clicked.connect(self.uiRf_projectTab.rf_projectTree)
+        self.bProjectTreeUp.clicked.connect(partial(self.uiCmds_projectTab.on_moveTreeItem,
+                                                    self.twProjectTree, 'up', rf=True))
+        self.bProjectTreeDn.clicked.connect(partial(self.uiCmds_projectTab.on_moveTreeItem,
+                                                    self.twProjectTree, 'down', rf=True))
         self.uiRf_projectTab.pop_projectTreeMenu()
 
     def windowInit(self):

@@ -12,4 +12,4 @@ pm.loadProject('asterix', 'ddd')
 # tree.addNode(**params)
 # print tree.treeNodes
 # tree.writeTreeToFile()
-pm.printTreeParams('asset')
+pm.printTreeParams('shot')

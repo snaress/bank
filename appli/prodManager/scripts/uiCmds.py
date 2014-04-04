@@ -40,9 +40,7 @@ class MenuCmds(object):
 
     #================================== POPUP MENU PROJECT TAB ===================================#
 
-    def on_newProjectTreeItem(self, itemType):
-        """ Command launch when miNewContainer is clicked
-            @param itemType: (str) : 'container' or 'node' """
+    def init_newProjectTreeItem(self, itemType):
         selTree = self.mainUi.twProjectTrees.selectedItems()
         selNode = self.mainUi.twProjectTree.selectedItems()
         create = True
@@ -57,6 +55,13 @@ class MenuCmds(object):
             elif itemType == 'node' and selNode and selNode[0].nodeType in self.pm.project.projectTrees:
                 warn = "!!! Warning: New node can only be child of container !!!"
                 create = False
+        return create, warn
+
+    def on_newProjectTreeItem(self, itemType):
+        """ Command launch when miNewContainer is clicked
+            @param itemType: (str) : 'container' or 'node' """
+        selNode = self.mainUi.twProjectTree.selectedItems()
+        create, warn = self.init_newProjectTreeItem(itemType)
         if not create:
             self.warnDial0 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept0])
             self.warnDial0.show()
@@ -73,6 +78,23 @@ class MenuCmds(object):
                                                             partial(self.newProjectTreeItem, itemType),
                                                             self.newProjectTreeCancel)
             self.pdNewProjectTree.show()
+
+    def on_newProjectTreeItems(self, itemType):
+        """ Command launch when miNewContainer is clicked
+            @param itemType: (str) : 'container' or 'node' """
+        selNode = self.mainUi.twProjectTree.selectedItems()
+        create, warn = self.init_newProjectTreeItem(itemType)
+        if not create:
+            self.warnDial0 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept0])
+            self.warnDial0.show()
+        else:
+            mess = self._getDialMessage(itemType)
+            if selNode:
+                mess.append("New items parent: %s" % selNode[0].nodePath)
+            else:
+                mess.append("New items parent: world")
+            self.editProjectTreeUi = pmWindow.EditProjectTreeUi(self.mainUi, '\n'.join(mess), itemType)
+            self.editProjectTreeUi.exec_()
 
     @staticmethod
     def _getDialMessage(itemType):
@@ -105,7 +127,7 @@ class MenuCmds(object):
                 nodeName = itemName
                 nodeLabel = itemLabel
                 nodeType = treeName
-            checkNewNode, nodePath = self._getProjectTreePath(nodeName)
+            checkNewNode, nodePath = self._getProjectTreePath(nodeName, nodeLabel)
             if checkNewNode:
                 params = self.defaultTemplate.projectTreeNodeAttr(nodeType, nodeLabel,
                                                                   nodeName, nodePath)
@@ -120,15 +142,15 @@ class MenuCmds(object):
                 self.warnDial1 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept1])
                 self.warnDial1.exec_()
 
-    def _getProjectTreePath(self, nodeName):
+    def _getProjectTreePath(self, nodeName, nodeLabel):
         """ Get parent item params
             @param nodeName: (str) : New item name
             @return: (bool) : NewName valide, (str) : node path """
         selItems = self.mainUi.twProjectTree.selectedItems()
         if selItems:
-            nodePath = '%s/%s' % (selItems[0].nodePath, nodeName)
+            nodePath = '%s/%s' % (selItems[0].nodePath, nodeLabel)
         else:
-            nodePath = nodeName
+            nodePath = nodeLabel
         allItems = pQt.getAllItems(self.mainUi.twProjectTree)
         check = True
         for item in allItems:
@@ -231,7 +253,7 @@ class ProjectTab(object):
         """ Command launch when the promptDialog bCancel is clicked """
         self.pdAddTree.close()
 
-    def on_moveTreeItem(self, twTree, side):
+    def on_moveTreeItem(self, twTree, side, rf=False):
         """ Move selected item from given QTreeWidget
             @param twTree: (object) : QTreeWidget contening item to move
             @param side: (str) : 'up' or 'down' """
@@ -243,6 +265,10 @@ class ProjectTab(object):
                 movedItem = self._moveTopItem(twTree, item, side)
             else:
                 movedItem = self._moveChildItem(item, side)
+            if rf:
+                selTree = self.mainUi.twProjectTrees.selectedItems()
+                if selTree:
+                    self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTree[0])
             #-- Reselect QTreeWidgetItem --#
             if movedItem is not None:
                 twTree.setCurrentItem(movedItem)

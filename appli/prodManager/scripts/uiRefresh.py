@@ -134,6 +134,10 @@ class ProjectTab(object):
                                      partial(self.mainUi.uiCmds_menu.on_newProjectTreeItem, 'container'))
         self.mainUi.miNewNode = self.mainUi.tbProjectTreeMenu.addAction("New Node",
                                 partial(self.mainUi.uiCmds_menu.on_newProjectTreeItem, 'node'))
+        self.mainUi.miNewContainers = self.mainUi.tbProjectTreeMenu.addAction("New Container List",
+                                      partial(self.mainUi.uiCmds_menu.on_newProjectTreeItems, 'container'))
+        self.mainUi.miNewNodes = self.mainUi.tbProjectTreeMenu.addAction("New Node List",
+                                 partial(self.mainUi.uiCmds_menu.on_newProjectTreeItems, 'node'))
         self.mainUi.twProjectTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.mainUi.connect(self.mainUi.twProjectTree,
                             QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'),
@@ -141,7 +145,10 @@ class ProjectTab(object):
         self.mainUi.menuProjectTree = QtGui.QMenu(self.mainUi)
         self.mainUi.menuProjectTree.setTearOffEnabled(True)
         self.mainUi.menuProjectTree.addAction(self.mainUi.miNewContainer)
+        self.mainUi.menuProjectTree.addAction(self.mainUi.miNewContainers)
+        self.mainUi.menuProjectTree.addSeparator()
         self.mainUi.menuProjectTree.addAction(self.mainUi.miNewNode)
+        self.mainUi.menuProjectTree.addAction(self.mainUi.miNewNodes)
 
 
 class PopulateTrees(object):
@@ -196,7 +203,7 @@ class PopulateTrees(object):
             @param kwargs: (dict) : Item default params
             @return: (object) : New QTreeWidgetItem """
         newItem = QtGui.QTreeWidgetItem()
-        newItem.setText(0, kwargs['nodeName'])
+        newItem.setText(0, kwargs['nodeLabel'])
         for k, v in kwargs.iteritems():
             if k.startswith('node'):
                 setattr(newItem, k, v)
