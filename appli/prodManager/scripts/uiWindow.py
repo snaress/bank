@@ -136,7 +136,8 @@ class EditProjectTreeUi(editProjectTreeClass, editProjectTreeUiClass):
         self.defaultTemplate = pmTemplate.DefaultTemplate()
         super(EditProjectTreeUi, self).__init__()
         self._setupUi()
-        self.rf_shotPrefix()
+        if self.itemType == 'node':
+            self.rf_shotPrefix()
 
     def _setupUi(self):
         """ Setup Load Project dialog """
@@ -172,7 +173,7 @@ class EditProjectTreeUi(editProjectTreeClass, editProjectTreeUiClass):
             for node in nodeList:
                 if nodePath == nodeList[node]['nodePath']:
                     nodeParent = self._getNodeParent(nodePath)
-                    params = self.defaultTemplate.projectTreeNodeAttr(self.itemType,
+                    params = self.defaultTemplate.projectTreeNodeAttr(nodeList[node]['nodeType'],
                                                                       nodeList[node]['nodeLabel'],
                                                                       nodeList[node]['nodeName'],
                                                                       nodeList[node]['nodePath'])
@@ -235,8 +236,7 @@ class EditProjectTreeUi(editProjectTreeClass, editProjectTreeUiClass):
         check = self._checkNodePathList(nodePathList, allItems)
         return check, nodeList
 
-    @staticmethod
-    def _getNodePathList(selItems, nodeList):
+    def _getNodePathList(self, selItems, nodeList):
         """ Get node path list from selected items
             @param selItems: (list) : Selected QTreeWidgetItem
             @param nodeList: (dict) : Node list
@@ -247,12 +247,26 @@ class EditProjectTreeUi(editProjectTreeClass, editProjectTreeUiClass):
                 for node in nodeList.keys():
                     nodePath = '%s/%s' % (selItem.nodePath, nodeList[node]['nodeLabel'])
                     nodeList[node]['nodePath'] = nodePath
+                    nodeList[node]['nodeType'] = self._getNodeType
                     nodePathList.append(nodePath)
         else:
             for node in nodeList.keys():
                 nodeList[node]['nodePath'] = nodeList[node]['nodeLabel']
+                nodeList[node]['nodeType'] = self._getNodeType
                 nodePathList.append(nodeList[node]['nodeLabel'])
         return nodePathList, nodeList
+
+    @property
+    def _getNodeType(self):
+        """ Get nodeType
+            @return: (str) : Node type """
+        selTrees = self.mainUi.twProjectTrees.selectedItems()
+        treeName = selTrees[0].treeName
+        if self.itemType == 'container':
+            nodeType = '%sCtnr' % treeName
+        else:
+            nodeType = treeName
+        return nodeType
 
     @staticmethod
     def _checkNodePathList(nodePathList, allItems):

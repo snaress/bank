@@ -84,6 +84,7 @@ class MenuCmds(object):
             @param itemType: (str) : 'container' or 'node' """
         selNode = self.mainUi.twProjectTree.selectedItems()
         create, warn = self.init_newProjectTreeItem(itemType)
+        print create
         if not create:
             self.warnDial0 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept0])
             self.warnDial0.show()
