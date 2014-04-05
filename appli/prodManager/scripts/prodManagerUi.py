@@ -89,6 +89,19 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
                 item.setSelected(False)
 
     @staticmethod
+    def delSelItems(twTree):
+        """ Remove selected items from given QTreeWidget
+            @param twTree: (object) : QTreeWidget """
+        selItems = twTree.selectedItems()
+        for item in selItems:
+            if item.parent() is None:
+                ind = twTree.indexOfTopLevelItem(item)
+                twTree.takeTopLevelItem(ind)
+            else:
+                ind = item.parent().indexOfChild(item)
+                item.parent().takeChild(ind)
+
+    @staticmethod
     def treeToDict(twTree):
         """ Convert QTreeWidget to dict list
             @param twTree: (object) : QTreeWidget

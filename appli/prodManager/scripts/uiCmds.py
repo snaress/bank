@@ -171,6 +171,13 @@ class MenuCmds(object):
         """ Command launch when 'Cancel' of confirmDialog is clicked """
         self.pdNewProjectTree.close()
 
+    def on_delProjectItem(self):
+        """ Remove selected items from given QTreeWidget
+            @param twTree: (object) : QTreeWidget """
+        self.mainUi.delSelItems(self.mainUi.twProjectTree)
+        selTrees = self.mainUi.twProjectTrees.selectedItems()
+        self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
+
 
 class ProjectTab(object):
     """ Class used by the ProdManagerUi for project tab actions
