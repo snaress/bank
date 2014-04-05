@@ -138,6 +138,8 @@ class ProjectTab(object):
                                       partial(self.mainUi.uiCmds_menu.on_newProjectTreeItems, 'container'))
         self.mainUi.miNewNodes = self.mainUi.tbProjectTreeMenu.addAction("New Node List",
                                  partial(self.mainUi.uiCmds_menu.on_newProjectTreeItems, 'node'))
+        self.mainUi.miUnselectAll = self.mainUi.tbProjectTreeMenu.addAction("Unselect All",
+                                    partial(self.mainUi.unselectAllItems, self.mainUi.twProjectTree))
         self.mainUi.twProjectTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.mainUi.connect(self.mainUi.twProjectTree,
                             QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'),
@@ -149,6 +151,8 @@ class ProjectTab(object):
         self.mainUi.menuProjectTree.addSeparator()
         self.mainUi.menuProjectTree.addAction(self.mainUi.miNewNode)
         self.mainUi.menuProjectTree.addAction(self.mainUi.miNewNodes)
+        self.mainUi.menuProjectTree.addSeparator()
+        self.mainUi.menuProjectTree.addAction(self.mainUi.miUnselectAll)
 
 
 class PopulateTrees(object):

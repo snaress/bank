@@ -76,7 +76,17 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
     def on_popProjectTreeMenu(self, point):
         """ Create project tree popupMenu launcher """
         if self.bEditProjectTab.isChecked():
-            self.menuProjectTree.exec_(self.twProjectTree.mapToGlobal(point))
+            if self.twProjectTrees.selectedItems():
+                self.menuProjectTree.exec_(self.twProjectTree.mapToGlobal(point))
+
+    @staticmethod
+    def unselectAllItems(twTree):
+        """ Unselect all items of given QTreeWidget
+            @param twTree: (object) : QTreeWidget """
+        selItems = twTree.selectedItems()
+        if selItems:
+            for item in selItems:
+                item.setSelected(False)
 
     @staticmethod
     def treeToDict(twTree):

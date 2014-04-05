@@ -1,5 +1,6 @@
 from appli.prodManager.scripts import prodManager
 
+
 pm = prodManager.ProdManager()
 # pm.newProject('asterix', 'ddd')
 pm.loadProject('asterix', 'ddd')

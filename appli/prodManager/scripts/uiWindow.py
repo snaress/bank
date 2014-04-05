@@ -1,7 +1,10 @@
 import os
+from PyQt4 import QtGui, uic
+from functools import partial
 from appli import prodManager
 from lib.qt.scripts import dialog
-from PyQt4 import QtGui, uic
+from lib.qt.scripts import procQt as pQt
+from appli.prodManager.scripts import uiRefresh as pmRefresh
 from appli.prodManager.scripts import template as pmTemplate
 
 
@@ -133,6 +136,7 @@ class EditProjectTreeUi(editProjectTreeClass, editProjectTreeUiClass):
         self.defaultTemplate = pmTemplate.DefaultTemplate()
         super(EditProjectTreeUi, self).__init__()
         self._setupUi()
+        self.rf_shotPrefix()
 
     def _setupUi(self):
         """ Setup Load Project dialog """
@@ -150,7 +154,49 @@ class EditProjectTreeUi(editProjectTreeClass, editProjectTreeUiClass):
     def on_create(self):
         """ Command launch when Qbutton 'Create' of tree editor is clicked """
         nodeList = self._getNodeList(**self._getListParams)
-        print nodeList
+        check, nodeList = self._checkNodeList(nodeList)
+        mess, btns = self._getDialogParams(check)
+        self.confirmCreation = dialog.ConfirmDialog('\n'.join(mess), btns=btns,
+                               cmds=[partial(self.on_confirmCreation, nodeList, check['success']),
+                                     self.on_cancelCreationConfirmation])
+        self.confirmCreation.exec_()
+
+    def on_confirmCreation(self, nodeList, valideNodePath):
+        """ Command launch when Qbutton 'Create' or 'Skip Existing' of dialog is clicked
+            @param nodeList: (dict) :  Node list
+            @param valideNodePath: (list) : Valid node path list """
+        populate = pmRefresh.PopulateTrees(self.mainUi)
+        valideNodePath.sort()
+        #-- Add New Item --#
+        for nodePath in valideNodePath:
+            for node in nodeList:
+                if nodePath == nodeList[node]['nodePath']:
+                    nodeParent = self._getNodeParent(nodePath)
+                    params = self.defaultTemplate.projectTreeNodeAttr(self.itemType,
+                                                                      nodeList[node]['nodeLabel'],
+                                                                      nodeList[node]['nodeName'],
+                                                                      nodeList[node]['nodePath'])
+                    newItem = populate.newProjectTreeItem(**params)
+                    if nodeParent is None:
+                        self.mainUi.twProjectTree.addTopLevelItem(newItem)
+                    else:
+                        parent = self.mainUi.getParentItemFromNodePath(self.mainUi.twProjectTree,
+                                                                       nodeList[node]['nodePath'])
+                        parent.addChild(newItem)
+        #-- Updates --#
+        selTrees = self.mainUi.twProjectTrees.selectedItems()
+        self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
+        self.confirmCreation.close()
+        self.close()
+
+    def on_cancelCreationConfirmation(self):
+        """ Command launch when Qbutton 'Cancel' of dialog is clicked """
+        self.confirmCreation.close()
+
+    def rf_shotPrefix(self):
+        """ Refresh shot prefix """
+        selItems = self.mainUi.twProjectTree.selectedItems()
+        self.leShotPrefix.setText('%s_' % selItems[0].nodeLabel)
 
     @property
     def _getListParams(self):
@@ -171,8 +217,83 @@ class EditProjectTreeUi(editProjectTreeClass, editProjectTreeUiClass):
             @return: (dict) : Node name and label list """
         nodeList = {}
         for n in range(kwargs['start'], kwargs['stop']+1, kwargs['step']):
+            padd = str(n).zfill(kwargs['padd'])
             nodeLabel = '%s%s%s' % (kwargs['prefixe'], padd, kwargs['suffixe'])
             nodeName = '%s%s' % (kwargs['shotPrefix'], nodeLabel)
-            padd = str(n).zfill(kwargs['padd'])
-            nodeList[nodeName] = nodeLabel
+            nodeList[nodeName] = {}
+            nodeList[nodeName]['nodeLabel'] = nodeLabel
+            nodeList[nodeName]['nodeName'] = nodeName
         return nodeList
+
+    def _checkNodeList(self, nodeList):
+        """ Check if new node already exists
+            @param nodeList: (dict) : Node list
+            @return: (dict) : Check result """
+        allItems = pQt.getAllItems(self.mainUi.twProjectTree)
+        selItems = self.mainUi.twProjectTree.selectedItems()
+        nodePathList, nodeList = self._getNodePathList(selItems, nodeList)
+        check = self._checkNodePathList(nodePathList, allItems)
+        return check, nodeList
+
+    @staticmethod
+    def _getNodePathList(selItems, nodeList):
+        """ Get node path list from selected items
+            @param selItems: (list) : Selected QTreeWidgetItem
+            @param nodeList: (dict) : Node list
+            @return: (list) : Node path list, (dict) :  Node list """
+        nodePathList = []
+        if selItems:
+            for selItem in selItems:
+                for node in nodeList.keys():
+                    nodePath = '%s/%s' % (selItem.nodePath, nodeList[node]['nodeLabel'])
+                    nodeList[node]['nodePath'] = nodePath
+                    nodePathList.append(nodePath)
+        else:
+            for node in nodeList.keys():
+                nodeList[node]['nodePath'] = nodeList[node]['nodeLabel']
+                nodePathList.append(nodeList[node]['nodeLabel'])
+        return nodePathList, nodeList
+
+    @staticmethod
+    def _checkNodePathList(nodePathList, allItems):
+        """ Check if node path list is valid
+            @param nodePathList: (list) : Node path list
+            @param allItems: (list) : QTreeWidgetItem list
+            @return: (dict) : Check results """
+        check = {'success': [], 'fail': []}
+        for node in nodePathList:
+            state = True
+            for item in allItems:
+                if item.nodePath == node:
+                    state = False
+                    if not item.nodePath in check['fail']:
+                        check['fail'].append(item.nodePath)
+            if state:
+                check['success'].append(node)
+        return check
+
+    def _getDialogParams(self, check):
+        """ Get dialog message and buttons list
+            @param check: (dict) : Check node list result
+            @return: (list) : Message, (list) : Buttons list """
+        if self.itemType == 'shot':
+            mess = ["########## Shot List Creation ##########"," "]
+        else:
+            mess = ["########## Shot Folder List Creation ##########"," "]
+        btns = ['Create', 'Cancel']
+        if check['fail']:
+            mess.append("#-- Existing nodes --#")
+            for node in check['fail']:
+                mess.append(node)
+            btns = ['Skip Existing', 'Cancel']
+        return mess, btns
+
+    def _getNodeParent(self, nodePath):
+        """ Get node params
+            @param nodePath: (str) : Given node path
+            @return: (str) : NodeLabel, (str) : NodeName, (str) : NodeParent """
+        if '/' in nodePath:
+            nodeParent = nodePath.split('/')[-2]
+        else:
+            nodeParent = None
+        return nodeParent
