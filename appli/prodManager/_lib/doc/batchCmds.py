@@ -1,3 +1,7 @@
+"""
+@author: Kheops
+"""
+
 #-- Modul Import --#
 from appli.prodManager.scripts import prodManager
 
