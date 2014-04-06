@@ -22,18 +22,6 @@ class DefaultTemplate(object):
         return {'nodeType': nodeType, 'nodeLabel': nodeLabel,
                 'nodeName': nodeName, 'nodePath': nodePath}
 
-    @staticmethod
-    def assetSteps():
-        """ Get default asset steps
-            @return: (list) : Project asset steps """
-        return ['design', 'modeling', 'mapping', 'rigg', 'cloth', 'hair', 'actor']
-
-    @staticmethod
-    def shotSteps():
-        """ Get default shot steps
-            @return: (list) : Project shot steps """
-        return ['storyBord', 'animatic', 'anim', 'lighting', 'cloth', 'fx', 'compo']
-
 
 class ProjectTemplate(object):
     """ Class used to managed project params
@@ -147,6 +135,31 @@ class TreeTemplate(object):
         else:
             return False
 
+    def addStep(self, stepName):
+        """ Append new step to tree
+            @param stepName: (str) : Step name
+            @return: (str) : New step if success, (bool) : False if fail """
+        if self._checkNewStep(stepName):
+            self.treeSteps.append(stepName)
+            return stepName
+        else:
+            return False
+
+    def insertStep(self, index, stepName):
+        """ Insert new step in tree at given index position
+            @param index: (int) : Position in the list
+            @param stepName: (str) : Step name
+            @return: (str) : New step if success, (bool) : False if fail """
+        if self._checkNewStep(stepName):
+            try:
+                self.treeSteps.insert(index, stepName)
+                return stepName
+            except:
+                print "!!! Warning: Can't insert step in list !!!"
+                return False
+        else:
+            return False
+
     def buildTreeFromFile(self):
         """ Build tree from given file """
         self.treeSteps = []
@@ -188,12 +201,27 @@ class TreeTemplate(object):
             params[k] = v
         return params
 
+    @property
+    def getSteps(self):
+        """ Get tree step list
+            @return: (list) : Tree steps """
+        params = self.getParams
+        return params['treeSteps']
+
     def printParams(self):
         """ Print tree params """
         print '#' * 100
         print "#----- %s TREE PARAMS -----#" % self._treeName.upper()
         for k, v in  self.getParams.iteritems():
             print k, '=', v
+        print '#' * 100
+
+    def printSteps(self):
+        """ Print tree steps """
+        print '#' * 100
+        print "#----- %s TREE STEPS -----#" % self._treeName.upper()
+        for step in self.getSteps:
+            print step
         print '#' * 100
 
     def _checkNewNode(self, nodePath, nodeName):
@@ -207,6 +235,16 @@ class TreeTemplate(object):
                 return False
             elif node.nodeName == nodeName:
                 print "!!! Warning: %s already exists !!!" % nodeName
+                return False
+        return True
+
+    def _checkNewStep(self, stepName):
+        """ Check if new node already exists
+            @param stepName: (str) : Step name
+            @return: (bool) : Check state """
+        for step in self.treeSteps:
+            if step == stepName:
+                print "!!! Warning: %s already exists !!!" % stepName
                 return False
         return True
 

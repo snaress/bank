@@ -1,6 +1,7 @@
 import os
 from functools import partial
 from PyQt4 import QtGui, QtCore
+from lib.qt.scripts import procQt as pQt
 from appli.prodManager.scripts import template as pmTemplate
 
 
@@ -117,13 +118,21 @@ class ProjectTab(object):
     def rf_projectTree(self):
         """ Refresh projectTree """
         self.mainUi.twProjectTree.clear()
+        self.mainUi.twProjectStep.clear()
         selTree = self.mainUi.twProjectTrees.selectedItems()
         if selTree:
             self.populate.projectTree()
+            self.populate.projectStep()
 
     def ud_projectTreesItem(self, treeItem):
         """ Update projectTrees QTreeWidgetItem.treeNodes
             @param treeItem: (object) : QTreeWidgetItem """
+        #-- Update TreeSteps --#
+        treeSteps = []
+        for step in pQt.getTopItems(self.mainUi.twProjectStep):
+            treeSteps.append(step.nodeName)
+        treeItem.treeSteps = treeSteps
+        #-- Update TreeNodes --#
         treeDict = self.mainUi.treeToDict(self.mainUi.twProjectTree)
         treeItem.treeNodes = treeDict
 
@@ -165,8 +174,11 @@ class ProjectTab(object):
         self.mainUi.tbProjectStepMenu = QtGui.QToolBar()
         self.mainUi.miNewStep = self.mainUi.tbProjectStepMenu.addAction("New Step",
                                 self.mainUi.uiCmds_menu.on_newProjectStepItem)
-        self.mainUi.miUnselectStepItem = self.mainUi.tbProjectStepMenu.addAction("Unselect All")
-        self.mainUi.miDelStepItem =  self.mainUi.tbProjectStepMenu.addAction("Remove Selection")
+        self.mainUi.miUnselectStepItem = self.mainUi.tbProjectStepMenu.addAction("Unselect All",
+                                         partial(self.mainUi.unselectAllItems,
+                                                 self.mainUi.twProjectStep))
+        self.mainUi.miDelStepItem =  self.mainUi.tbProjectStepMenu.addAction("Remove Selection",
+                                     self.mainUi.uiCmds_menu.on_delStepItem)
         self.mainUi.twProjectStep.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.mainUi.connect(self.mainUi.twProjectStep,
                             QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'),
@@ -192,7 +204,8 @@ class PopulateTrees(object):
         trees = []
         for tree in self.pm.project.projectTrees:
             treeObj = getattr(self.pm, '%sTree' % tree)
-            newTree = self.newProjectTreesItem(tree, treeNodes=treeObj.treeNodes)
+            newTree = self.newProjectTreesItem(tree, treeSteps=treeObj.treeSteps,
+                                               treeNodes=treeObj.treeNodes)
             trees.append(newTree)
         self.mainUi.twProjectTrees.addTopLevelItems(trees)
 
@@ -207,6 +220,13 @@ class PopulateTrees(object):
                 self.mainUi.twProjectTree.addTopLevelItem(newItem)
             else:
                 parent.addChild(newItem)
+
+    def projectStep(self):
+        """ Populate projectStep QTreeWidget """
+        selTree = self.mainUi.twProjectTrees.selectedItems()
+        for step in selTree[0].treeSteps:
+            newItem = self.newProjectStepItem(step)
+            self.mainUi.twProjectStep.addTopLevelItem(newItem)
 
     @staticmethod
     def newProjectTreesItem(treeName, treeSteps=None, treeNodes=None):
@@ -245,7 +265,7 @@ class PopulateTrees(object):
                 setattr(newItem, k, v)
         return newItem
 
-    def nexProjectStepItem(self, stepName):
+    def newProjectStepItem(self, stepName):
         """ Create new project step QTreeWidgetItem
             @param stepName: (str) : Item Name
             @return: (object) : New QTreeWidgetItem """

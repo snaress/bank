@@ -1,7 +1,3 @@
-"""
-@author: Kheops
-"""
-
 #-- Modul Import --#
 from appli.prodManager.scripts import prodManager
 
@@ -51,17 +47,24 @@ print treeDict
 print '*' * 100
 
 #-- Print Tree Params --#
-pm.printTreeParams('asset')
+pm.printTreeParams('shot')
 
 #-- Add Project Tree Node --#
-nodeParams1 = {'nodeType': 'assetCtnr', 'nodeLabel': 'chars',
-               'nodeName': 'chars', 'nodePath': 'chars'}
-assetTree.addNode(**nodeParams1)
-nodeParams2 = {'nodeType': 'assetCtnr', 'nodeLabel': 'main',
-               'nodeName': 'main', 'nodePath': 'chars/main'}
-assetTree.addNode(**nodeParams2)
-nodeParams3 = {'nodeType': 'asset', 'nodeLabel': 'asterix',
-               'nodeName': 'asterix', 'nodePath': 'chars/main/asterix'}
-assetTree.addNode(**nodeParams3)
-pm.printTreeParams('asset')
+# nodeParams1 = {'nodeType': 'assetCtnr', 'nodeLabel': 'chars',
+#                'nodeName': 'chars', 'nodePath': 'chars'}
+# assetTree.addNode(**nodeParams1)
+# nodeParams2 = {'nodeType': 'assetCtnr', 'nodeLabel': 'main',
+#                'nodeName': 'main', 'nodePath': 'chars/main'}
+# assetTree.addNode(**nodeParams2)
+# nodeParams3 = {'nodeType': 'asset', 'nodeLabel': 'asterix',
+#                'nodeName': 'asterix', 'nodePath': 'chars/main/asterix'}
+# assetTree.addNode(**nodeParams3)
+# pm.printTreeParams('asset')
+# assetTree.writeTreeToFile()
+
+#-- Add Tree Step --#
+assetTree.addStep('mapping')
+assetTree.printSteps()
+assetTree.insertStep(2, 'surfacing')
+assetTree.printSteps()
 # assetTree.writeTreeToFile()

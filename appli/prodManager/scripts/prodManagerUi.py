@@ -53,6 +53,10 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
                                                     self.twProjectTree, 'up', rf=True))
         self.bProjectTreeDn.clicked.connect(partial(self.uiCmds_projectTab.on_moveTreeItem,
                                                     self.twProjectTree, 'down', rf=True))
+        self.bProjectStepUp.clicked.connect(partial(self.uiCmds_projectTab.on_moveTreeItem,
+                                                    self.twProjectStep, 'up', rf=True))
+        self.bProjectStepDn.clicked.connect(partial(self.uiCmds_projectTab.on_moveTreeItem,
+                                                    self.twProjectStep, 'down', rf=True))
         self.uiRf_projectTab.pop_projectTreeMenu()
         self.uiRf_projectTab.pop_projectStepMenu()
 

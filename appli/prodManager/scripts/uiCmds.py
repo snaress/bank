@@ -177,7 +177,7 @@ class MenuCmds(object):
         self.pdNewProjectTree.close()
 
     def on_delProjectItem(self):
-        """ Remove selected items from given QTreeWidget """
+        """ Remove selected items from project tree QTreeWidget """
         self.mainUi.delSelItems(self.mainUi.twProjectTree)
         selTrees = self.mainUi.twProjectTrees.selectedItems()
         self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
@@ -205,18 +205,19 @@ class MenuCmds(object):
             mess = ["Enter new step name,", "Don't use special caracter or space."]
             self.pdNewProjectStep = dialog.PromptDialog('\n'.join(mess), self.newProjectStepItem,
                                                         self.newProjectStepCancel)
-            self.pdNewProjectStep.show_()
+            self.pdNewProjectStep.show()
 
-    def newProjectStepItem(self, stepName):
+    def newProjectStepItem(self):
         """ Command launch when miNewStep is clicked
             @param stepName: (str) : New step name """
         selTrees = self.mainUi.twProjectTrees.selectedItems()
+        stepName = str(self.pdNewProjectStep.leUserValue.text())
         if selTrees:
-            treeName = selTrees[0].treeName
             checNewStep = self._checkNewStepItem(stepName)
             if checNewStep:
-                newItem = self.populate.nexProjectStepItem(stepName)
+                newItem = self.populate.newProjectStepItem(stepName)
                 self.mainUi.twProjectStep.addTopLevelItem(newItem)
+                self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
             else:
                 warn = "!!! Warning !!!\n%s\nalready exists" % stepName
                 self.warnDial3 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept3])
@@ -243,6 +244,12 @@ class MenuCmds(object):
     def newProjectStepCancel(self):
         """ Command launch when 'Cancel' of confirmDialog is clicked """
         self.pdNewProjectStep.close()
+
+    def on_delStepItem(self):
+        """ Remove selected items from project step QTreeWidget """
+        self.mainUi.delSelItems(self.mainUi.twProjectStep)
+        selTrees = self.mainUi.twProjectTrees.selectedItems()
+        self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
 
 
 class ProjectTab(object):
@@ -396,4 +403,4 @@ class ProjectTab(object):
             if not hasattr(self.pm, '%sTree' % item.treeName):
                 self.pm.project.addTree(item.treeName)
             treeObj = getattr(self.pm, '%sTree' % item.treeName)
-            treeObj.buildTreeFromUi(item.treeNodes)
+            treeObj.buildTreeFromUi(item.treeSteps, item.treeNodes)
