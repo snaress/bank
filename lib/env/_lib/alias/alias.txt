@@ -6,10 +6,9 @@ c = cls
 rnd = cd F:\rnd
 ws = cd F:\rnd\workspace
 
+ma = "C:\Program Files\Autodesk\Maya2012\bin\maya.exe"
 textPad = "C:\Program Files (x86)\TextPad 6\TextPad.exe"
 designer = "C:\Program Files\Autodesk\Maya2012\bin\designer.exe"
-archiver = mayapy F:\rnd\workspace\bank\tools\apps\archiver\__exe__.py
-grapher = mayapy F:\rnd\workspace\bank\tools\apps\grapher\__exe__.py
 
 my = "F:\rnd\workspace\bank\lib\env\_lib\alias\alias.txt"
 aliasSync = python F:\rnd\workspace\bank\lib\env\scripts\aliasSync.py
