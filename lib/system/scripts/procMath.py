@@ -1,17 +1,6 @@
 import math
 
 
-def secondsToStr(seconds):
-    """ Convert number of seconds into humanized string
-        @param seconds: (int) : Number of seconds
-        @return: (str) : Humanized string """
-    S = int(seconds)
-    hours = S / 3600
-    S = S - (hours * 3600)
-    minutes = S / 60
-    seconds = S - (minutes * 60)
-    return "%s:%s:%s" % (hours, minutes, seconds)
-
 def getDistance(p1, p2):
     """ Get distance between two 3d points
         @param p1: (list) : First point coord (list[float(x), float(y), float(z)])

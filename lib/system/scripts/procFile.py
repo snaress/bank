@@ -56,6 +56,17 @@ def fileSizeFormat(bytes, precision=2):
     return "%.*f %s" % (precision, bytes / math.pow(1024, log),
                        ['b', 'kb', 'mb', 'gb', 'tb','pb', 'eb', 'zb', 'yb'][int(log)])
 
+def secondsToStr(seconds):
+    """ Convert number of seconds into humanized string
+        @param seconds: (int) : Number of seconds
+        @return: (str) : Humanized string """
+    S = int(seconds)
+    hours = S / 3600
+    S = S - (hours * 3600)
+    minutes = S / 60
+    seconds = S - (minutes * 60)
+    return "%s:%s:%s" % (hours, minutes, seconds)
+
 
 class PathToDict(object):
     """ Convert treePath to dict
