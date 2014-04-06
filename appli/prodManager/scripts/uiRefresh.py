@@ -163,7 +163,8 @@ class ProjectTab(object):
     def pop_projectStepMenu(self):
         """ Create project step QTreeWidget popupMenu """
         self.mainUi.tbProjectStepMenu = QtGui.QToolBar()
-        self.mainUi.miNewStep = self.mainUi.tbProjectStepMenu.addAction("New Step")
+        self.mainUi.miNewStep = self.mainUi.tbProjectStepMenu.addAction("New Step",
+                                self.mainUi.uiCmds_menu.on_newProjectStepItem)
         self.mainUi.miUnselectStepItem = self.mainUi.tbProjectStepMenu.addAction("Unselect All")
         self.mainUi.miDelStepItem =  self.mainUi.tbProjectStepMenu.addAction("Remove Selection")
         self.mainUi.twProjectStep.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -208,9 +209,10 @@ class PopulateTrees(object):
                 parent.addChild(newItem)
 
     @staticmethod
-    def newProjectTreesItem(treeName, treeNodes=None):
+    def newProjectTreesItem(treeName, treeSteps=None, treeNodes=None):
         """ Create new project tree QTreeWidgetItem
             @param treeName: (str) : New tree name (ex: 'asset', 'shot')
+            @param treeSteps: (list) : List of tree steps
             @param treeNodes: (list) : List of nodes dict
             @return: (object) : New QTreeWidgetItem """
         newItem = QtGui.QTreeWidgetItem()
@@ -218,6 +220,10 @@ class PopulateTrees(object):
         newItem.setText(1, '%sTree' % treeName)
         newItem.treeName = treeName
         newItem.treeLabel = '%sTree' % treeName
+        if treeSteps is None:
+            newItem.treeSteps = []
+        else:
+            newItem.treeSteps = treeSteps
         if treeNodes is None:
             newItem.treeNodes = []
         else:
@@ -237,4 +243,14 @@ class PopulateTrees(object):
         for k, v in kwargs.iteritems():
             if k.startswith('node'):
                 setattr(newItem, k, v)
+        return newItem
+
+    def nexProjectStepItem(self, stepName):
+        """ Create new project step QTreeWidgetItem
+            @param stepName: (str) : Item Name
+            @return: (object) : New QTreeWidgetItem """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setText(0, stepName)
+        newItem.nodeType = 'step'
+        newItem.nodeName = stepName
         return newItem

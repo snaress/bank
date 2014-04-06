@@ -122,6 +122,7 @@ class TreeTemplate(object):
 
     def __init__(self, pm, treeName):
         self.pm = pm
+        self.treeSteps = []
         self.treeNodes = []
         self.treeOrder = []
         self._treeName = treeName
@@ -148,18 +149,21 @@ class TreeTemplate(object):
 
     def buildTreeFromFile(self):
         """ Build tree from given file """
+        self.treeSteps = []
         self.treeNodes = []
         self.treeOrder = []
         if os.path.exists(self._treeFile):
             print "Building %s ..." % self._treeLabel
             tree = pFile.readPyFile(self._treeFile)
-            # self.treeNodes = tree['treeNodes']
+            self.treeSteps = tree['treeSteps']
             for node in tree['treeNodes']:
                 self.addNode(**node)
 
-    def buildTreeFromUi(self, treeNodes):
+    def buildTreeFromUi(self, treeSteps, treeNodes):
         """ Build tree obj from ui
+            @param treeSteps: (list) : Tree step list
             @param treeNodes: (list) : Node dict list """
+        self.treeSteps = treeSteps
         self.treeNodes = treeNodes
         self.treeOrder = []
         for nodeDict in self.treeNodes:
@@ -167,7 +171,8 @@ class TreeTemplate(object):
 
     def writeTreeToFile(self):
         """ Write tree object to file """
-        treeTxt = ["treeNodes = %s" % self.treeNodes]
+        treeTxt = ["treeSteps = %s" % self.treeSteps,
+                   "treeNodes = %s" % self.treeNodes]
         try:
             pFile.writeFile(self._treeFile, '\n'.join(treeTxt))
             print "Writing %s file" % self._treeLabel

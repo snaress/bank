@@ -69,7 +69,7 @@ class MenuCmds(object):
             self.warnDial0 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept0])
             self.warnDial0.show()
         else:
-            mess = self._getDialMessage(itemType)
+            mess = self._getTreeDialMessage(itemType)
             if selNode:
                 mess.append("New item's parent: %s" % selNode[0].nodePath)
             else:
@@ -92,7 +92,7 @@ class MenuCmds(object):
             self.warnDial0 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept0])
             self.warnDial0.show()
         else:
-            mess = self._getDialMessage(itemType)
+            mess = self._getTreeDialMessage(itemType)
             if selNode:
                 mess.append("New items parent: %s" % selNode[0].nodePath)
             else:
@@ -101,7 +101,7 @@ class MenuCmds(object):
             self.editProjectTreeUi.exec_()
 
     @staticmethod
-    def _getDialMessage(itemType):
+    def _getTreeDialMessage(itemType):
         """ Get dialog message
             @param itemType: (str) : 'container' or 'node'
             @return: (list) : Message """
@@ -118,7 +118,9 @@ class MenuCmds(object):
 
     def newProjectTreeItem(self, itemType, itemName=None, itemLabel=None):
         """ Command launch when 'Ok' of confirmDialog is clicked
-            @param itemType: (str) : 'container' or 'node' """
+            @param itemType: (str) : 'container' or 'node'
+            @param itemName: (str) : New node name
+            @param itemLabel: (str) : New node label """
         selTrees = self.mainUi.twProjectTrees.selectedItems()
         selItems = self.mainUi.twProjectTree.selectedItems()
         if selTrees:
@@ -192,6 +194,55 @@ class MenuCmds(object):
             warn = "!!! Warning: Select a tree to add new steps !!!"
             create = False
         return create, warn
+
+    def on_newProjectStepItem(self):
+        """ Command launch when miNewStep is clicked """
+        create, warn = self.init_newProjectStepItem()
+        if not create:
+            self.warnDial2 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept2])
+            self.warnDial2.show()
+        else:
+            mess = ["Enter new step name,", "Don't use special caracter or space."]
+            self.pdNewProjectStep = dialog.PromptDialog('\n'.join(mess), self.newProjectStepItem,
+                                                        self.newProjectStepCancel)
+            self.pdNewProjectStep.show_()
+
+    def newProjectStepItem(self, stepName):
+        """ Command launch when miNewStep is clicked
+            @param stepName: (str) : New step name """
+        selTrees = self.mainUi.twProjectTrees.selectedItems()
+        if selTrees:
+            treeName = selTrees[0].treeName
+            checNewStep = self._checkNewStepItem(stepName)
+            if checNewStep:
+                newItem = self.populate.nexProjectStepItem(stepName)
+                self.mainUi.twProjectStep.addTopLevelItem(newItem)
+            else:
+                warn = "!!! Warning !!!\n%s\nalready exists" % stepName
+                self.warnDial3 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept3])
+                self.warnDial3.exec_()
+
+    def _checkNewStepItem(self, stepName):
+        """ Check nes step name validity
+            @param stepName: (str) : New step name
+            @return: (bool) : True if valid, False if not """
+        allItems = pQt.getAllItems(self.mainUi.twProjectStep)
+        for item in allItems:
+            if item.nodeName == stepName:
+                return False
+        return True
+
+    def on_dialAccept2(self):
+        """ Command launch when Qbutton 'Ok' of dialog is clicked """
+        self.warnDial2.close()
+
+    def on_dialAccept3(self):
+        """ Command launch when Qbutton 'Ok' of dialog is clicked """
+        self.warnDial3.close()
+
+    def newProjectStepCancel(self):
+        """ Command launch when 'Cancel' of confirmDialog is clicked """
+        self.pdNewProjectStep.close()
 
 
 class ProjectTab(object):
