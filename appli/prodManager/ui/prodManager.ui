@@ -975,7 +975,7 @@
                   <bool>false</bool>
                  </property>
                  <attribute name="headerVisible">
-                  <bool>false</bool>
+                  <bool>true</bool>
                  </attribute>
                  <attribute name="headerShowSortIndicator" stdset="0">
                   <bool>false</bool>
@@ -1009,7 +1009,7 @@
                   <bool>true</bool>
                  </property>
                  <attribute name="headerVisible">
-                  <bool>false</bool>
+                  <bool>true</bool>
                  </attribute>
                  <column>
                   <property name="text">

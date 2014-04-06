@@ -100,6 +100,12 @@ class ProjectTemplate(object):
             params[k] = v
         return params
 
+    def getTrees(self):
+        """ Get project tree list
+            @return: (list) : Project trees """
+        params = self.getParams
+        return params['projectTrees']
+
     def printParams(self):
         """ Print project params """
         print '#' * 100

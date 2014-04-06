@@ -38,9 +38,12 @@ class MenuCmds(object):
         """ Print project attributes """
         self.pm.project.printParams()
 
-    #================================== POPUP MENU PROJECT TAB ===================================#
+    #================================== POPUP MENU PROJECT TREE ==================================#
 
     def init_newProjectTreeItem(self, itemType):
+        """ Initialize QTreeWidgetItem creation
+            @param itemType: (str) : 'container' or 'node'
+            @return: (bool) : Creation check state, (str) : Warning message """
         selTree = self.mainUi.twProjectTrees.selectedItems()
         selNode = self.mainUi.twProjectTree.selectedItems()
         create = True
@@ -172,11 +175,23 @@ class MenuCmds(object):
         self.pdNewProjectTree.close()
 
     def on_delProjectItem(self):
-        """ Remove selected items from given QTreeWidget
-            @param twTree: (object) : QTreeWidget """
+        """ Remove selected items from given QTreeWidget """
         self.mainUi.delSelItems(self.mainUi.twProjectTree)
         selTrees = self.mainUi.twProjectTrees.selectedItems()
         self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
+
+    #================================== POPUP MENU PROJECT STEP ==================================#
+
+    def init_newProjectStepItem(self):
+        """ Initialize QTreeWidgetItem creation
+            @return: (bool) : Creation check state, (str) : Warning message """
+        selTree = self.mainUi.twProjectTrees.selectedItems()
+        create = True
+        warn = ""
+        if not selTree:
+            warn = "!!! Warning: Select a tree to add new steps !!!"
+            create = False
+        return create, warn
 
 
 class ProjectTab(object):

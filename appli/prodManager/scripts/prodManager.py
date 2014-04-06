@@ -75,6 +75,15 @@ class ProdManager(object):
         return projectList
 
     @property
+    def getParams(self):
+        """ Get prodManager params and value
+            @return: (dict) : Project params and value """
+        params = {}
+        for k, v in  self.__dict__.iteritems():
+            params[k] = v
+        return params
+
+    @property
     def getProjectParams(self):
         """ Get project params
             @return: (dict) : Project params """
@@ -94,6 +103,14 @@ class ProdManager(object):
         print '#' * 100
         print "#----- PROJECTS -----#"
         print '\n'.join(self.getProjects)
+        print '#' * 100
+
+    def printProdManagerParams(self):
+        """ Print prodManager params """
+        print '#' * 100
+        print "#----- PRODMANAGER PARAMS -----#"
+        for k, v in  self.getParams.iteritems():
+            print k, '=', v
         print '#' * 100
 
     def printProjectParams(self):

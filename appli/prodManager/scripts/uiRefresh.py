@@ -131,17 +131,20 @@ class ProjectTab(object):
         """ Create project tree QTreeWidget popupMenu """
         self.mainUi.tbProjectTreeMenu = QtGui.QToolBar()
         self.mainUi.miNewContainer = self.mainUi.tbProjectTreeMenu.addAction("New Container",
-                                     partial(self.mainUi.uiCmds_menu.on_newProjectTreeItem, 'container'))
+                                     partial(self.mainUi.uiCmds_menu.on_newProjectTreeItem,
+                                             'container'))
         self.mainUi.miNewNode = self.mainUi.tbProjectTreeMenu.addAction("New Node",
                                 partial(self.mainUi.uiCmds_menu.on_newProjectTreeItem, 'node'))
         self.mainUi.miNewContainers = self.mainUi.tbProjectTreeMenu.addAction("New Container List",
-                                      partial(self.mainUi.uiCmds_menu.on_newProjectTreeItems, 'container'))
+                                      partial(self.mainUi.uiCmds_menu.on_newProjectTreeItems,
+                                              'container'))
         self.mainUi.miNewNodes = self.mainUi.tbProjectTreeMenu.addAction("New Node List",
                                  partial(self.mainUi.uiCmds_menu.on_newProjectTreeItems, 'node'))
-        self.mainUi.miUnselectAll = self.mainUi.tbProjectTreeMenu.addAction("Unselect All",
-                                    partial(self.mainUi.unselectAllItems, self.mainUi.twProjectTree))
-        self.mainUi.miDelItem = self.mainUi.tbProjectTreeMenu.addAction("Remove Selection",
-                                self.mainUi.uiCmds_menu.on_delProjectItem)
+        self.mainUi.miUnselectTreeItem = self.mainUi.tbProjectTreeMenu.addAction("Unselect All",
+                                         partial(self.mainUi.unselectAllItems,
+                                                 self.mainUi.twProjectTree))
+        self.mainUi.miDelTreeItem = self.mainUi.tbProjectTreeMenu.addAction("Remove Selection",
+                                    self.mainUi.uiCmds_menu.on_delProjectItem)
         self.mainUi.twProjectTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.mainUi.connect(self.mainUi.twProjectTree,
                             QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'),
@@ -154,8 +157,25 @@ class ProjectTab(object):
         self.mainUi.menuProjectTree.addAction(self.mainUi.miNewNode)
         self.mainUi.menuProjectTree.addAction(self.mainUi.miNewNodes)
         self.mainUi.menuProjectTree.addSeparator()
-        self.mainUi.menuProjectTree.addAction(self.mainUi.miUnselectAll)
-        self.mainUi.menuProjectTree.addAction(self.mainUi.miDelItem)
+        self.mainUi.menuProjectTree.addAction(self.mainUi.miUnselectTreeItem)
+        self.mainUi.menuProjectTree.addAction(self.mainUi.miDelTreeItem)
+
+    def pop_projectStepMenu(self):
+        """ Create project step QTreeWidget popupMenu """
+        self.mainUi.tbProjectStepMenu = QtGui.QToolBar()
+        self.mainUi.miNewStep = self.mainUi.tbProjectStepMenu.addAction("New Step")
+        self.mainUi.miUnselectStepItem = self.mainUi.tbProjectStepMenu.addAction("Unselect All")
+        self.mainUi.miDelStepItem =  self.mainUi.tbProjectStepMenu.addAction("Remove Selection")
+        self.mainUi.twProjectStep.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.mainUi.connect(self.mainUi.twProjectStep,
+                            QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'),
+                            self.mainUi.on_popProjectStepMenu)
+        self.mainUi.menuProjectStep = QtGui.QMenu(self.mainUi)
+        self.mainUi.menuProjectStep.setTearOffEnabled(True)
+        self.mainUi.menuProjectStep.addAction(self.mainUi.miNewStep)
+        self.mainUi.menuProjectStep.addSeparator()
+        self.mainUi.menuProjectStep.addAction(self.mainUi.miUnselectStepItem)
+        self.mainUi.menuProjectStep.addAction(self.mainUi.miDelStepItem)
 
 
 class PopulateTrees(object):
@@ -204,13 +224,16 @@ class PopulateTrees(object):
             newItem.treeNodes = treeNodes
         return newItem
 
-    @staticmethod
-    def newProjectTreeItem(**kwargs):
+    def newProjectTreeItem(self, **kwargs):
         """ Create new project tree QTreeWidgetItem
             @param kwargs: (dict) : Item default params
             @return: (object) : New QTreeWidgetItem """
         newItem = QtGui.QTreeWidgetItem()
-        newItem.setText(0, kwargs['nodeLabel'])
+        if kwargs['nodeType'] in self.pm.project.projectTrees:
+            newItem.setText(0, kwargs['nodeLabel'])
+            newItem.setTextColor(0, QtGui.QColor(50, 100, 255))
+        else:
+            newItem.setText(0, kwargs['nodeLabel'].upper())
         for k, v in kwargs.iteritems():
             if k.startswith('node'):
                 setattr(newItem, k, v)
