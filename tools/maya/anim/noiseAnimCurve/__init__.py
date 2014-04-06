@@ -16,10 +16,12 @@ for ui in uiL:
 
 
 #-- Show Info --#
-print '########## %s ##########' % toolName.upper()
-print 'Tool Path : ', toolPath
-print 'Tool Package : ', toolPack
-print '#%s#' % ('-'*(22+len(toolName)))
-for ui in sorted(uiList):
-    print '%s : %s' % (ui, uiList[ui])
-print '%s\n' % ('#'*(22+len(toolName)))
+def printToolInfo():
+    """ Print init info """
+    print '########## %s ##########' % toolName.upper()
+    print 'Tool Path : ', toolPath
+    print 'Tool Package : ', toolPack
+    print '#%s#' % ('-'*(22+len(toolName)))
+    for ui in sorted(uiList):
+        print '%s : %s' % (ui, uiList[ui])
+    print '%s\n' % ('#'*(22+len(toolName)))
