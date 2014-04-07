@@ -1,8 +1,9 @@
 import os
 from PyQt4 import QtGui, uic
 from functools import partial
-from lib.qt.scripts import procQt as pQt
 from tools.maya.util import toolManager
+from lib.qt.scripts import procQt as pQt
+from lib.system.scripts import  procFile as pFile
 
 
 class PopulateTree(object):
@@ -36,10 +37,21 @@ class PopulateTree(object):
                         if (os.path.isdir(toolPath) and not toolName.startswith('.') and
                             os.path.exists(launchFile)):
                             newTool = self.newTreeItem('tool', toolName, toolPath)
-                            toolWidget = ToolWidget(self.mainUi, toolName, 'WIP', 'No Comment !!!')
+                            toolTask, toolComm = self._getWidgetParams(launchFile)
+                            toolWidget = ToolWidget(self.mainUi, toolName, toolTask, toolComm)
                             newType.addChild(newTool)
                             self.mainUi.twTools.setItemWidget(newTool, 0, toolWidget)
 
+    def _getWidgetParams(self, launchFile):
+        toolTask = 'WIP'
+        toolComm = "No comments !!!"
+        lines = pFile.readFile(launchFile)
+        for line in lines:
+            if line.startswith('toolTask'):
+                toolTask = line.split(' = ')[-1].split('"')[1]
+            if line.startswith('toolComment'):
+                toolComm = line.split(' = ')[-1].split('"')[1]
+        return toolTask, toolComm
 
     def newTreeItem(self, nodeType, nodeName, nodePath):
         """ Create new tools tree QTreeWidgetItem
@@ -93,6 +105,7 @@ class ToolWidget(toolWidgetClass, toolWidgetUiClass):
         self.toolComment = toolComment
         super(ToolWidget, self).__init__()
         self._setupUi()
+        self.initTaskColor()
 
     def _setupUi(self):
         """ Setup Widget """
@@ -100,3 +113,21 @@ class ToolWidget(toolWidgetClass, toolWidgetUiClass):
         self.lToolName.setText(self.toolName)
         self.lToolTask.setText(self.toolTask)
         self.lToolComment.setText(self.toolComment)
+
+    def initTaskColor(self):
+        """ Task color init """
+        taskColor = QtGui.QColor(125, 125, 125)
+        taskColorWip  = QtGui.QColor(255, 0, 0)
+        taskColorDev  = QtGui.QColor(255, 200, 0)
+        taskColorProd  = QtGui.QColor(0, 255, 0)
+        if self.toolTask == 'WIP':
+            color = taskColorWip
+        elif self.toolTask == 'DEV':
+            color = taskColorDev
+        elif self.toolTask == 'PROD':
+            color = taskColorProd
+        else:
+            color = taskColor
+        values = "{r}, {g}, {b}, {a}".format(r = color.red(), g = color.green(),
+                                             b = color.blue(), a = 255)
+        self.lToolTask.setStyleSheet("QLabel { color: rgba("+values+"); }")

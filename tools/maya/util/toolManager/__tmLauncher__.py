@@ -21,8 +21,12 @@ from tools.maya.util.toolManager.scripts import uiRefresh
 reload(toolManager)
 reload(toolManagerUi)
 reload(uiRefresh)
-print 'end reload'
 toolManager.printToolInfo()
+
+
+print "#-- Tool Variables --#"
+toolTask = "WIP"
+toolComment = "Tool showing the listing of all the maya tools."
 
 
 print "#-- Launch Tool Ui --#"

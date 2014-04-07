@@ -11,6 +11,11 @@ reload(noiseAnimCurveUi)
 noiseAnimCurve.printToolInfo()
 
 
+print "#-- Tool Variables --#"
+toolTask = "WIP"
+toolComment = "Tool editing selected anim curve with noise."
+
+
 print "#-- Launch Tool Ui --#"
 # global window
 window = noiseAnimCurveUi.NoiseAnimCurveUi()
