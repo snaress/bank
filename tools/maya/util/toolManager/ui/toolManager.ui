@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>274</width>
-    <height>210</height>
+    <width>532</width>
+    <height>264</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,6 +16,9 @@
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <widget class="QTreeWidget" name="twTools">
+     <property name="indentation">
+      <number>0</number>
+     </property>
      <attribute name="headerVisible">
       <bool>false</bool>
      </attribute>

@@ -21,6 +21,7 @@ for ui in uiL:
 
 #-- Show Info --#
 def printToolInfo():
+    """ Print init info """
     print '########## %s ##########' % toolName.upper()
     print 'Tool Path : ', toolPath
     print 'Tool Package : ', toolPack

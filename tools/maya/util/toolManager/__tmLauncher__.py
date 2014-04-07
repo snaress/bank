@@ -1,3 +1,6 @@
+"""
+Modul used by the ToolManager
+"""
 import os
 import sys
 
@@ -14,8 +17,11 @@ for path in [libPath, bankPath]:
 print "#-- Import And Reload --#"
 from tools.maya.util import toolManager
 from tools.maya.util.toolManager.scripts import toolManagerUi
+from tools.maya.util.toolManager.scripts import uiRefresh
 reload(toolManager)
 reload(toolManagerUi)
+reload(uiRefresh)
+print 'end reload'
 toolManager.printToolInfo()
 
 
