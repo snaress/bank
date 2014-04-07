@@ -37,6 +37,7 @@ class PopulateTree(object):
                         if (os.path.isdir(toolPath) and not toolName.startswith('.') and
                             os.path.exists(launchFile)):
                             newTool = self.newTreeItem('tool', toolName, toolPath)
+                            newTool.launchFile = launchFile
                             toolTask, toolComm = self._getWidgetParams(launchFile)
                             toolWidget = ToolWidget(self.mainUi, toolName, toolTask, toolComm)
                             newType.addChild(newTool)
@@ -77,6 +78,8 @@ class PopulateTree(object):
         newFont.setBold(True)
         newCtnr.setFont(newFont)
         newCtnr.setCheckable(True)
+        newCtnr.setMinimumHeight(20)
+        newCtnr.setMaximumHeight(20)
         return newCtnr
 
     def on_container(self, topLevelItem):
@@ -117,9 +120,9 @@ class ToolWidget(toolWidgetClass, toolWidgetUiClass):
     def initTaskColor(self):
         """ Task color init """
         taskColor = QtGui.QColor(125, 125, 125)
-        taskColorWip  = QtGui.QColor(255, 0, 0)
-        taskColorDev  = QtGui.QColor(255, 200, 0)
-        taskColorProd  = QtGui.QColor(0, 255, 0)
+        taskColorWip = QtGui.QColor(255, 0, 0)
+        taskColorDev = QtGui.QColor(255, 200, 0)
+        taskColorProd = QtGui.QColor(0, 255, 0)
         if self.toolTask == 'WIP':
             color = taskColorWip
         elif self.toolTask == 'DEV':

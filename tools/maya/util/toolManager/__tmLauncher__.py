@@ -1,35 +1,23 @@
 """
 Modul used by the ToolManager
 """
-import os
-import sys
 
-
-print "#-- Check SysPath --#"
-libPath = os.path.join('F:', os.sep, 'rnd', 'lib')
-bankPath = os.path.join('F:', os.sep, 'rnd', 'workspace', 'bank')
-for path in [libPath, bankPath]:
-    if not path in sys.path:
-        print "Add %s in sysPath ..." % path
-        sys.path.insert(0, path)
-
-
-print "#-- Import And Reload --#"
+#-- Import And Reload --#
 from tools.maya.util import toolManager
 from tools.maya.util.toolManager.scripts import toolManagerUi
 from tools.maya.util.toolManager.scripts import uiRefresh
 reload(toolManager)
 reload(toolManagerUi)
 reload(uiRefresh)
+
+
+#-- Tool Variables --#
 toolManager.printToolInfo()
-
-
-print "#-- Tool Variables --#"
-toolTask = "WIP"
+toolTask = "DEV"
 toolComment = "Tool showing the listing of all the maya tools."
 
 
-print "#-- Launch Tool Ui --#"
+#-- Launch Tool Ui --#
 # global window
 window = toolManagerUi.ToolManagerUi()
 window.show()

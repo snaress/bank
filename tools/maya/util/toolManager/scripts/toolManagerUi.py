@@ -19,11 +19,19 @@ class ToolManagerUi(toolManagerClass, toolManagerUiClass):
     def _setupUi(self):
         """ Setup main window """
         self.setupUi(self)
+        self.bLaunchTool.clicked.connect(self.launchTool)
 
     def rf_toolsTree(self):
         """ Refresh tools QTreeWidget """
         self.twTools.clear()
         self.populate.toolsTree()
+
+    def launchTool(self):
+        """ Launch selected tool """
+        selTool = self.twTools.selectedItems()
+        if selTool:
+            print "#-- Launch From ToolManager: %s --#" % selTool[0].nodeName
+            execfile(selTool[0].launchFile, globals())
 
 
 
