@@ -14,10 +14,9 @@ reload(uiRefresh)
 #-- Tool Variables --#
 toolManager.printToolInfo()
 toolTask = "DEV"
-toolComment = "Tool showing the listing of all the maya tools."
+toolComment = "Tool showing the listing of all maya tools."
 
 
 #-- Launch Tool Ui --#
-# global window
 window = toolManagerUi.ToolManagerUi()
 window.show()
