@@ -5,7 +5,7 @@ import maya.cmds as mc
 def getSelAnimCurves():
     """ Get selcted curves from graphEditor
         @return: (list) : Selected curves name """
-    return mc.keyframe(q=True, n=True)
+    return mc.keyframe(q=True, n=True, sl=True) or []
 
 def getCurveInfo(animCurves):
     """ store info from selected curves
@@ -61,7 +61,60 @@ def getRandomSeq(**kwargs):
     printNoiseParams(**kwargs)
     return randSeq
 
-def createCurves(curveInfo, randSeq):
+def getSinRandomSeq(**kwargs):
+    """ Create sinusoidal random sequence from params
+        @param kwargs: (dict) : Noise Params
+            @keyword noiseType: (str) : 'random' or sinRandom'
+            @keyword min: (float) : Amplitude Minimum
+            @keyword max: (float) : Amplitude Maximum
+            @keyword bias: (bool) : Amplitude Bias on or off
+            @keyword biasMin: (float) : Bias Minimum
+            @keyword biasMax: (float) : Bias Maximum
+            @keyword octaves: (int) : Number of random value to create
+            @keyword frequence: (int) : Octaves repetition
+        @return: (list) : Random sequence """
+    #-- Create Sinusoidal Random Sequence --#
+    randSeq = []
+    rand = 0
+    sign = ''
+    for n in range(kwargs['octaves']):
+        #-- Random Init --#
+        if sign == '':
+            rand = random.uniform(kwargs['min'], kwargs['max'])
+            if rand > (kwargs['min'] + kwargs['max'])/2:
+                sign = '+'
+                if kwargs['bias']:
+                    if not rand > kwargs['biasMax'] and not rand < kwargs['biasMin']:
+                        rand = random.uniform(kwargs['biasMax'], kwargs['max'])
+            else:
+                sign = '-'
+                if kwargs['bias']:
+                    if not rand > kwargs['biasMax'] and not rand < kwargs['biasMin']:
+                        rand = random.uniform(kwargs['min'], kwargs['biasMin'])
+        #-- Random Lo --#
+        elif sign == '+':
+            rand = random.uniform(kwargs['min'], (kwargs['min'] + kwargs['max'])/2)
+            if kwargs['bias']:
+                if not rand > kwargs['biasMax'] and not rand < kwargs['biasMin']:
+                    rand = random.uniform(kwargs['min'], kwargs['biasMin'])
+            sign = '-'
+        #-- Random Hi --#
+        elif sign == '-':
+            rand = random.uniform((kwargs['min'] + kwargs['max'])/2, kwargs['max'])
+            if kwargs['bias']:
+                if not rand > kwargs['biasMax'] and not rand < kwargs['biasMin']:
+                    rand = random.uniform(kwargs['biasMax'], kwargs['max'])
+            sign = '+'
+        randSeq.append(rand)
+    #-- Create Random Frequence --#
+    rOctaves = randSeq
+    for m in range(kwargs['frequence']-1):
+        randSeq.extend(rOctaves)
+    #-- Return Random List --#
+    printNoiseParams(**kwargs)
+    return randSeq
+
+def getNewCurves(curveInfo, randSeq):
     """ Create new curves with noise params
         @param curveInfo: (dict) : Selected curves info
         @param randSeq: (list) : Random sequence
