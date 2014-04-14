@@ -6,15 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>602</width>
-    <height>254</height>
+    <width>567</width>
+    <height>235</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Noise Anim Curve</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_3">
+   <layout class="QGridLayout" name="gridLayout_2">
+    <property name="margin">
+     <number>1</number>
+    </property>
+    <property name="spacing">
+     <number>1</number>
+    </property>
     <item row="0" column="0">
      <layout class="QGridLayout" name="slSimpleZone">
       <property name="spacing">
@@ -74,9 +80,9 @@
            <number>2</number>
           </property>
           <item>
-           <widget class="QRadioButton" name="rbRandom">
+           <widget class="QRadioButton" name="rbUniform">
             <property name="text">
-             <string>Random</string>
+             <string>Uniform</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -84,9 +90,9 @@
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="rbSinRandom">
+           <widget class="QRadioButton" name="rbSinusoidal">
             <property name="text">
-             <string>SinRandom</string>
+             <string>Sinusoidal</string>
             </property>
            </widget>
           </item>
@@ -498,25 +504,132 @@
           <number>2</number>
          </property>
          <item>
-          <widget class="QCheckBox" name="cbInitialState">
+          <widget class="QLabel" name="lMode">
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
+           </property>
            <property name="text">
-            <string>From Initial State</string>
+            <string>Mode:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="rbInit">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>70</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>From Init</string>
            </property>
            <property name="checked">
-            <bool>true</bool>
-           </property>
-           <property name="autoExclusive">
             <bool>true</bool>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="cbCurrentState">
-           <property name="text">
-            <string>From Current State</string>
+          <widget class="QRadioButton" name="rbStored">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
            </property>
-           <property name="autoExclusive">
-            <bool>true</bool>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>From Stored</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="rbCurrent">
+           <property name="minimumSize">
+            <size>
+             <width>65</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>From Current</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="spacing">
+          <number>2</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="bNoiseSimple">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>120</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Noise Selected Curves</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>120</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Store Current State</string>
            </property>
           </widget>
          </item>
@@ -526,31 +639,6 @@
         <widget class="Line" name="line_4">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="bNoiseSimple">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>120</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Noise Selected Curves</string>
          </property>
         </widget>
        </item>
@@ -564,7 +652,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>602</width>
+     <width>567</width>
      <height>21</height>
     </rect>
    </property>

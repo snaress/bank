@@ -20,7 +20,7 @@ class NoiseAnimCurveUi(noiseAnimCurveClass, noiseAnimCurveUiClass):
         self.setupUi(self)
         self.miToolTips.triggered.connect(self.on_toolTips)
         self.cbAdvancedMethod.clicked.connect(self.rf_methodUi)
-        self.bNoiseSimple.clicked.connect(self.noiseCurve)
+        self.bNoiseSimple.clicked.connect(self.noiseCurveSimple)
 
     def rf_methodUi(self):
         """ Refresh Ui method """
@@ -32,16 +32,13 @@ class NoiseAnimCurveUi(noiseAnimCurveClass, noiseAnimCurveUiClass):
         else:
             self.setGeometry(self.pos().x()+8, self.pos().y()+30, 400, self.height())
 
-    def noiseCurve(self):
+    def noiseCurveSimple(self):
         """ Command launch when bNoise is clicked """
         curves = self.cmds.getSelAnimCurves()
         curveInfo = self.cmds.getCurveInfo(curves)
-        randSeq = None
-        if self.rbRandom.isChecked():
-            randSeq = self.cmds.getRandomSeq(**self.getNoiseParams)
-        elif self.rbSinRandom.isChecked():
-            randSeq = self.cmds.getSinRandomSeq(**self.getNoiseParams)
+        randSeq = self.cmds.getRandomSeq(**self.getNoiseParams)
         newCurves = self.cmds.getNewCurves(curveInfo, randSeq)
+        self.cmds.addAttrOnCurves(curveInfo)
         self.cmds.applyOnCurves(newCurves)
 
     @property
@@ -49,10 +46,10 @@ class NoiseAnimCurveUi(noiseAnimCurveClass, noiseAnimCurveUiClass):
         """ Get noise params from ui
             @return: (dict) : Noise params """
         params = {}
-        if self.rbRandom.isChecked():
-            params['noiseType'] = 'random'
-        elif self.rbSinRandom.isChecked():
-            params['noiseType'] = 'sinRandom'
+        if self.rbUniform.isChecked():
+            params['randType'] = 'uniform'
+        elif self.rbSinusoidal.isChecked():
+            params['randType'] = 'sinusoidal'
         params['min'] = self.sbAmpMin.value()
         params['max'] = self.sbAmpMax.value()
         params['bias'] = self.gbBias.isChecked()
@@ -76,14 +73,15 @@ class NoiseAnimCurveUi(noiseAnimCurveClass, noiseAnimCurveUiClass):
             @return: (dict) : Tool tips str """
         toolTipDict = {}
         toolTipDict['lNoiseType'] = "Noise type choice for random sequence creation"
-        toolTipDict['rbRandom'] = "Uniform random"
-        toolTipDict['rbSinRandom'] = "Sinusoidal random"
+        toolTipDict['rbUniform'] = "Uniform random"
+        toolTipDict['rbSinusoidal'] = "Sinusoidal random"
         toolTipDict['lAmp'] = "New keys min and max value"
         toolTipDict['gbBias'] = "Activate amplitude bias"
         toolTipDict['lBiasMin'] = "Amplitude highest minimum value"
         toolTipDict['lBiasMax'] = "Amplitude lowest maximum value"
         toolTipDict['lOctaves'] = "Number of random value to create"
         toolTipDict['lFrequence'] = "Number of octaves repetition"
+        toolTipDict['lMode'] = "Curve state from which random is generated"
         return toolTipDict
 
 

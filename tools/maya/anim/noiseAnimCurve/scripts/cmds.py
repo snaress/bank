@@ -1,5 +1,5 @@
-import random
 import maya.cmds as mc
+from lib.system.scripts import procMath as pMath
 
 
 def getSelAnimCurves():
@@ -20,98 +20,56 @@ def getCurveInfo(animCurves):
         #-- Get Frame Info --#
         nk = mc.keyframe(curve, q=True, kc=True)
         nf = []
+        vals = []
         for k in range(nk):
-            nf.append(mc.keyframe(curve, q=True, index=(k,k))[0])
+            f = mc.keyframe(curve, q=True, index=(k,k))[0]
+            nf.append(f)
+            vals.append(mc.keyframe(curve, q=True, t=(f, f), ev=True)[0])
         #-- Create dict --#
         curveInfo[curve] = {}
         curveInfo[curve]['nodes'] = nodes
         curveInfo[curve]['nk'] = nk
         curveInfo[curve]['nf'] = nf
+        curveInfo[curve]['val'] = vals
         curveInfo[curve]['duree'] = (nf[nk-1] - nf[0]) + 1
     return curveInfo
+
+def addAttrOnCurves(curveInfo):
+    """ Add and set curve attributes
+        @param curveInfo: (dict) : Selected curves info """
+    for curve in curveInfo.keys():
+        if not mc.objExists('%s.nac_initState' % curve):
+            mc.addAttr(curve, ln='nac_initState', dt='string')
+        if not mc.objExists('%s.nac_storedState' % curve):
+            mc.addAttr(curve, ln='nac_storedState', dt='string')
+        curveState = {}
+        for n, f in enumerate(curveInfo[curve]['nf']):
+            curveState[str(f)] = curveInfo[curve]['val'][n]
+        mc.setAttr('%s.nac_initState' % curve, curveState, type='string')
 
 def getRandomSeq(**kwargs):
     """ Create random sequence from params
         @param kwargs: (dict) : Noise Params
-            @keyword noiseType: (str) : 'random' or sinRandom'
+            @keyword randType: (str) : 'uniform' or 'sinusoidal'
             @keyword min: (float) : Amplitude Minimum
             @keyword max: (float) : Amplitude Maximum
+            @keyword octaves: (int) : Number of random value to create
+            @keyword frequence: (int) : Octaves repetition
             @keyword bias: (bool) : Amplitude Bias on or off
             @keyword biasMin: (float) : Bias Minimum
             @keyword biasMax: (float) : Bias Maximum
-            @keyword octaves: (int) : Number of random value to create
-            @keyword frequence: (int) : Octaves repetition
         @return: (list) : Random sequence """
     #-- Create Random Sequence --#
-    randSeq = []
-    for n in range(kwargs['octaves']):
-        rand = random.uniform(kwargs['min'], kwargs['max'])
-        if kwargs['bias']:
-            if not rand > kwargs['biasMax'] and not rand < kwargs['biasMin']:
-                if rand > (kwargs['min'] + kwargs['max'])/2:
-                    rand = random.uniform(kwargs['biasMax'], kwargs['max'])
-                else:
-                    rand = random.uniform(kwargs['biasMin'], kwargs['min'])
-        randSeq.append(rand)
+    r = pMath.RandomSequence(kwargs['randType'], kwargs['min'], kwargs['max'], kwargs['octaves'],
+                             kwargs['frequence'], bias=kwargs['bias'], biasMin=kwargs['biasMin'],
+                             biasMax=kwargs['biasMax'])
+    randSeq = r.generate()
     #-- Create Random Frequence --#
     rOctaves = randSeq
     for m in range(kwargs['frequence']-1):
         randSeq.extend(rOctaves)
     #-- Return Random List --#
-    printNoiseParams(**kwargs)
-    return randSeq
-
-def getSinRandomSeq(**kwargs):
-    """ Create sinusoidal random sequence from params
-        @param kwargs: (dict) : Noise Params
-            @keyword noiseType: (str) : 'random' or sinRandom'
-            @keyword min: (float) : Amplitude Minimum
-            @keyword max: (float) : Amplitude Maximum
-            @keyword bias: (bool) : Amplitude Bias on or off
-            @keyword biasMin: (float) : Bias Minimum
-            @keyword biasMax: (float) : Bias Maximum
-            @keyword octaves: (int) : Number of random value to create
-            @keyword frequence: (int) : Octaves repetition
-        @return: (list) : Random sequence """
-    #-- Create Sinusoidal Random Sequence --#
-    randSeq = []
-    rand = 0
-    sign = ''
-    for n in range(kwargs['octaves']):
-        #-- Random Init --#
-        if sign == '':
-            rand = random.uniform(kwargs['min'], kwargs['max'])
-            if rand > (kwargs['min'] + kwargs['max'])/2:
-                sign = '+'
-                if kwargs['bias']:
-                    if not rand > kwargs['biasMax'] and not rand < kwargs['biasMin']:
-                        rand = random.uniform(kwargs['biasMax'], kwargs['max'])
-            else:
-                sign = '-'
-                if kwargs['bias']:
-                    if not rand > kwargs['biasMax'] and not rand < kwargs['biasMin']:
-                        rand = random.uniform(kwargs['min'], kwargs['biasMin'])
-        #-- Random Lo --#
-        elif sign == '+':
-            rand = random.uniform(kwargs['min'], (kwargs['min'] + kwargs['max'])/2)
-            if kwargs['bias']:
-                if not rand > kwargs['biasMax'] and not rand < kwargs['biasMin']:
-                    rand = random.uniform(kwargs['min'], kwargs['biasMin'])
-            sign = '-'
-        #-- Random Hi --#
-        elif sign == '-':
-            rand = random.uniform((kwargs['min'] + kwargs['max'])/2, kwargs['max'])
-            if kwargs['bias']:
-                if not rand > kwargs['biasMax'] and not rand < kwargs['biasMin']:
-                    rand = random.uniform(kwargs['biasMax'], kwargs['max'])
-            sign = '+'
-        randSeq.append(rand)
-    #-- Create Random Frequence --#
-    rOctaves = randSeq
-    for m in range(kwargs['frequence']-1):
-        randSeq.extend(rOctaves)
-    #-- Return Random List --#
-    printNoiseParams(**kwargs)
+    r.printRandParams()
     return randSeq
 
 def getNewCurves(curveInfo, randSeq):
@@ -122,15 +80,16 @@ def getNewCurves(curveInfo, randSeq):
     newCurves = {}
     for curve in curveInfo.keys():
         newCurves[curve] = {}
-        step = curveInfo[curve]['duree'] / len(randSeq)-1
+        step = curveInfo[curve]['duree'] / len(randSeq)
         newCurves[curve]['step'] = step
         for n, rand in enumerate(randSeq):
             ind = curveInfo[curve]['nf'][0] + (step * (n+1))
-            val = mc.keyframe(curve, q=True, t=(ind, ind), ev=True)
-            if val is not None:
-                newCurves[curve][ind] = {}
-                newCurves[curve][ind]['rand'] = rand
-                newCurves[curve][ind]['val'] = val[0]+rand
+            if not ind >= curveInfo[curve]['nf'][-1]:
+                val = mc.keyframe(curve, q=True, t=(ind, ind), ev=True)
+                if val is not None:
+                    newCurves[curve][ind] = {}
+                    newCurves[curve][ind]['rand'] = rand
+                    newCurves[curve][ind]['val'] = val[0]+rand
     return newCurves
 
 def applyOnCurves(newCurves):
@@ -141,15 +100,6 @@ def applyOnCurves(newCurves):
         for k, v in newCurves[curve].iteritems():
             if not k == 'step':
                 mc.setKeyframe(curve, t=k, v=v['val'])
-
-def printNoiseParams(**kwargs):
-    """ Print noise params
-        @param kwargs: (dict) : Noise Params """
-    print "\n", "#" * 60
-    print "#-- Noise Params --#"
-    for k, v in kwargs.iteritems():
-        print k, ' = ', v
-    print "#" * 60
 
 def printNewCurvesInfo(newCurves):
     """ Print new curves info
