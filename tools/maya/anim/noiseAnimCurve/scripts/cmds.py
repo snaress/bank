@@ -59,16 +59,10 @@ def getRandomSeq(**kwargs):
             @keyword biasMin: (float) : Bias Minimum
             @keyword biasMax: (float) : Bias Maximum
         @return: (list) : Random sequence """
-    #-- Create Random Sequence --#
     r = pMath.RandomSequence(kwargs['randType'], kwargs['min'], kwargs['max'], kwargs['octaves'],
                              kwargs['frequence'], bias=kwargs['bias'], biasMin=kwargs['biasMin'],
                              biasMax=kwargs['biasMax'])
     randSeq = r.generate()
-    #-- Create Random Frequence --#
-    rOctaves = randSeq
-    for m in range(kwargs['frequence']-1):
-        randSeq.extend(rOctaves)
-    #-- Return Random List --#
     r.printRandParams()
     return randSeq
 
