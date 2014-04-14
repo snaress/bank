@@ -38,78 +38,121 @@ def coordOp(p1, p2, operation):
         for x, y in zip(p1, p2):
             newCoord.append((x + y) / 2)
 
-def getRandomSeq(ampMin=-5, ampMax=5, bias=False, biasMin=-3, biasMax=3, octaves=4, frequence=2):
-    """ Create random sequence from params
-        @param ampMin: (float) : Amplitude Minimum
-        @param ampMax: (float) : Amplitude Maximum
-        @param bias: (bool) : Amplitude Bias on or off
-        @param biasMin: (float) : Bias Minimum
-        @param biasMax: (float) : Bias Maximum
-        @param octaves: (int) : Number of random value to create
-        @param frequence: (int) : Octaves repetition
-        @return: (list) : Random sequence """
-    #-- Create Random Sequence --#
-    randSeq = []
-    for n in range(octaves):
-        rand = random.uniform(ampMin, ampMax)
-        if bias:
-            if not rand > biasMax and not rand < biasMin:
-                if rand > (ampMin + ampMax)/2:
-                    rand = random.uniform(biasMax, ampMax)
-                else:
-                    rand = random.uniform(biasMin, ampMin)
-        randSeq.append(rand)
-    #-- Create Random Frequence --#
-    rOctaves = randSeq
-    for m in range(frequence-1):
-        randSeq.extend(rOctaves)
-    return randSeq
 
-def getSinRandomSeq(ampMin=-5, ampMax=5, bias=False, biasMin=-3, biasMax=3, octaves=4, frequence=2):
-    """ Create sinusoidal random sequence from params
+class RandomSequence(object):
+    """ Create random sequence from given params
+        @param randType: (str) : 'uniform' or 'sinusoidal'
         @param ampMin: (float) : Amplitude Minimum
         @param ampMax: (float) : Amplitude Maximum
-        @param bias: (bool) : Amplitude Bias on or off
-        @param biasMin: (float) : Bias Minimum
-        @param biasMax: (float) : Bias Maximum
         @param octaves: (int) : Number of random value to create
         @param frequence: (int) : Octaves repetition
-        @return: (list) : Random sequence """
-    #-- Create Sinusoidal Random Sequence --#
-    randSeq = []
-    rand = 0
-    sign = ''
-    for n in range(octaves):
-        #-- Random Init --#
-        if sign == '':
-            rand = random.uniform(ampMin, ampMax)
-            if rand > (ampMin + ampMax)/2:
-                sign = '+'
-                if bias:
-                    if not rand > biasMax and not rand < biasMin:
-                        rand = random.uniform(biasMax, ampMax)
-            else:
+        @param bias: (bool) : Amplitude Bias on or off
+        @param biasMin: (float) : Bias Minimum
+        @param biasMax: (float) : Bias Maximum """
+
+    def __init__(self, randType, ampMin, ampMax, octaves, frequence, bias=False, biasMin=0, biasMax=0):
+        self.randType = randType
+        self.ampMin = ampMin
+        self.ampMax = ampMax
+        self.octaves = octaves
+        self.frequence = frequence
+        self.bias = bias
+        self.biasMin = biasMin
+        self.biasMax = biasMax
+
+    def generate(self):
+        """ Generate random sequence
+            @return: (list) : Random sequence """
+        if self.randType == 'uniform':
+            return self.getUniformRand
+        elif self.randType == 'sinusoidal':
+            return self.getSinusoidalRand
+
+    @property
+    def getUniformRand(self):
+        """ Create uniform random sequence from params
+            @return: (list) : Uniform random sequence """
+        #-- Create Random Sequence --#
+        randSeq = []
+        for n in range(self.octaves):
+            rand = random.uniform(self.ampMin, self.ampMax)
+            if self.bias:
+                if not rand > self.biasMax and not rand < self.biasMin:
+                    if rand > (self.ampMin + self.ampMax)/2:
+                        rand = random.uniform(self.biasMax, self.ampMax)
+                    else:
+                        rand = random.uniform(self.biasMin, self.ampMin)
+            randSeq.append(rand)
+        #-- Create Random Frequence --#
+        rOctaves = randSeq
+        for m in range(self.frequence-1):
+            randSeq.extend(rOctaves)
+        return randSeq
+
+    @property
+    def getSinusoidalRand(self):
+        """ Create sinusoidal random sequence from params
+            @return: (list) : Sinusoidal random sequence """
+        #-- Create Sinusoidal Random Sequence --#
+        randSeq = []
+        rand = 0
+        sign = ''
+        for n in range(self.octaves):
+            #-- Random Init --#
+            if sign == '':
+                rand = random.uniform(self.ampMin, self.ampMax)
+                if rand > (self.ampMin + self.ampMax)/2:
+                    if self.bias:
+                        rand = self.getSinBiasValue(rand, '-')
+                    sign = '+'
+                else:
+                    if self.bias:
+                        rand = self.getSinBiasValue(rand, '+')
+                    sign = '-'
+            #-- Random Lo --#
+            elif sign == '+':
+                rand = random.uniform(self.ampMin, (self.ampMin + self.ampMax)/2)
+                if self.bias:
+                    rand = self.getSinBiasValue(rand, sign)
                 sign = '-'
-                if bias:
-                    if not rand > biasMax and not rand < biasMin:
-                        rand = random.uniform(ampMin, biasMin)
-        #-- Random Lo --#
-        elif sign == '+':
-            rand = random.uniform(ampMin, (ampMin + ampMax)/2)
-            if bias:
-                if not rand > biasMax and not rand < biasMin:
-                    rand = random.uniform(ampMin, biasMin)
-            sign = '-'
-        #-- Random Hi --#
-        elif sign == '-':
-            rand = random.uniform((ampMin + ampMax)/2, ampMax)
-            if bias:
-                if not rand > biasMax and not rand < biasMin:
-                    rand = random.uniform(biasMax, ampMax)
-            sign = '+'
-        randSeq.append(rand)
-    #-- Create Random Frequence --#
-    rOctaves = randSeq
-    for m in range(frequence-1):
-        randSeq.extend(rOctaves)
-    return randSeq
+            #-- Random Hi --#
+            elif sign == '-':
+                rand = random.uniform((self.ampMin + self.ampMax)/2, self.ampMax)
+                if self.bias:
+                    rand = self.getSinBiasValue(rand, sign)
+                sign = '+'
+            randSeq.append(rand)
+        #-- Create Random Frequence --#
+        rOctaves = randSeq
+        for m in range(self.frequence-1):
+            randSeq.extend(rOctaves)
+        return randSeq
+
+    def getSinBiasValue(self, rand, sign):
+        """ Get bias value from given params
+            @param rand: (float) : Random value
+            @param sign: (str) : '-' or '+'
+            @return: (float) : Bias value """
+        if not rand > self.biasMax and not rand < self.biasMin:
+            if sign == '+':
+                rand = random.uniform(self.ampMin, self.biasMin)
+            else:
+                rand = random.uniform(self.biasMax, self.ampMax)
+        return rand
+
+    def printRandParams(self):
+        """ Print noise params
+            @param kwargs: (dict) : Noise Params """
+        print "\n", "#" * 60
+        print "#-- Random Params --#"
+        for k, v in self.__dict__.iteritems():
+            print k, ' = ', v
+        print "#" * 60
+
+
+if __name__ == '__main__':
+    r = RandomSequence('sinusoidal', -5, 5, 10, 2, bias=True, biasMin=-3, biasMax=3)
+    r.printRandParams()
+    rand = r.generate()
+    for val in rand:
+        print val
