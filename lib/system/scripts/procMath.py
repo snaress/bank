@@ -141,8 +141,7 @@ class RandomSequence(object):
         return rand
 
     def printRandParams(self):
-        """ Print noise params
-            @param kwargs: (dict) : Noise Params """
+        """ Print noise params """
         print "\n", "#" * 60
         print "#-- Random Params --#"
         for k, v in self.__dict__.iteritems():
