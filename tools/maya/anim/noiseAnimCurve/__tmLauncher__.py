@@ -6,9 +6,11 @@ Modul used by the ToolManager
 from tools.maya.anim import noiseAnimCurve
 from tools.maya.anim.noiseAnimCurve.scripts import noiseAnimCurveUi
 from tools.maya.anim.noiseAnimCurve.scripts import cmds as tmCmds
+from lib.qt.scripts import procQt as pQt
 reload(noiseAnimCurve)
 reload(noiseAnimCurveUi)
 reload(tmCmds)
+reload(pQt)
 
 
 #-- Tool Variables --#

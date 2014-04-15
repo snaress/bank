@@ -7,17 +7,29 @@ def getSelAnimCurves():
         @return: (list) : Selected curves name """
     return mc.keyframe(q=True, n=True, sl=True) or []
 
+def getCurveLinks(curve):
+    """ Get curve output connections
+        @param curve: (str) : Curve node name
+        @return: (list) : Connected node list """
+    nodes = None
+    if mc.listConnections(curve, p=True) is not None:
+        nodes = mc.listConnections(curve, p=True)
+    return nodes
+
+def getNacCurves():
+    nacCurves = []
+    for curve in mc.ls(type='animCurveTL'):
+        if mc.objExists('%s.nac_links' % curve):
+            nacCurves.append(curve)
+    return nacCurves
+
 def getCurveInfo(animCurves):
     """ store info from selected curves
         @param animCurves: (list) : Selected curves name
         @return: (dict) : Selected curves info """
     curveInfo = {}
     for curve in animCurves:
-        #-- Get Connections --#
-        nodes = None
-        if mc.listConnections(curve, p=True) is not None:
-            nodes = mc.listConnections(curve, p=True)
-        #-- Get Frame Info --#
+        nodes = getCurveLinks(curve)
         nk = mc.keyframe(curve, q=True, kc=True)
         nf = []
         vals = []
@@ -33,19 +45,6 @@ def getCurveInfo(animCurves):
         curveInfo[curve]['val'] = vals
         curveInfo[curve]['duree'] = (nf[nk-1] - nf[0]) + 1
     return curveInfo
-
-def addAttrOnCurves(curveInfo):
-    """ Add and set curve attributes
-        @param curveInfo: (dict) : Selected curves info """
-    for curve in curveInfo.keys():
-        if not mc.objExists('%s.nac_initState' % curve):
-            mc.addAttr(curve, ln='nac_initState', dt='string')
-        if not mc.objExists('%s.nac_storedState' % curve):
-            mc.addAttr(curve, ln='nac_storedState', dt='string')
-        curveState = {}
-        for n, f in enumerate(curveInfo[curve]['nf']):
-            curveState[str(f)] = curveInfo[curve]['val'][n]
-        mc.setAttr('%s.nac_initState' % curve, curveState, type='string')
 
 def getRandomSeq(**kwargs):
     """ Create random sequence from params
@@ -111,3 +110,33 @@ def printNewCurvesInfo(newCurves):
         for f in frames:
             print "\tFrame %s = %s" % (f, newCurves[curve][f])
     print "#" * 60
+
+def checkCurveStatus(curve):
+    """ Check curve status
+        @param curve: (str): Curve name
+        @return: (str) : Curve status ('init' or 'choice' or 'blend') """
+    if not mc.objExists('%s.nac_links' % curve):
+        mc.addAttr(curve, ln='nac_links', dt='string')
+        mc.addAttr(curve, ln='nac_choice', dt='string')
+        mc.addAttr(curve, ln='nac_blend', dt='string')
+        mc.setAttr('%s.nac_links' % curve, getCurveLinks(curve), type='string')
+        return 'init'
+    nodeType = mc.nodeType(eval(mc.getAttr('%s.nac_links' % curve))[0])
+    print nodeType
+    if not nodeType in ['choice', 'blend']:
+        mc.setAttr('%s.nac_links' % curve, getCurveLinks(curve), type='string')
+        return 'init'
+    if nodeType == 'choice':
+        return 'choice'
+    if nodeType == 'blend':
+        return 'blend'
+
+def convertToChoice(curve, status):
+    if status == 'init':
+        curveLinks = getCurveLinks(curve)
+        mc.setAttr('%s.nac_links' % curve, curveLinks, type='string')
+        newChoice = mc.createNode('choice', n='nac_choice_1')
+        mc.connectAttr('%s.output' % curve, '%s.input[0]' % newChoice, f=True)
+        for link in curveLinks:
+            mc.disconnectAttr('%s.output' % curve, link)
+            mc.connectAttr('%s.output' % newChoice, link)
