@@ -101,6 +101,7 @@ class NoiseAnimCurveUi(noiseAnimCurveClass, noiseAnimCurveUiClass):
             if not selItems[0].curveStatus == 'choice':
                 self.cmds.convertToChoice(selItems[0].curveName, selItems[0].curveStatus)
                 selItems[0].setTextColor(0, QtGui.QColor(100, 100, 255))
+                selItems[0].curveStatus = 'choice'
             else:
                 print "NAC Warning: %s is already in choice mode !!!"
 
@@ -109,6 +110,7 @@ class NoiseAnimCurveUi(noiseAnimCurveClass, noiseAnimCurveUiClass):
         selItems = self.twCurves.selectedItems()
         if selItems:
             curve = selItems[0]
+            newCurve = self.cmds.newNacCurve(curve.curveName)
 
     def newCurveItems(self, curves):
         """ Create new curve item for given curves

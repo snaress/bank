@@ -115,14 +115,14 @@ def checkCurveStatus(curve):
     """ Check curve status
         @param curve: (str): Curve name
         @return: (str) : Curve status ('init' or 'choice' or 'blend') """
+    curveLinks = getCurveLinks(curve)
     if not mc.objExists('%s.nac_links' % curve):
         mc.addAttr(curve, ln='nac_links', dt='string')
         mc.addAttr(curve, ln='nac_choice', dt='string')
         mc.addAttr(curve, ln='nac_blend', dt='string')
-        mc.setAttr('%s.nac_links' % curve, getCurveLinks(curve), type='string')
+        mc.setAttr('%s.nac_links' % curve, curveLinks[0], type='string')
         return 'init'
-    nodeType = mc.nodeType(eval(mc.getAttr('%s.nac_links' % curve))[0])
-    print nodeType
+    nodeType = mc.nodeType(curveLinks[0])
     if not nodeType in ['choice', 'blend']:
         mc.setAttr('%s.nac_links' % curve, getCurveLinks(curve), type='string')
         return 'init'
@@ -132,6 +132,9 @@ def checkCurveStatus(curve):
         return 'blend'
 
 def convertToChoice(curve, status):
+    """ Convert selected item to choice mode
+        @param curve: (str): Curve name
+        @param status: (str) : 'init' or 'choice' or "blend' """
     if status == 'init':
         curveLinks = getCurveLinks(curve)
         mc.setAttr('%s.nac_links' % curve, curveLinks, type='string')
@@ -140,3 +143,17 @@ def convertToChoice(curve, status):
         for link in curveLinks:
             mc.disconnectAttr('%s.output' % curve, link)
             mc.connectAttr('%s.output' % newChoice, link)
+
+def newNacCurve(curve):
+    """ Create new curve to the curve linked node (choice or blend)
+        @param curve: (str): Curve name """
+    dupCurve = mc.duplicate(curve, n='%s__nac_1' % curve)
+    if mc.objExists('%s.nac_links' % dupCurve[0]):
+        mc.deleteAttr('%s.nac_links' % dupCurve[0])
+    links = getCurveLinks(curve)
+    if links:
+        choiceNode =  links[0].split('.')[0]
+        if mc.nodeType(choiceNode) in ['choice', 'blend']:
+            ind = len(mc.listConnections('%s.input' % choiceNode, p=True))
+            mc.connectAttr('%s.output' % dupCurve[0], '%s.input[%s]' % (choiceNode, ind), f=True)
+    return dupCurve
