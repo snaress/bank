@@ -91,6 +91,7 @@ class ProjectTemplate(object):
             params[k] = v
         return params
 
+    @property
     def getTrees(self):
         """ Get project tree list
             @return: (list) : Project trees """
@@ -103,6 +104,15 @@ class ProjectTemplate(object):
         print "#----- PROJECT PARAMS -----#"
         for k, v in  self.getParams.iteritems():
             print k, '=', v
+        print '#' * 100
+
+    def printTasks(self):
+        """ Print project tasks """
+        print '#' * 100
+        print "#----- PROJECT TASKS -----#"
+        tasksDict = getattr(self, 'projectTasks')
+        for td in tasksDict:
+            print td['taskName']
         print '#' * 100
 
 

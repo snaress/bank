@@ -65,6 +65,10 @@ class ProjectTab(object):
         self.mainUi.lProject.setText('')
         self.mainUi.deProjectStart.setDisplayFormat("yyyy/MM/dd")
         self.mainUi.deProjectEnd.setDisplayFormat("yyyy/MM/dd")
+        self.mainUi.qfProjectTasks.setVisible(False)
+        self.mainUi.twProjectTasks.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+        self.mainUi.twProjectTasks.header().setResizeMode(1, QtGui.QHeaderView.ResizeToContents)
+        self.mainUi.twProjectTasks.header().setResizeMode(2, QtGui.QHeaderView.ResizeToContents)
         self.mainUi.splitProjectTrees.setVisible(False)
         self.mainUi.twProjectTrees.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
         self.mainUi.twProjectTrees.header().setResizeMode(1, QtGui.QHeaderView.ResizeToContents)
@@ -85,6 +89,12 @@ class ProjectTab(object):
         #-- Init Project Work Directory --#
         self.mainUi.leProjectWorkDir.setEnabled(state)
         self.mainUi.bOpenProjectWorkDir.setEnabled(state)
+        #-- Init Project Tasks --~#
+        self.mainUi.bProjectTaskAdd.setEnabled(state)
+        self.mainUi.bProjectTaskDel.setEnabled(state)
+        self.mainUi.bProjectTaskUp.setEnabled(state)
+        self.mainUi.bProjectTaskDn.setEnabled(state)
+        self.mainUi.twProjectTasks.setEnabled(state)
         #-- Init Project Trees --#
         self.mainUi.bProjectTreesAdd.setEnabled(state)
         self.mainUi.bProjectTreesUp.setEnabled(state)
@@ -114,6 +124,9 @@ class ProjectTab(object):
                                                       int(self.pm.project.projectEnd.split('/')[2])))
         #-- Refresh Project Work Directory --#
         self.mainUi.leProjectWorkDir.setText(self.pm.project.projectWorkDir)
+        #-- Refresh Project Tasks --#
+        self.mainUi.twProjectTasks.clear()
+        self.populate.projectTasks()
         #-- Refresh Project Trees --#
         self.mainUi.twProjectTrees.clear()
         self.mainUi.twProjectTree.clear()
@@ -233,6 +246,18 @@ class PopulateTrees(object):
         self.mainUi = mainUi
         self.pm = self.mainUi.pm
 
+    def projectTasks(self):
+        """ Populate projectTasks QTreeWidget """
+        for taskDict in self.pm.project.projectTasks:
+            taskName = taskDict.keys()[0]
+            taskColor = taskDict[taskName]['color']
+            taskStat = taskDict[taskName]['stat']
+            newTask, newColor, newStat = self.newProjectTaskItem(taskName, taskColor=taskColor,
+                                                                           taskStat=taskStat)
+            self.mainUi.twProjectTasks.addTopLevelItem(newTask)
+            self.mainUi.twProjectTasks.setItemWidget(newTask, 1, newColor)
+            self.mainUi.twProjectTasks.setItemWidget(newTask, 2, newStat)
+
     def projectTrees(self):
         """ Populate projectTrees QTreeWidget """
         trees = []
@@ -271,6 +296,57 @@ class PopulateTrees(object):
             newItem, newChoice = self.newProjectAttrItem(attrName, attrDict[attrName])
             self.mainUi.twProjectAttr.addTopLevelItem(newItem)
             self.mainUi.twProjectAttr.setItemWidget(newItem, 1, newChoice)
+
+    def newProjectTaskItem(self, taskName, taskColor=None, taskStat=None):
+        """ Create new project task QTreeWidgetItem
+            @param taskName: (str) : Task Name
+            @param taskColor: (tuple) : Rgb color
+            @param taskStat: (bool) : Task count in stats
+            @return: (object) : New QTreeWidgetItem """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setText(0, taskName)
+        newItem.nodeName = taskName
+        newColor = self.newProjectTaskColor(newItem, taskColor)
+        newStat = self.newProjectTaskStat(newItem, taskStat)
+        newItem.colWidget = newColor
+        newItem.statWidget = newStat
+        return newItem, newColor, newStat
+
+    def newProjectTaskColor(self, newItem, taskColor):
+        """ New task color QPushButton
+            @param newItem: (object) : New parent QTreeWidgetItem
+            @param taskColor: (tuple) : Rgb color
+            @return: (object) : New task color QPushButton """
+        newColor = QtGui.QPushButton()
+        newColor.setText('')
+        newColor.setMaximumWidth(40)
+        newColor.connect(newColor, QtCore.SIGNAL("clicked()"),
+                         partial(self.mainUi.uiCmds_projectTab.on_taskColor, newItem))
+        if taskColor is None:
+            newItem.taskColor = (200, 200, 200)
+        else:
+            newItem.taskColor = taskColor
+            newColor.setStyleSheet("background:rgb(%s, %s, %s)" % (taskColor[0],
+                                                                   taskColor[1],
+                                                                   taskColor[2]))
+        return newColor
+
+    def newProjectTaskStat(self, newItem, taskStat):
+        """ New task stat QCheckBox
+            @param newItem: (object) : New parent QTreeWidgetItem
+            @param taskStat: (bool) : Task count in stats
+            @return: (object) : New task stat QCheckBox """
+        newStat = QtGui.QCheckBox()
+        newStat.setText('')
+        newStat.connect(newStat, QtCore.SIGNAL("clicked()"),
+                        partial(self.mainUi.uiCmds_projectTab.on_taskStat, newItem))
+        if taskStat is None:
+            newItem.taskStat = True
+            newStat.setChecked(True)
+        else:
+            newItem.taskStat = taskStat
+            newStat.setChecked(taskStat)
+        return newStat
 
     @staticmethod
     def newProjectTreesItem(treeName, treeSteps=None, treeAttrs=None, treeNodes=None):
@@ -317,7 +393,8 @@ class PopulateTrees(object):
                 setattr(newItem, k, v)
         return newItem
 
-    def newProjectStepItem(self, stepName):
+    @staticmethod
+    def newProjectStepItem(stepName):
         """ Create new project step QTreeWidgetItem
             @param stepName: (str) : Item Name
             @return: (object) : New QTreeWidgetItem """
@@ -344,5 +421,6 @@ class PopulateTrees(object):
         newChoice.setCurrentIndex(newChoice.findText(attrType))
         newChoice.connect(newChoice, QtCore.SIGNAL("currentIndexChanged(const QString&)"),
                           self.mainUi.uiCmds_projectTab.on_attrType)
+        #-- Result --#
         newItem.widget = newChoice
         return newItem, newChoice

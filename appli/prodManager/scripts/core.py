@@ -89,8 +89,7 @@ def createProjectFile(projectBinPath, projectName, projectAlias):
            "projectAlias = %r" % projectAlias,
            "projectStart = %r" % time.strftime("%Y/%m/%d", time.localtime()),
            "projectEnd = %r" % time.strftime("%Y/%m/%d", time.localtime()),
-           "projectWorkDir = ''",
-           "projectTrees = []"]
+           "projectWorkDir = ''", "projectTasks = []", "projectTrees = []"]
     projectFile = os.path.join(projectBinPath, '%s--%s.py' % (projectName, projectAlias))
     try:
         print "Create project file in dataBase ..."

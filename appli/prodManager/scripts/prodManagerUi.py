@@ -42,6 +42,13 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.bEditProjectTab.clicked.connect(self.uiCmds_projectTab.on_editProjectTab)
         self.bCancelProjectTab.clicked.connect(self.uiCmds_projectTab.on_cancelProjectTab)
         self.bOpenProjectWorkDir.clicked.connect(self.uiCmds_projectTab.on_openProjectWorkDir)
+        self.cbProjectTasks.clicked.connect(self.uiCmds_projectTab.on_projectTasks)
+        self.bProjectTaskAdd.clicked.connect(self.uiCmds_projectTab.on_addTask)
+        self.bProjectTaskDel.clicked.connect(self.uiCmds_projectTab.on_delTask)
+        self.bProjectTaskUp.clicked.connect(partial(self.uiCmds_projectTab.on_moveTreeItem,
+                                                    self.twProjectTasks, 'up'))
+        self.bProjectTaskDn.clicked.connect(partial(self.uiCmds_projectTab.on_moveTreeItem,
+                                                    self.twProjectTasks, 'down'))
         self.cbProjectTrees.clicked.connect(self.uiCmds_projectTab.on_projectTrees)
         self.bProjectTreesAdd.clicked.connect(self.uiCmds_projectTab.on_addTree)
         self.bProjectTreesUp.clicked.connect(partial(self.uiCmds_projectTab.on_moveTreeItem,
@@ -136,6 +143,30 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
                 nodeDict[k] = v
             nodeList.append(nodeDict)
         return nodeList
+
+    @property
+    def getTaskList(self):
+        """ Get task list from ui
+            @return: (list) : Task list """
+        tasks = []
+        items = pQt.getAllItems(self.twProjectTasks)
+        for item in items:
+            tasks.append(item.nodeName)
+        return tasks
+
+    @property
+    def getTaskParams(self):
+        """ Get task params from ui
+            @return: (list) : Task params """
+        tasks = []
+        items = pQt.getAllItems(self.twProjectTasks)
+        for item in items:
+            task = {}
+            task[item.nodeName] = {}
+            task[item.nodeName]['color'] = item.taskColor
+            task[item.nodeName]['stat'] = item.taskStat
+            tasks.append(task)
+        return tasks
 
     @staticmethod
     def getParentItemFromNodePath(twTree, nodePath):

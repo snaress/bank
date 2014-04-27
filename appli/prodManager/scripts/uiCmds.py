@@ -377,6 +377,62 @@ class ProjectTab(object):
         if selPath:
             self.mainUi.leProjectWorkDir.setText(str(selPath[0]))
 
+    def on_projectTasks(self):
+        """ Command launch when cbProjectTasks is clicked """
+        self.mainUi.qfProjectTasks.setVisible(self.mainUi.cbProjectTasks.isChecked())
+
+    def on_addTask(self):
+        """ Command launch when bProjectTaskAdd is clicked """
+        mess = ["New Task: Don't use special caracter"]
+        self.pdAddTask = dialog.PromptDialog('\n'.join(mess), self.addTaskAccept, self.addTaskCancel)
+        self.pdAddTask.exec_()
+
+    def addTaskAccept(self):
+        """ Command launch when the promptDialog bOk is clicked """
+        taskName = str(self.pdAddTask.leUserValue.text())
+        if not taskName in self.mainUi.getTaskList:
+            self.pdAddTask.close()
+            newTask, newCol, newStat = self.populate.newProjectTaskItem(taskName)
+            self.mainUi.twProjectTasks.addTopLevelItem(newTask)
+            self.mainUi.twProjectTasks.setItemWidget(newTask, 1, newCol)
+            self.mainUi.twProjectTasks.setItemWidget(newTask, 2, newStat)
+        else:
+            mess = "Warning: Task name already exists (%s) !!!" % taskName
+            self.cdAddTaskError = dialog.ConfirmDialog(mess, btns=['ok'],
+                                                       cmds=[self.addTaskDialAccept])
+            self.cdAddTaskError.exec_()
+
+    def addTaskDialAccept(self):
+        """ Command launch when the confirmDialog bOk is clicked """
+        self.cdAddTaskError.close()
+
+    def addTaskCancel(self):
+        """ Command launch when the promptDialog bCancel is clicked """
+        self.pdAddTask.close()
+
+    def on_delTask(self):
+        """ Remove selected items from project tasks QTreeWidget """
+        selTasks = self.mainUi.twProjectTasks.selectedItems()
+        if selTasks:
+            self.mainUi.delSelItems(self.mainUi.twProjectTasks)
+
+    # noinspection PyArgumentList
+    def on_taskColor(self, item):
+        """ Command launch when bColorChoice of projectTasks QTreeWidgetItem is clicked
+            @param item: (object) : Project task QTreeWidgetItem """
+        if self.mainUi.bEditProjectTab.isChecked():
+            color = QtGui.QColorDialog.getColor()
+            if color.isValid():
+                rgba = color.getRgb()
+                item.colWidget.setStyleSheet("background:rgb(%s, %s, %s)" % (rgba[0], rgba[1], rgba[2]))
+                item.taskColor = (rgba[0], rgba[1], rgba[2])
+
+    def on_taskStat(self, item):
+        """ Command launch when cbStat of projectTasks QTreeWidgetItem is clicked
+            @param item: (object) : Project task QTreeWidgetItem """
+        if self.mainUi.bEditProjectTab.isChecked():
+            item.taskStat = item.statWidget.isChecked()
+
     def on_projectTrees(self):
         """ Command launch when cbProjectTree is clicked """
         self.mainUi.splitProjectTrees.setVisible(self.mainUi.cbProjectTrees.isChecked())
@@ -489,6 +545,7 @@ class ProjectTab(object):
         self.pm.project.projectStart = str(self.mainUi.deProjectStart.text())
         self.pm.project.projectEnd = str(self.mainUi.deProjectEnd.text())
         self.pm.project.projectWorkDir = str(self.mainUi.leProjectWorkDir.text())
+        self.pm.project.projectTasks = self.mainUi.getTaskParams
         for item in pQt.getAllItems(self.mainUi.twProjectTrees):
             if not hasattr(self.pm, '%sTree' % item.treeName):
                 self.pm.project.addTree(item.treeName, new=True)
