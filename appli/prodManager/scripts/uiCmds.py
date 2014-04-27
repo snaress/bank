@@ -208,13 +208,12 @@ class MenuCmds(object):
             self.pdNewProjectStep.show()
 
     def newProjectStepItem(self):
-        """ Command launch when miNewStep is clicked
-            @param stepName: (str) : New step name """
+        """ Command launch when miNewStep is clicked """
         selTrees = self.mainUi.twProjectTrees.selectedItems()
         stepName = str(self.pdNewProjectStep.leUserValue.text())
         if selTrees:
-            checNewStep = self._checkNewStepItem(stepName)
-            if checNewStep:
+            checkNewStep = self._checkNewStepItem(stepName)
+            if checkNewStep:
                 newItem = self.populate.newProjectStepItem(stepName)
                 self.mainUi.twProjectStep.addTopLevelItem(newItem)
                 self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
@@ -224,7 +223,7 @@ class MenuCmds(object):
                 self.warnDial3.exec_()
 
     def _checkNewStepItem(self, stepName):
-        """ Check nes step name validity
+        """ Check new step name validity
             @param stepName: (str) : New step name
             @return: (bool) : True if valid, False if not """
         allItems = pQt.getAllItems(self.mainUi.twProjectStep)
@@ -250,6 +249,86 @@ class MenuCmds(object):
         self.mainUi.delSelItems(self.mainUi.twProjectStep)
         selTrees = self.mainUi.twProjectTrees.selectedItems()
         self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
+
+    #================================== POPUP MENU PROJECT ATTR ==================================#
+
+    def init_newProjectAttrItem(self):
+        """ Initialize QTreeWidgetItem creation
+            @return: (bool) : Creation check state, (str) : Warning message """
+        selTree = self.mainUi.twProjectTrees.selectedItems()
+        create = True
+        warn = ""
+        if not selTree:
+            warn = "!!! Warning: Select a tree to add new steps !!!"
+            create = False
+        return create, warn
+
+    def on_newProjectAttrItem(self):
+        """ Command launch when miNewAttr is clicked """
+        create, warn = self.init_newProjectAttrItem()
+        if not create:
+            self.warnDial4 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept4])
+            self.warnDial4.show()
+        else:
+            mess = ["Enter new attribute name,", "Don't use special caracter or space."]
+            self.pdNewProjectAttr = dialog.PromptDialog('\n'.join(mess), self.newProjectAttrItem,
+                                                        self.newProjectAttrCancel)
+            self.pdNewProjectAttr.show()
+
+    def newProjectAttrItem(self):
+        """ Command launch when miNewAttr is clicked """
+        selTrees = self.mainUi.twProjectTrees.selectedItems()
+        attrName = str(self.pdNewProjectAttr.leUserValue.text())
+        if selTrees:
+            checkNewAttr = self._checkNewAttrItem(attrName)
+            if checkNewAttr:
+                newItem, newChoice = self.populate.newProjectAttrItem(attrName, 'string')
+                self.mainUi.twProjectAttr.addTopLevelItem(newItem)
+                self.mainUi.twProjectAttr.setItemWidget(newItem, 1, newChoice)
+                self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
+            else:
+                warn = "!!! Warning !!!\n%s\nalready exists" % attrName
+                self.warnDial5 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept5])
+                self.warnDial5.exec_()
+
+    def _checkNewAttrItem(self, attrName):
+        """ Check new atribute name validity
+            @param attrName: (str) : New attribute name
+            @return: (bool) : True if valid, False if not """
+        allItems = pQt.getAllItems(self.mainUi.twProjectAttr)
+        for item in allItems:
+            if item.nodeName == attrName:
+                return False
+        return True
+
+    def on_dialAccept4(self):
+        """ Command launch when Qbutton 'Ok' of dialog is clicked """
+        self.warnDial4.close()
+
+    def on_dialAccept5(self):
+        """ Command launch when Qbutton 'Ok' of dialog is clicked """
+        self.warnDial5.close()
+
+    def newProjectAttrCancel(self):
+        """ Command launch when 'Cancel' of confirmDialog is clicked """
+        self.pdNewProjectAttr.close()
+
+    def on_delAttrItem(self):
+        """ Remove selected items from project attributes QTreeWidget """
+        selAttrs = self.mainUi.twProjectAttr.selectedItems()
+        if selAttrs:
+            if not selAttrs[0].nodeName == 'workDir':
+                self.mainUi.delSelItems(self.mainUi.twProjectAttr)
+                selTrees = self.mainUi.twProjectTrees.selectedItems()
+                self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
+            else:
+                warn = "!!! Warning: Remove 'workDir' attribute not allowed !!!"
+                self.warnDial6 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept6])
+                self.warnDial6.exec_()
+
+    def on_dialAccept6(self):
+        """ Command launch when Qbutton 'Ok' of dialog is clicked """
+        self.warnDial6.close()
 
 
 class ProjectTab(object):
@@ -337,7 +416,8 @@ class ProjectTab(object):
     def on_moveTreeItem(self, twTree, side, rf=False):
         """ Move selected item from given QTreeWidget
             @param twTree: (object) : QTreeWidget contening item to move
-            @param side: (str) : 'up' or 'down' """
+            @param side: (str) : 'up' or 'down'
+            @param rf: (bool) : Refresh projectTrees params """
         selItems = twTree.selectedItems()
         if selItems:
             item = selItems[0]
@@ -394,6 +474,16 @@ class ProjectTab(object):
                 parent.insertChild(ind+1, movedItem)
         return movedItem
 
+    def on_attrType(self):
+        """ Change selected attribute type """
+        if self.mainUi.bEditProjectTab.isChecked():
+            if self.mainUi.twProjectTrees.selectedItems():
+                tree = self.mainUi.twProjectTrees.selectedItems()[0]
+                allItems = pQt.getAllItems(self.mainUi.twProjectAttr)
+                for item in allItems:
+                    item.attrType = str(item.widget.currentText())
+                self.mainUi.uiRf_projectTab.ud_projectTreesItem(tree)
+
     def ud_projectTabParams(self):
         """ Update ProdManager instance """
         self.pm.project.projectStart = str(self.mainUi.deProjectStart.text())
@@ -401,6 +491,6 @@ class ProjectTab(object):
         self.pm.project.projectWorkDir = str(self.mainUi.leProjectWorkDir.text())
         for item in pQt.getAllItems(self.mainUi.twProjectTrees):
             if not hasattr(self.pm, '%sTree' % item.treeName):
-                self.pm.project.addTree(item.treeName)
+                self.pm.project.addTree(item.treeName, new=True)
             treeObj = getattr(self.pm, '%sTree' % item.treeName)
-            treeObj.buildTreeFromUi(item.treeSteps, item.treeNodes)
+            treeObj.buildTreeFromUi(item.treeSteps, item.treeAttrs, item.treeNodes)

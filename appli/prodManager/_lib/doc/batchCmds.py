@@ -47,7 +47,7 @@ print treeDict
 print '*' * 100
 
 #-- Print Tree Params --#
-pm.printTreeParams('shot')
+pm.printTreeParams('asset')
 
 #-- Add Project Tree Node --#
 # nodeParams1 = {'nodeType': 'assetCtnr', 'nodeLabel': 'chars',
@@ -63,8 +63,12 @@ pm.printTreeParams('shot')
 # assetTree.writeTreeToFile()
 
 #-- Add Tree Step --#
-assetTree.addStep('mapping')
-assetTree.printSteps()
-assetTree.insertStep(2, 'surfacing')
-assetTree.printSteps()
+# assetTree.addStep('mapping')
+# assetTree.printSteps()
+# assetTree.insertStep(2, 'surfacing')
+# assetTree.printSteps()
 # assetTree.writeTreeToFile()
+
+#-- Add Tree Attribute --#
+assetTree.addAttr('toto')
+assetTree.printAttrs()

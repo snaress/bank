@@ -57,8 +57,13 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
                                                     self.twProjectStep, 'up', rf=True))
         self.bProjectStepDn.clicked.connect(partial(self.uiCmds_projectTab.on_moveTreeItem,
                                                     self.twProjectStep, 'down', rf=True))
+        self.bProjectAttrUp.clicked.connect(partial(self.uiCmds_projectTab.on_moveTreeItem,
+                                                    self.twProjectAttr, 'up', rf=True))
+        self.bProjectAttrDn.clicked.connect(partial(self.uiCmds_projectTab.on_moveTreeItem,
+                                                    self.twProjectAttr, 'down', rf=True))
         self.uiRf_projectTab.pop_projectTreeMenu()
         self.uiRf_projectTab.pop_projectStepMenu()
+        self.uiRf_projectTab.pop_projectAttrMenu()
 
     def windowInit(self):
         """ Main ui inititialize """
@@ -89,6 +94,12 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         if self.bEditProjectTab.isChecked():
             if self.twProjectTrees.selectedItems():
                 self.menuProjectStep.exec_(self.twProjectStep.mapToGlobal(point))
+
+    def on_popProjectAttrMenu(self, point):
+        """ Create project attributes popupMenu launcher """
+        if self.bEditProjectTab.isChecked():
+            if self.twProjectTrees.selectedItems():
+                self.menuProjectAttr.exec_(self.twProjectAttr.mapToGlobal(point))
 
     @staticmethod
     def unselectAllItems(twTree):

@@ -68,6 +68,8 @@ class ProjectTab(object):
         self.mainUi.splitProjectTrees.setVisible(False)
         self.mainUi.twProjectTrees.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
         self.mainUi.twProjectTrees.header().setResizeMode(1, QtGui.QHeaderView.ResizeToContents)
+        self.mainUi.twProjectAttr.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+        self.mainUi.twProjectAttr.header().setResizeMode(1, QtGui.QHeaderView.ResizeToContents)
         self.rf_projectTabVis()
 
     def rf_projectTabVis(self, state=False):
@@ -91,6 +93,9 @@ class ProjectTab(object):
         self.mainUi.bProjectTreeDn.setEnabled(state)
         self.mainUi.bProjectStepUp.setEnabled(state)
         self.mainUi.bProjectStepDn.setEnabled(state)
+        self.mainUi.bProjectAttrUp.setEnabled(state)
+        self.mainUi.bProjectAttrDn.setEnabled(state)
+        self.mainUi.twProjectAttr.setEnabled(state)
 
     def rf_projectTab(self):
         """ Refresh project tab """
@@ -113,16 +118,19 @@ class ProjectTab(object):
         self.mainUi.twProjectTrees.clear()
         self.mainUi.twProjectTree.clear()
         self.mainUi.twProjectStep.clear()
+        self.mainUi.twProjectAttr.clear()
         self.populate.projectTrees()
 
     def rf_projectTree(self):
         """ Refresh projectTree """
         self.mainUi.twProjectTree.clear()
         self.mainUi.twProjectStep.clear()
+        self.mainUi.twProjectAttr.clear()
         selTree = self.mainUi.twProjectTrees.selectedItems()
         if selTree:
             self.populate.projectTree()
             self.populate.projectStep()
+            self.populate.projectAttr()
 
     def ud_projectTreesItem(self, treeItem):
         """ Update projectTrees QTreeWidgetItem.treeNodes
@@ -132,6 +140,11 @@ class ProjectTab(object):
         for step in pQt.getTopItems(self.mainUi.twProjectStep):
             treeSteps.append(step.nodeName)
         treeItem.treeSteps = treeSteps
+        #-- Update TreeAttr --#
+        treeAttrs = []
+        for attr in pQt.getTopItems(self.mainUi.twProjectAttr):
+            treeAttrs.append({attr.nodeName: attr.attrType})
+        treeItem.treeAttrs = treeAttrs
         #-- Update TreeNodes --#
         treeDict = self.mainUi.treeToDict(self.mainUi.twProjectTree)
         treeItem.treeNodes = treeDict
@@ -190,6 +203,27 @@ class ProjectTab(object):
         self.mainUi.menuProjectStep.addAction(self.mainUi.miUnselectStepItem)
         self.mainUi.menuProjectStep.addAction(self.mainUi.miDelStepItem)
 
+    def pop_projectAttrMenu(self):
+        """ Create project attributes QTreeWidget popupMenu """
+        self.mainUi.tbProjectAttrMenu = QtGui.QToolBar()
+        self.mainUi.miNewAttr = self.mainUi.tbProjectAttrMenu.addAction("New Attribute",
+                                self.mainUi.uiCmds_menu.on_newProjectAttrItem)
+        self.mainUi.miUnselectAttrItem = self.mainUi.tbProjectAttrMenu.addAction("Unselect All",
+                                         partial(self.mainUi.unselectAllItems,
+                                                 self.mainUi.twProjectAttr))
+        self.mainUi.miDelAttrItem =  self.mainUi.tbProjectAttrMenu.addAction("Remove Selection",
+                                     self.mainUi.uiCmds_menu.on_delAttrItem)
+        self.mainUi.twProjectAttr.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.mainUi.connect(self.mainUi.twProjectAttr,
+                            QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'),
+                            self.mainUi.on_popProjectAttrMenu)
+        self.mainUi.menuProjectAttr = QtGui.QMenu(self.mainUi)
+        self.mainUi.menuProjectAttr.setTearOffEnabled(True)
+        self.mainUi.menuProjectAttr.addAction(self.mainUi.miNewAttr)
+        self.mainUi.menuProjectAttr.addSeparator()
+        self.mainUi.menuProjectAttr.addAction(self.mainUi.miUnselectAttrItem)
+        self.mainUi.menuProjectAttr.addAction(self.mainUi.miDelAttrItem)
+
 
 class PopulateTrees(object):
     """ Populate prodManager trees QTreeWidget
@@ -205,7 +239,8 @@ class PopulateTrees(object):
         for tree in self.pm.project.projectTrees:
             treeObj = getattr(self.pm, '%sTree' % tree)
             newTree = self.newProjectTreesItem(tree, treeSteps=treeObj.treeSteps,
-                                               treeNodes=treeObj.treeNodes)
+                                                     treeAttrs=treeObj.treeAttrs,
+                                                     treeNodes=treeObj.treeNodes)
             trees.append(newTree)
         self.mainUi.twProjectTrees.addTopLevelItems(trees)
 
@@ -228,11 +263,21 @@ class PopulateTrees(object):
             newItem = self.newProjectStepItem(step)
             self.mainUi.twProjectStep.addTopLevelItem(newItem)
 
+    def projectAttr(self):
+        """ Populate projectAttr QTreeWidget """
+        selTree = self.mainUi.twProjectTrees.selectedItems()
+        for attrDict in selTree[0].treeAttrs:
+            attrName = attrDict.keys()[0]
+            newItem, newChoice = self.newProjectAttrItem(attrName, attrDict[attrName])
+            self.mainUi.twProjectAttr.addTopLevelItem(newItem)
+            self.mainUi.twProjectAttr.setItemWidget(newItem, 1, newChoice)
+
     @staticmethod
-    def newProjectTreesItem(treeName, treeSteps=None, treeNodes=None):
+    def newProjectTreesItem(treeName, treeSteps=None, treeAttrs=None, treeNodes=None):
         """ Create new project tree QTreeWidgetItem
             @param treeName: (str) : New tree name (ex: 'asset', 'shot')
             @param treeSteps: (list) : List of tree steps
+            @param treeAttrs: (list) : List of tree attributes
             @param treeNodes: (list) : List of nodes dict
             @return: (object) : New QTreeWidgetItem """
         newItem = QtGui.QTreeWidgetItem()
@@ -240,10 +285,17 @@ class PopulateTrees(object):
         newItem.setText(1, '%sTree' % treeName)
         newItem.treeName = treeName
         newItem.treeLabel = '%sTree' % treeName
+        #-- Tree Steps --#
         if treeSteps is None:
             newItem.treeSteps = []
         else:
             newItem.treeSteps = treeSteps
+        #-- Tree Attributes --#
+        if treeAttrs is None:
+            newItem.treeAttrs = [{'workDir': 'string'}]
+        else:
+            newItem.treeAttrs = treeAttrs
+        #-- Tree Nodes --#
         if treeNodes is None:
             newItem.treeNodes = []
         else:
@@ -274,3 +326,23 @@ class PopulateTrees(object):
         newItem.nodeType = 'step'
         newItem.nodeName = stepName
         return newItem
+
+    def newProjectAttrItem(self, attrName, attrType):
+        """ Create new project attribute QTreeWidgetItem
+            @param attrName: (str) : Item Name
+            @param attrType: (str) : 'string' or 'float' or 'int' or 'bool' or 'comment'
+            @return: (object) : New QTreeWidgetItem """
+        #-- Item --#
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setText(0, attrName)
+        newItem.nodeType = 'attr'
+        newItem.nodeName = attrName
+        newItem.attrType = attrType
+        #-- Type --#
+        newChoice = QtGui.QComboBox()
+        newChoice.addItems(['string', 'int', 'float', 'bool', 'comment'])
+        newChoice.setCurrentIndex(newChoice.findText(attrType))
+        newChoice.connect(newChoice, QtCore.SIGNAL("currentIndexChanged(const QString&)"),
+                          self.mainUi.uiCmds_projectTab.on_attrType)
+        newItem.widget = newChoice
+        return newItem, newChoice

@@ -42,6 +42,7 @@ class ProjectTemplate(object):
     def addTree(self, treeName, new=False):
         """ Add Tree to project
             @param treeName: (str) : New tree name (ex: 'asset', 'shot')
+            @param new: (bool) : New tree from ui
             @return: (object) : New tree object """
         if '.' in treeName or 'tree' in treeName:
             print "Warning: Tree name not valid !!!"
@@ -58,6 +59,8 @@ class ProjectTemplate(object):
             setattr(self, 'projectTrees', trees)
             newTree = TreeTemplate(self.pm, treeName)
             setattr(self.pm, '%sTree' % treeName, newTree)
+            if new:
+                newTree.treeAttrs = [{'workDir': 'string'}]
             return newTree
 
     def writeProjectFile(self):
@@ -111,6 +114,7 @@ class TreeTemplate(object):
     def __init__(self, pm, treeName):
         self.pm = pm
         self.treeSteps = []
+        self.treeAttrs = []
         self.treeNodes = []
         self.treeOrder = []
         self._treeName = treeName
@@ -160,23 +164,52 @@ class TreeTemplate(object):
         else:
             return False
 
+    def addAttr(self, attrName):
+        """ Append new attribute to tree
+            @param attrName: (str) : Attribute name
+            @return: (str) : New attribute if success, (bool) : False if fail """
+        if self._checkNewAttr(attrName):
+            self.treeAttrs.append(attrName)
+            return attrName
+        else:
+            return False
+
+    def insertAttr(self, index, attrName):
+        """ Insert new step in tree at given index position
+            @param index: (int) : Position in the list
+            @param attrName: (str) : Attribute name
+            @return: (str) : New attribute if success, (bool) : False if fail """
+        if self._checkNewAttr(attrName):
+            try:
+                self.treeAttrs.insert(index, attrName)
+                return attrName
+            except:
+                print "!!! Warning: Can't insert step in list !!!"
+                return False
+        else:
+            return False
+
     def buildTreeFromFile(self):
         """ Build tree from given file """
         self.treeSteps = []
+        self.treeAttrs = []
         self.treeNodes = []
         self.treeOrder = []
         if os.path.exists(self._treeFile):
             print "Building %s ..." % self._treeLabel
             tree = pFile.readPyFile(self._treeFile)
             self.treeSteps = tree['treeSteps']
+            self.treeAttrs = tree['treeAttrs']
             for node in tree['treeNodes']:
                 self.addNode(**node)
 
-    def buildTreeFromUi(self, treeSteps, treeNodes):
+    def buildTreeFromUi(self, treeSteps, treeAttrs, treeNodes):
         """ Build tree obj from ui
             @param treeSteps: (list) : Tree step list
+            @param treeAttrs: (list) : Tree attributes list
             @param treeNodes: (list) : Node dict list """
         self.treeSteps = treeSteps
+        self.treeAttrs = treeAttrs
         self.treeNodes = treeNodes
         self.treeOrder = []
         for nodeDict in self.treeNodes:
@@ -185,6 +218,7 @@ class TreeTemplate(object):
     def writeTreeToFile(self):
         """ Write tree object to file """
         treeTxt = ["treeSteps = %s" % self.treeSteps,
+                   "treeAttrs = %s" % self.treeAttrs,
                    "treeNodes = %s" % self.treeNodes]
         try:
             pFile.writeFile(self._treeFile, '\n'.join(treeTxt))
@@ -208,6 +242,13 @@ class TreeTemplate(object):
         params = self.getParams
         return params['treeSteps']
 
+    @property
+    def getAttrs(self):
+        """ Get tree attributes list
+            @return: (list) : Tree steps """
+        params = self.getParams
+        return params['treeAttrs']
+
     def printParams(self):
         """ Print tree params """
         print '#' * 100
@@ -222,6 +263,14 @@ class TreeTemplate(object):
         print "#----- %s TREE STEPS -----#" % self._treeName.upper()
         for step in self.getSteps:
             print step
+        print '#' * 100
+
+    def printAttrs(self):
+        """ Print tree attributes """
+        print '#' * 100
+        print "#----- %s TREE ATTRIBUTES -----#" % self._treeName.upper()
+        for attr in self.getAttrs:
+            print attr
         print '#' * 100
 
     def _checkNewNode(self, nodePath, nodeName):
@@ -239,12 +288,22 @@ class TreeTemplate(object):
         return True
 
     def _checkNewStep(self, stepName):
-        """ Check if new node already exists
+        """ Check if new step already exists
             @param stepName: (str) : Step name
             @return: (bool) : Check state """
         for step in self.treeSteps:
             if step == stepName:
                 print "!!! Warning: %s already exists !!!" % stepName
+                return False
+        return True
+
+    def _checkNewAttr(self, attrName):
+        """ Check if new attribute already exists
+            @param attrName: (str) : Attribute name
+            @return: (bool) : Check state """
+        for attr in self.treeAttrs:
+            if attr == attrName:
+                print "!!! Warning: %s already exists !!!" % attrName
                 return False
         return True
 
