@@ -416,11 +416,11 @@ class ProjectTab(object):
         if selTasks:
             self.mainUi.delSelItems(self.mainUi.twProjectTasks)
 
-    # noinspection PyArgumentList
     def on_taskColor(self, item):
         """ Command launch when bColorChoice of projectTasks QTreeWidgetItem is clicked
             @param item: (object) : Project task QTreeWidgetItem """
         if self.mainUi.bEditProjectTab.isChecked():
+            # noinspection PyArgumentList
             color = QtGui.QColorDialog.getColor()
             if color.isValid():
                 rgba = color.getRgb()
