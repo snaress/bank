@@ -311,3 +311,23 @@ class EditProjectTreeUi(editProjectTreeClass, editProjectTreeUiClass):
         else:
             nodeParent = None
         return nodeParent
+
+
+shotNodeClass, shotNodeUiClass = uic.loadUiType(prodManager.uiList['shotNode'])
+class ShotNodeWidget(shotNodeClass, shotNodeUiClass):
+    """ ShotInfo tab tree widget
+        @param mainUi: (object) : ProdManager QMainWindow """
+
+    def __init__(self, mainUi, **kwargs):
+        self.mainUi = mainUi
+        self.params = kwargs
+        self.pm = self.mainUi.pm
+        super(ShotNodeWidget, self).__init__()
+        self._setupUi()
+
+    def _setupUi(self):
+        """ Setup Widget """
+        self.setupUi(self)
+        self.lNameVal.setText(self.params['nodeName'])
+        self.lTypeVal.setText(self.params['nodeType'])
+        self.lPathVal.setText(self.params['nodePath'])

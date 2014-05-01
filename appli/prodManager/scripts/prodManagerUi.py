@@ -6,6 +6,7 @@ from lib.qt.scripts import procQt as pQt
 from appli.prodManager.scripts import prodManager as pm
 from appli.prodManager.scripts import uiCmds as pmUiCmds
 from appli.prodManager.scripts import uiRefresh as pmRefresh
+from appli.prodManager.scripts import uiWindow as pmWindow
 
 
 prodManagerClass, prodManagerUiClass = uic.loadUiType(prodManager.uiList['prodManager'])
@@ -16,9 +17,11 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
     def __init__(self):
         print "##### Launching ProdManager Ui #####"
         self.pm = pm.ProdManager()
+        self.pmWindow = pmWindow
         self.uiRf_previewImage = pmRefresh.PreviewImage(self)
-        self.uiRf_mainTrees = pmRefresh.MainTrees(self)
+        self.uiRf_mainTrees = pmRefresh.MainTree(self)
         self.uiRf_projectTab = pmRefresh.ProjectTab(self)
+        self.uiRf_shotInfoTab = pmRefresh.ShotInfoTab(self)
         self.uiCmds_menu = pmUiCmds.MenuCmds(self)
         self.uiCmds_mainTree = pmUiCmds.MainTree(self)
         self.uiCmds_projectTab = pmUiCmds.ProjectTab(self)
@@ -31,6 +34,7 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.setupUi(self)
         self._setupMenu()
         self._setupProject()
+        self._setupShotInfo()
         self.windowInit()
 
     def _setupMenu(self):
@@ -75,17 +79,23 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.uiRf_projectTab.pop_projectStepMenu()
         self.uiRf_projectTab.pop_projectAttrMenu()
 
+    def _setupShotInfo(self):
+        """ Setup shotInfo tab """
+        self.twProject.clicked.connect(self.uiCmds_mainTree.on_treeItem)
+
     def windowInit(self):
         """ Main ui inititialize """
         self.setGeometry(QtCore.QRect(100, 50, 1200, 800))
         self.setWindowTitle("ProdManager: Untitled")
+        self.tabProdManager.setCurrentIndex(0)
         self.uiRf_previewImage.rf_previewIma(prodManager.imaList['prodManager.png'])
         self.uiRf_projectTab.initProjectTab()
+        self.uiRf_shotInfoTab.initShotInfoTab()
 
     def windowRefresh(self):
         """ Main ui updates """
         self.uiRf_projectTab.rf_projectTab()
-        self.uiRf_mainTrees.rf_mainTreesSwitch()
+        self.uiRf_mainTrees.rf_mainTreeSwitch()
         self.uiRf_mainTrees.rf_mainTree()
 
     def loadProject(self, projectName, projectAlias):

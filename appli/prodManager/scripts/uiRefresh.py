@@ -50,7 +50,7 @@ class PreviewImage(object):
         self.mainUi.lPreview.imaHeight = self.mainUi.previewIma.height()
 
 
-class MainTrees(object):
+class MainTree(object):
     """ Class used by the ProdManagerUi for mainTrees updates and refresh
         @param mainUi: (object) : ProdManager QMainWindow """
 
@@ -59,7 +59,7 @@ class MainTrees(object):
         self.pm = self.mainUi.pm
         self.populate = PopulateTrees(self.mainUi)
 
-    def rf_mainTreesSwitch(self):
+    def rf_mainTreeSwitch(self):
         """ Refresh main trees switch """
         for n, tree in enumerate(self.pm.project.projectTrees):
             newWidget = QtGui.QRadioButton()
@@ -267,6 +267,26 @@ class ProjectTab(object):
         self.mainUi.menuProjectAttr.addAction(self.mainUi.miDelAttrItem)
 
 
+class ShotInfoTab(object):
+    """ Class used by the ProdManagerUi for shotInfoTab updates and refresh
+        @param mainUi: (object) : ProdManager QMainWindow """
+
+    def __init__(self, mainUi):
+        self.mainUi = mainUi
+        self.pm = self.mainUi.pm
+        self.populate = PopulateTrees(self.mainUi)
+
+    def initShotInfoTab(self):
+        """ Initialize shotInfo tab """
+        self.mainUi.lShotNodePath.setText('')
+
+    def rf_shotInfoTab(self):
+        """ Refresh shotInfo tab """
+        self.mainUi.twShotInfo.clear()
+        self.mainUi.twShotInfo.setHeaderLabel(self.mainUi.selectedTree)
+        self.populate.shotInfoTree()
+
+
 class PopulateTrees(object):
     """ Populate prodManager trees QTreeWidget
         @param mainUi: (object) : ProdManager QMainWindow """
@@ -339,6 +359,21 @@ class PopulateTrees(object):
                     self.mainUi.twProject.addTopLevelItem(newItem)
                 else:
                     parent.addChild(newItem)
+
+    def shotInfoTree(self):
+        """ Populate shotInfo tree QTreeWidget """
+        selItems = self.mainUi.twProject.selectedItems()
+        if selItems:
+            selItem = selItems[0]
+            allItems = pQt.getAllItems(self.mainUi.twProject)
+            self.mainUi.lShotNodePath.setText(selItem.nodePath)
+            for item in allItems:
+                if not 'Ctnr' in item.nodeType and item.nodePath.startswith(selItem.nodePath):
+                    newItem = self.newShotInfoItem(**item.__dict__)
+                    newWidget = self.mainUi.pmWindow.ShotNodeWidget(self.mainUi, **item.__dict__)
+                    newItem.widget = newWidget
+                    self.mainUi.twShotInfo.addTopLevelItem(newItem)
+                    self.mainUi.twShotInfo.setItemWidget(newItem, 0, newWidget)
 
     def newProjectTaskItem(self, taskName, taskColor=None, taskStat=None):
         """ Create new project task QTreeWidgetItem
@@ -472,4 +507,26 @@ class PopulateTrees(object):
             @param kwargs: (dict) : Item default params
             @return: (object) : New QTreeWidgetItem """
         newItem = self.newProjectTreeItem(**kwargs)
+        if not 'Ctnr' in kwargs['nodeType']:
+            dataPath = os.path.join(self.pm.project._projectPath, 'tree', kwargs['nodeType'])
+            for fld in kwargs['nodePath'].split('/'):
+                newItem.dataPath = os.path.join(dataPath, fld)
+            newItem.dataFile = os.path.join(newItem.dataPath, '%s.py' % kwargs['nodeName'])
+        return newItem
+
+    def newShotInfoItem(self, **kwargs):
+        """ Create new shotInfo tree QTreeWidgetItem
+            @param kwargs: (dict) : Item default params
+            @return: (object) : New QTreeWidgetItem """
+        newItem = QtGui.QTreeWidgetItem()
+        #-- Data Info --#
+        if not 'Ctnr' in kwargs['nodeType']:
+            dataPath = os.path.join(self.pm.project._projectPath, 'tree', kwargs['nodeType'])
+            for fld in kwargs['nodePath'].split('/'):
+                newItem.dataPath = os.path.join(dataPath, fld)
+            newItem.dataFile = os.path.join(newItem.dataPath, '%s.py' % kwargs['nodeName'])
+        #-- Default Node Attr --#
+        for k, v in kwargs.iteritems():
+            if k.startswith('node'):
+                setattr(newItem, k, v)
         return newItem

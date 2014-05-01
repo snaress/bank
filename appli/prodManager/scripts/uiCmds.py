@@ -346,6 +346,13 @@ class MainTree(object):
         self.mainUi.selectedTree = treeLabel
         self.mainUi.uiRf_mainTrees.rf_mainTree()
 
+    def on_treeItem(self):
+        """ Refresh selected tab params """
+        selTab = self.mainUi.tabProdManager.tabText(self.mainUi.tabProdManager.currentIndex())
+        if selTab == 'Shot Info':
+            self.mainUi.uiRf_shotInfoTab.rf_shotInfoTab()
+
+
 class ProjectTab(object):
     """ Class used by the ProdManagerUi for project tab actions
         @param mainUi: (object) : ProdManager QMainWindow """
