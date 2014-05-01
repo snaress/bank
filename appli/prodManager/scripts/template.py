@@ -22,6 +22,12 @@ class DefaultTemplate(object):
         return {'nodeType': nodeType, 'nodeLabel': nodeLabel,
                 'nodeName': nodeName, 'nodePath': nodePath}
 
+    @staticmethod
+    def projectTreeAttrs():
+        """ Get Default project tree attributes
+            @return: (list) : Default attributes """
+        return [{'workDir': 'string'}, {'imaDir': 'string'}]
+
 
 class ProjectTemplate(object):
     """ Class used to managed project params

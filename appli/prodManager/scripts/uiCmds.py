@@ -317,7 +317,8 @@ class MenuCmds(object):
         """ Remove selected items from project attributes QTreeWidget """
         selAttrs = self.mainUi.twProjectAttr.selectedItems()
         if selAttrs:
-            if not selAttrs[0].nodeName == 'workDir':
+            attrs = [x.keys()[0] for x in self.defaultTemplate.projectTreeAttrs()]
+            if not selAttrs[0].nodeName in attrs:
                 self.mainUi.delSelItems(self.mainUi.twProjectAttr)
                 selTrees = self.mainUi.twProjectTrees.selectedItems()
                 self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
@@ -330,6 +331,20 @@ class MenuCmds(object):
         """ Command launch when Qbutton 'Ok' of dialog is clicked """
         self.warnDial6.close()
 
+
+class MainTree(object):
+    """ Class used by the ProdManagerUi for main tree actions
+        @param mainUi: (object) : ProdManager QMainWindow """
+
+    def __init__(self, mainUi):
+        self.mainUi = mainUi
+        self.pm = self.mainUi.pm
+
+    def on_switchTree(self, treeLabel):
+        """ Switch main tree
+            @param treeLabel: (str) : Tree label """
+        self.mainUi.selectedTree = treeLabel
+        self.mainUi.uiRf_mainTrees.rf_mainTree()
 
 class ProjectTab(object):
     """ Class used by the ProdManagerUi for project tab actions
@@ -352,6 +367,7 @@ class ProjectTab(object):
             for tree in self.pm.project.projectTrees:
                 treeObj = getattr(self.pm, '%sTree' % tree)
                 treeObj.writeTreeToFile()
+            self.mainUi.uiRf_mainTrees.rf_mainTreesSwitch()
         self.mainUi.uiRf_projectTab.rf_projectTabVis(state=checkState)
 
     def on_cancelProjectTab(self):

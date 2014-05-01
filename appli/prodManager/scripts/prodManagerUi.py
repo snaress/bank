@@ -17,9 +17,12 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         print "##### Launching ProdManager Ui #####"
         self.pm = pm.ProdManager()
         self.uiRf_previewImage = pmRefresh.PreviewImage(self)
+        self.uiRf_mainTrees = pmRefresh.MainTrees(self)
         self.uiRf_projectTab = pmRefresh.ProjectTab(self)
         self.uiCmds_menu = pmUiCmds.MenuCmds(self)
+        self.uiCmds_mainTree = pmUiCmds.MainTree(self)
         self.uiCmds_projectTab = pmUiCmds.ProjectTab(self)
+        self.selectedTree = None
         super(ProdManagerUi, self).__init__()
         self._setupUi()
 
@@ -82,6 +85,8 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
     def windowRefresh(self):
         """ Main ui updates """
         self.uiRf_projectTab.rf_projectTab()
+        self.uiRf_mainTrees.rf_mainTreesSwitch()
+        self.uiRf_mainTrees.rf_mainTree()
 
     def loadProject(self, projectName, projectAlias):
         """ Load given project

@@ -50,6 +50,35 @@ class PreviewImage(object):
         self.mainUi.lPreview.imaHeight = self.mainUi.previewIma.height()
 
 
+class MainTrees(object):
+    """ Class used by the ProdManagerUi for mainTrees updates and refresh
+        @param mainUi: (object) : ProdManager QMainWindow """
+
+    def __init__(self, mainUi):
+        self.mainUi = mainUi
+        self.pm = self.mainUi.pm
+        self.populate = PopulateTrees(self.mainUi)
+
+    def rf_mainTreesSwitch(self):
+        """ Refresh main trees switch """
+        for n, tree in enumerate(self.pm.project.projectTrees):
+            newWidget = QtGui.QRadioButton()
+            newWidget.setText(tree)
+            newWidget.treeName = tree
+            newWidget.treeLabel = '%sTree' % tree
+            if n == 0:
+                newWidget.setChecked(True)
+                self.mainUi.selectedTree = newWidget.treeLabel
+            newWidget.connect(newWidget, QtCore.SIGNAL("clicked()"),
+                              partial(self.mainUi.uiCmds_mainTree.on_switchTree, newWidget.treeLabel))
+            self.mainUi.hlMainTrees.addWidget(newWidget)
+
+    def rf_mainTree(self):
+        """ Refresh main trees QTreeWidget """
+        self.mainUi.twProject.clear()
+        self.populate.mainTree()
+
+
 class ProjectTab(object):
     """ Class used by the ProdManagerUi for projectTab updates and refresh
         @param mainUi: (object) : ProdManager QMainWindow """
@@ -245,6 +274,7 @@ class PopulateTrees(object):
     def __init__(self, mainUi):
         self.mainUi = mainUi
         self.pm = self.mainUi.pm
+        self.defaultTemplate = pmTemplate.DefaultTemplate
 
     def projectTasks(self):
         """ Populate projectTasks QTreeWidget """
@@ -297,6 +327,19 @@ class PopulateTrees(object):
             self.mainUi.twProjectAttr.addTopLevelItem(newItem)
             self.mainUi.twProjectAttr.setItemWidget(newItem, 1, newChoice)
 
+    def mainTree(self):
+        """ Populate main tree QTreeWidget """
+        if self.mainUi.selectedTree is not None:
+            treeObj = getattr(self.pm, self.mainUi.selectedTree)
+            for nodeDict in treeObj.treeNodes:
+                parent = self.mainUi.getParentItemFromNodePath(self.mainUi.twProject,
+                                                               nodeDict['nodePath'])
+                newItem = self.newMainTreeItem(**nodeDict)
+                if parent is None:
+                    self.mainUi.twProject.addTopLevelItem(newItem)
+                else:
+                    parent.addChild(newItem)
+
     def newProjectTaskItem(self, taskName, taskColor=None, taskStat=None):
         """ Create new project task QTreeWidgetItem
             @param taskName: (str) : Task Name
@@ -348,8 +391,7 @@ class PopulateTrees(object):
             newStat.setChecked(taskStat)
         return newStat
 
-    @staticmethod
-    def newProjectTreesItem(treeName, treeSteps=None, treeAttrs=None, treeNodes=None):
+    def newProjectTreesItem(self, treeName, treeSteps=None, treeAttrs=None, treeNodes=None):
         """ Create new project tree QTreeWidgetItem
             @param treeName: (str) : New tree name (ex: 'asset', 'shot')
             @param treeSteps: (list) : List of tree steps
@@ -368,7 +410,7 @@ class PopulateTrees(object):
             newItem.treeSteps = treeSteps
         #-- Tree Attributes --#
         if treeAttrs is None:
-            newItem.treeAttrs = [{'workDir': 'string'}]
+            newItem.treeAttrs = self.defaultTemplate.projectTreeAttrs()
         else:
             newItem.treeAttrs = treeAttrs
         #-- Tree Nodes --#
@@ -424,3 +466,10 @@ class PopulateTrees(object):
         #-- Result --#
         newItem.widget = newChoice
         return newItem, newChoice
+
+    def newMainTreeItem(self, **kwargs):
+        """ Create new main tree QTreeWidgetItem
+            @param kwargs: (dict) : Item default params
+            @return: (object) : New QTreeWidgetItem """
+        newItem = self.newProjectTreeItem(**kwargs)
+        return newItem
