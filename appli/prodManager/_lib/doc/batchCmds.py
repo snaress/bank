@@ -5,7 +5,7 @@ from appli.prodManager.scripts import prodManager
 pm = prodManager.ProdManager()
 
 #-- Projects Listing --#
-pm.printProjects()
+# pm.printProjects()
 
 #-- New Project --#
 # pm.newProject('test', 'dev')
@@ -14,24 +14,24 @@ pm.printProjects()
 pm.loadProject('asterix', 'ddd')
 
 #-- Get ProdManager Params --#
-pmDict = pm.getParams
-print '*' * 100
-print "#----- Get ProdManager Params -----#"
-print pmDict
-print '*' * 100
+# pmDict = pm.getParams
+# print '*' * 100
+# print "#----- Get ProdManager Params -----#"
+# print pmDict
+# print '*' * 100
 
 #-- Print ProdManager Params --#
-pm.printProdManagerParams()
+# pm.printProdManagerParams()
 
 #-- Get Project Params --#
-projectDict = pm.project.getParams
-print '*' * 100
-print "#----- Get Project Params -----#"
-print projectDict
-print '*' * 100
+# projectDict = pm.project.getParams
+# print '*' * 100
+# print "#----- Get Project Params -----#"
+# print projectDict
+# print '*' * 100
 
 #-- Print Project Params --#
-pm.printProjectParams()
+# pm.printProjectParams()
 
 #-- Edit ProdManager Project Params --#
 # pm.project.projectEnd = '2015/03/29'
@@ -39,15 +39,15 @@ pm.printProjectParams()
 # pm.project.writeProjectFile()
 
 #-- Get Tree Params --#
-assetTree = getattr(pm, 'assetTree')
-treeDict = assetTree.getParams
-print '*' * 100
-print "#----- Get Tree Params -----#"
-print treeDict
-print '*' * 100
+# assetTree = getattr(pm, 'assetTree')
+# treeDict = assetTree.getParams
+# print '*' * 100
+# print "#----- Get Tree Params -----#"
+# print treeDict
+# print '*' * 100
 
 #-- Print Tree Params --#
-pm.printTreeParams('asset')
+# pm.printTreeParams('asset')
 
 #-- Add Project Tree Node --#
 # nodeParams1 = {'nodeType': 'assetCtnr', 'nodeLabel': 'chars',
@@ -70,5 +70,11 @@ pm.printTreeParams('asset')
 # assetTree.writeTreeToFile()
 
 #-- Add Tree Attribute --#
-assetTree.addAttr('toto')
-assetTree.printAttrs()
+# assetTree.addAttr('toto')
+# assetTree.printAttrs()
+
+pm.printProjectParams()
+assetTree = getattr(pm, 'assetTree')
+assetTree.printParams()
+for node in assetTree.treeOrder:
+    node.printParams()

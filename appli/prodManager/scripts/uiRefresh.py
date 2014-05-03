@@ -279,12 +279,35 @@ class ShotInfoTab(object):
     def initShotInfoTab(self):
         """ Initialize shotInfo tab """
         self.mainUi.lShotNodePath.setText('')
+        self.mainUi.twShotParams.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+        self.mainUi.twShotParams.header().setResizeMode(1, QtGui.QHeaderView.ResizeToContents)
+        self.rf_shotParamsVis()
 
-    def rf_shotInfoTab(self):
-        """ Refresh shotInfo tab """
+    def rf_shotParamsVis(self, state=False):
+        """ Refresh shotInfo tab ui visibility
+            @param state: (bool) : Visibility state """
+        self.mainUi.bCancelShotParams.setVisible(state)
+        allItems = pQt.getTopItems(self.mainUi.twShotParams)
+        for item in allItems:
+            if item.paramType == 'bool':
+                item.widget.setEnabled(not state)
+            else:
+                if item.paramType in ['dir', 'file']:
+                    item.widget.paramVal.setReadOnly(not state)
+                    item.widget.bOpen.setVisible(state)
+                else:
+                    item.widget.setReadOnly(not state)
+
+    def rf_shotInfoTree(self):
+        """ Refresh shotInfo QTreeWidget """
         self.mainUi.twShotInfo.clear()
         self.mainUi.twShotInfo.setHeaderLabel(self.mainUi.selectedTree)
         self.populate.shotInfoTree()
+
+    def rf_shotParamsTree(self):
+        """ Refresh shotParams QTreeWidget """
+        self.mainUi.twShotParams.clear()
+        self.populate.shotParamsTree()
 
 
 class PopulateTrees(object):
@@ -294,7 +317,10 @@ class PopulateTrees(object):
     def __init__(self, mainUi):
         self.mainUi = mainUi
         self.pm = self.mainUi.pm
+        self.wnd = self.mainUi.pmWindow
         self.defaultTemplate = pmTemplate.DefaultTemplate
+
+    #========================================== POPULATE ==========================================#
 
     def projectTasks(self):
         """ Populate projectTasks QTreeWidget """
@@ -374,6 +400,24 @@ class PopulateTrees(object):
                     newItem.widget = newWidget
                     self.mainUi.twShotInfo.addTopLevelItem(newItem)
                     self.mainUi.twShotInfo.setItemWidget(newItem, 0, newWidget)
+
+    def shotParamsTree(self):
+        """ Populate shotParams tree QTreeWidget """
+        selItems = self.mainUi.twShotInfo.selectedItems()
+        if selItems:
+            selItem = selItems[0]
+            treeObj = getattr(self.pm, '%sTree' % selItem.nodeType)
+            for attrDict in treeObj.treeAttrs:
+                attrName = attrDict.keys()[0]
+                attrType = attrDict[attrName]
+                newItem, newWidget = self.newShotParamItem(attrName, attrType)
+                self.mainUi.twShotParams.addTopLevelItem(newItem)
+                if newWidget is None:
+                    print "!!! Error: Can't create new shot param widget !!!"
+                else:
+                    self.mainUi.twShotParams.setItemWidget(newItem, 1, newWidget)
+
+    #=========================================== ITEMS ============================================#
 
     def newProjectTaskItem(self, taskName, taskColor=None, taskStat=None):
         """ Create new project task QTreeWidgetItem
@@ -484,7 +528,7 @@ class PopulateTrees(object):
     def newProjectAttrItem(self, attrName, attrType):
         """ Create new project attribute QTreeWidgetItem
             @param attrName: (str) : Item Name
-            @param attrType: (str) : 'string' or 'float' or 'int' or 'bool' or 'comment'
+            @param attrType: (str) : 'file', 'dir', 'string', 'float', 'int', 'bool'
             @return: (object) : New QTreeWidgetItem """
         #-- Item --#
         newItem = QtGui.QTreeWidgetItem()
@@ -494,7 +538,7 @@ class PopulateTrees(object):
         newItem.attrType = attrType
         #-- Type --#
         newChoice = QtGui.QComboBox()
-        newChoice.addItems(['string', 'int', 'float', 'bool', 'comment'])
+        newChoice.addItems(['file', 'dir', 'string', 'int', 'float', 'bool'])
         newChoice.setCurrentIndex(newChoice.findText(attrType))
         newChoice.connect(newChoice, QtCore.SIGNAL("currentIndexChanged(const QString&)"),
                           self.mainUi.uiCmds_projectTab.on_attrType)
@@ -508,10 +552,10 @@ class PopulateTrees(object):
             @return: (object) : New QTreeWidgetItem """
         newItem = self.newProjectTreeItem(**kwargs)
         if not 'Ctnr' in kwargs['nodeType']:
-            dataPath = os.path.join(self.pm.project._projectPath, 'tree', kwargs['nodeType'])
-            for fld in kwargs['nodePath'].split('/'):
-                newItem.dataPath = os.path.join(dataPath, fld)
-            newItem.dataFile = os.path.join(newItem.dataPath, '%s.py' % kwargs['nodeName'])
+            dataPath, dataFile = self.pm.getDataFileAbsPath(kwargs['nodeType'], kwargs['nodePath'],
+                                                            kwargs['nodeName'])
+            newItem.dataPath = dataPath
+            newItem.dataFile = os.path.join(dataPath, dataFile)
         return newItem
 
     def newShotInfoItem(self, **kwargs):
@@ -521,12 +565,94 @@ class PopulateTrees(object):
         newItem = QtGui.QTreeWidgetItem()
         #-- Data Info --#
         if not 'Ctnr' in kwargs['nodeType']:
-            dataPath = os.path.join(self.pm.project._projectPath, 'tree', kwargs['nodeType'])
-            for fld in kwargs['nodePath'].split('/'):
-                newItem.dataPath = os.path.join(dataPath, fld)
-            newItem.dataFile = os.path.join(newItem.dataPath, '%s.py' % kwargs['nodeName'])
+            dataPath, dataFile = self.pm.getDataFileAbsPath(kwargs['nodeType'], kwargs['nodePath'],
+                                                            kwargs['nodeName'])
+            newItem.dataPath = dataPath
+            newItem.dataFile = os.path.join(dataPath, dataFile)
         #-- Default Node Attr --#
         for k, v in kwargs.iteritems():
             if k.startswith('node'):
                 setattr(newItem, k, v)
         return newItem
+
+    def newShotParamItem(self, paramName, paramType):
+        """ Create new shotInfo tree QTreeWidgetItem
+            @param paramName: (str) : Param name
+            @param paramType: (str) : Param type ('file', 'string', 'int', 'float', 'bool')
+            @return: (object), (object) : New QTreeWidgetItem, New QWidget """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setText(0, paramName)
+        newItem.paramName = paramName
+        newItem.paramType = paramType
+        if paramType in ['dir', 'file']:
+            newWidget = self.newShotParamFile(paramType, '')
+        elif paramType == 'string':
+            newWidget = self.newShotParamStr('')
+        elif paramType == 'int':
+            newWidget = self.newShotParamInt(0)
+        elif paramType == 'float':
+            newWidget = self.newShotParamFloat(0.0)
+        elif paramType == 'bool':
+            newWidget = self.newShotParamBool(False)
+        else:
+            newWidget = None
+        newItem.widget = newWidget
+        return newItem, newWidget
+
+    #========================================== WIDGETS ===========================================#
+
+    def newShotParamFile(self, paramType, value):
+        """ Create new shot param file widget
+            @param value: (str) : Param value
+            @param paramType: (str) : 'dir', 'file'
+            @return: (object) : new QWidget """
+        newWidget = self.wnd.ShotParamFileWidget(self.mainUi, paramType, value)
+        return newWidget
+
+    @staticmethod
+    def newShotParamStr(value):
+        """ Create new shot param string widget
+            @param value: (str) : Param value
+            @return: (object) : new QLineEdit """
+        newWidget = QtGui.QLineEdit()
+        newWidget.setText(value)
+        newWidget.setReadOnly(True)
+        return newWidget
+
+    @staticmethod
+    def newShotParamInt(value):
+        """ Create new shot param int widget
+            @param value: (int) : Param value
+            @return: (object) : new QSpinBox """
+        newWidget = QtGui.QSpinBox()
+        newWidget.setValue(value)
+        newWidget.setMinimum(-999999)
+        newWidget.setMaximum(999999)
+        newWidget.setSingleStep(1)
+        newWidget.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        newWidget.setReadOnly(True)
+        return newWidget
+
+    @staticmethod
+    def newShotParamFloat(value):
+        """ Create new shot param float widget
+            @param value: (float) : Param value
+            @return: (object) : new QDoubleSpinBox """
+        newWidget = QtGui.QDoubleSpinBox()
+        newWidget.setValue(value)
+        newWidget.setMinimum(-999999.999999)
+        newWidget.setMaximum(999999.999999)
+        newWidget.setDecimals(3)
+        newWidget.setSingleStep(0.1)
+        newWidget.setReadOnly(True)
+        return newWidget
+
+    @staticmethod
+    def newShotParamBool(value):
+        """ Create new shot param bool widget
+            @param value: (bool) : Param value
+            @return: (object) : new QCheckBox """
+        newWidget = QtGui.QCheckBox()
+        newWidget.setValue(value)
+        newWidget.setEnabled(False)
+        return newWidget

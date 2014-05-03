@@ -25,6 +25,7 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.uiCmds_menu = pmUiCmds.MenuCmds(self)
         self.uiCmds_mainTree = pmUiCmds.MainTree(self)
         self.uiCmds_projectTab = pmUiCmds.ProjectTab(self)
+        self.uiCmds_shotInfoTab = pmUiCmds.ShotInfoTab(self)
         self.selectedTree = None
         super(ProdManagerUi, self).__init__()
         self._setupUi()
@@ -82,6 +83,9 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
     def _setupShotInfo(self):
         """ Setup shotInfo tab """
         self.twProject.clicked.connect(self.uiCmds_mainTree.on_treeItem)
+        self.twShotInfo.clicked.connect(self.uiCmds_shotInfoTab.on_shotInfoItem)
+        self.bEditShotParams.clicked.connect(self.uiCmds_shotInfoTab.on_editShotParams)
+        self.bCancelShotParams.clicked.connect(self.uiCmds_shotInfoTab.on_cancelShotParams)
 
     def windowInit(self):
         """ Main ui inititialize """

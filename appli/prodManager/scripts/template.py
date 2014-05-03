@@ -1,5 +1,7 @@
 import os
+from lib.qt.scripts import procQt as pQt
 from lib.system.scripts import procFile as pFile
+from appli.prodManager.scripts import core as pmCore
 
 
 class DefaultTemplate(object):
@@ -26,7 +28,7 @@ class DefaultTemplate(object):
     def projectTreeAttrs():
         """ Get Default project tree attributes
             @return: (list) : Default attributes """
-        return [{'workDir': 'string'}, {'imaDir': 'string'}]
+        return [{'workDir': 'dir'}, {'prevIma': 'file'}]
 
 
 class ProjectTemplate(object):
@@ -331,8 +333,46 @@ class TreeNode(object):
 
     def __init__(self, tree, **kwargs):
         self.tree = tree
+        self.pm = self.tree.pm
         for k, v in kwargs.iteritems():
             setattr(self, k, v)
+        self.params = {}
+
+    def ud_paramsFromUi(self, mainUi):
+        """ Update node params with ui values
+            @param mainUi: (object) : QMainWindow """
+        allItems = pQt.getTopItems(mainUi.twShotParams)
+        params = {}
+        for item in allItems:
+            if item.paramType in ['dir', 'file']:
+                params[item.paramName] = str(item.widget.paramVal.text())
+            elif item.paramType == 'string':
+                params[item.paramName] = str(item.widget.text(0))
+            elif item.paramType in ['int', 'float']:
+                params[item.paramName] = item.widget.value()
+            elif item.paramType == 'bool':
+                params[item.paramName] = item.widget.isChecked()
+        self.params = params
+
+    def ud_paramsFromFile(self):
+        """ Update node params with file values """
+        #TODO: Update from file for tree building
+
+    def writeNodeToFile(self):
+        """ Write node object to file """
+        if hasattr(self, 'nodeName') and hasattr(self, 'nodeType') and hasattr(self, 'nodePath'):
+            nodeName = getattr(self, 'nodeName')
+            nodeType = getattr(self, 'nodeType')
+            nodePath = getattr(self, 'nodePath')
+            dataPath, dataFile = self.pm.getDataFileAbsPath(nodeType, nodePath, nodeName)
+            _dataFile = os.path.join(dataPath, dataFile)
+            dataTxt = "nodeParams = %s" % self.params
+            if pmCore.createDataPath(_dataFile):
+                try:
+                    pFile.writeFile(_dataFile, dataTxt)
+                    print "Writing %s dataFile" % nodeName
+                except:
+                    print "!!! Error: Can't write %s dataFile !!!" % nodeName
 
     @property
     def getParams(self):

@@ -331,3 +331,48 @@ class ShotNodeWidget(shotNodeClass, shotNodeUiClass):
         self.lNameVal.setText(self.params['nodeName'])
         self.lTypeVal.setText(self.params['nodeType'])
         self.lPathVal.setText(self.params['nodePath'])
+
+
+shotParamFileClass, shotParamFileUiClass = uic.loadUiType(prodManager.uiList['shotParamFile'])
+class ShotParamFileWidget(shotParamFileClass, shotParamFileUiClass):
+    """ ShotParamFile tree widget
+        @param mainUi: (object) : ProdManager QMainWindow
+        @param value: (str) : Param value """
+
+    def __init__(self, mainUi, paramType, value):
+        self.mainUi = mainUi
+        self.pm = self.mainUi.pm
+        self.paramType = paramType
+        self.value = value
+        super(ShotParamFileWidget, self).__init__()
+        self._setupUi()
+
+    def _setupUi(self):
+        """ Setup Widget """
+        self.setupUi(self)
+        self.paramVal.setText(self.value)
+        self.paramVal.setReadOnly(True)
+        self.bOpen.setVisible(False)
+        self.bOpen.clicked.connect(self.on_fileDialog)
+
+    def on_fileDialog(self):
+        """ Command launch when QPushButton 'open' is clicked """
+        if str(self.paramVal.text()) == '':
+            if self.pm.project.projectWorkDir == '':
+                root = prodManager.rootDisk
+            else:
+                root = self.pm.project.projectWorkDir
+        else:
+            root = str(self.paramVal.text())
+        self.fdDir = dialog.fileDialog(fdRoot=root, fdCmd=self.ud_paramVal)
+        if self.paramType == 'dir':
+            self.fdDir.setFileMode(QtGui.QFileDialog.DirectoryOnly)
+        elif self.paramType == 'file':
+            self.fdDir.setFileMode(QtGui.QFileDialog.AnyFile)
+        self.fdDir.exec_()
+
+    def ud_paramVal(self):
+        """ Update param value with selected path """
+        selPath = self.fdDir.selectedFiles()
+        if selPath:
+            self.paramVal.setText(str(selPath[0]))

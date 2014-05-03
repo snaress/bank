@@ -98,6 +98,29 @@ class ProdManager(object):
             tree = getattr(self, '%sTree' % treeName)
         return tree
 
+    def getNodeFromNodePath(self, treeName, nodePath):
+        """ Get nodeObject given nodePath
+            @param treeName: (str) : Node tree name
+            @param nodePath: (str) : Node path
+            @return: (object) : NodeObject """
+        treeObj = getattr(self, '%sTree' % treeName)
+        for node in treeObj.treeOrder:
+            if node.nodePath == nodePath:
+                return node
+        return None
+
+    def getDataFileAbsPath(self, treeName, nodePath, nodeName):
+        """ Get dataPath and dataFile from given node
+            @param treeName: (str) : Node tree name
+            @param nodePath: (str) : Node path
+            @param nodeName: (str) : Node name
+            @return: (str), (str) : Node dataPath, Node dataFile """
+        dataPath = os.path.join(self.project._projectPath, 'tree', treeName)
+        for fld in nodePath.split('/'):
+            dataPath = os.path.join(dataPath, fld)
+        dataFile = '%s.py' % nodeName
+        return dataPath, dataFile
+
     def printProjects(self):
         """ Print project list """
         print '#' * 100

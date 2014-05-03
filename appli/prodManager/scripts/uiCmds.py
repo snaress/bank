@@ -350,7 +350,7 @@ class MainTree(object):
         """ Refresh selected tab params """
         selTab = self.mainUi.tabProdManager.tabText(self.mainUi.tabProdManager.currentIndex())
         if selTab == 'Shot Info':
-            self.mainUi.uiRf_shotInfoTab.rf_shotInfoTab()
+            self.mainUi.uiRf_shotInfoTab.rf_shotInfoTree()
 
 
 class ProjectTab(object):
@@ -574,3 +574,42 @@ class ProjectTab(object):
                 self.pm.project.addTree(item.treeName, new=True)
             treeObj = getattr(self.pm, '%sTree' % item.treeName)
             treeObj.buildTreeFromUi(item.treeSteps, item.treeAttrs, item.treeNodes)
+
+
+class ShotInfoTab(object):
+    """ Class used by the ProdManagerUi for shotInfo tab actions
+        @param mainUi: (object) : ProdManager QMainWindow """
+
+    def __init__(self, mainUi):
+        self.mainUi = mainUi
+        self.pm = self.mainUi.pm
+
+    def on_shotInfoItem(self):
+        """ Refresh selected item params """
+        self.mainUi.uiRf_shotInfoTab.rf_shotParamsTree()
+
+    def on_editShotParams(self):
+        """ Command launch when bEditShotParams is clicked """
+        checkState = self.mainUi.bEditShotParams.isChecked()
+        if checkState:
+            self.mainUi.bEditShotParams.setText("Save")
+        else:
+            self.mainUi.bEditShotParams.setText("Edit")
+            self.ud_shotParams()
+        self.mainUi.uiRf_shotInfoTab.rf_shotParamsVis(state=checkState)
+
+    def on_cancelShotParams(self):
+        """ Command launch when bCancelShotParams is clicked """
+        self.mainUi.bEditShotParams.setText("Edit")
+        self.mainUi.bEditShotParams.setChecked(False)
+        self.mainUi.uiRf_shotInfoTab.rf_shotParamsTree()
+        self.mainUi.uiRf_shotInfoTab.rf_shotParamsVis()
+
+    def ud_shotParams(self):
+        """ Update ProdManager instance """
+        items = self.mainUi.twShotInfo.selectedItems()
+        if items:
+            node = self.pm.getNodeFromNodePath(items[0].nodeType, items[0].nodePath)
+            if node is not None:
+                node.ud_paramsFromUi(self.mainUi)
+                node.writeNodeToFile()
