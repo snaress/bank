@@ -356,15 +356,18 @@ class TreeNode(object):
 
     def ud_paramsFromFile(self):
         """ Update node params with file values """
-        #TODO: Update from file for tree building
+        dataPath, dataFile, nodeName = self.getDataFile()
+        if dataPath is not None and dataFile is not None and nodeName is not None:
+            _dataFile = os.path.join(dataPath, dataFile)
+            if os.path.exists(_dataFile):
+                _params = {}
+                execfile(_dataFile, _params)
+                self.params = _params['nodeParams']
 
     def writeNodeToFile(self):
         """ Write node object to file """
-        if hasattr(self, 'nodeName') and hasattr(self, 'nodeType') and hasattr(self, 'nodePath'):
-            nodeName = getattr(self, 'nodeName')
-            nodeType = getattr(self, 'nodeType')
-            nodePath = getattr(self, 'nodePath')
-            dataPath, dataFile = self.pm.getDataFileAbsPath(nodeType, nodePath, nodeName)
+        dataPath, dataFile, nodeName = self.getDataFile()
+        if dataPath is not None and dataFile is not None and nodeName is not None:
             _dataFile = os.path.join(dataPath, dataFile)
             dataTxt = "nodeParams = %s" % self.params
             if pmCore.createDataPath(_dataFile):
@@ -373,6 +376,20 @@ class TreeNode(object):
                     print "Writing %s dataFile" % nodeName
                 except:
                     print "!!! Error: Can't write %s dataFile !!!" % nodeName
+        else:
+            print "!!! Error: Can't get dataFile for node %s" % nodeName
+
+    def getDataFile(self):
+        """ Get dataPath and dataFile
+            @return: (str), (str), (str) : Data path, Data file, None name """
+        if hasattr(self, 'nodeName') and hasattr(self, 'nodeType') and hasattr(self, 'nodePath'):
+            nodeName = getattr(self, 'nodeName')
+            nodeType = getattr(self, 'nodeType')
+            nodePath = getattr(self, 'nodePath')
+            dataPath, dataFile = self.pm.getDataFileAbsPath(nodeType, nodePath, nodeName)
+            return dataPath, dataFile, nodeName
+        else:
+            return None, None, None
 
     @property
     def getParams(self):

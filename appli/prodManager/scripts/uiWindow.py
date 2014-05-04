@@ -357,19 +357,42 @@ class ShotParamFileWidget(shotParamFileClass, shotParamFileUiClass):
 
     def on_fileDialog(self):
         """ Command launch when QPushButton 'open' is clicked """
-        if str(self.paramVal.text()) == '':
-            if self.pm.project.projectWorkDir == '':
-                root = prodManager.rootDisk
-            else:
-                root = self.pm.project.projectWorkDir
-        else:
-            root = str(self.paramVal.text())
+        root = self._getRootDir
         self.fdDir = dialog.fileDialog(fdRoot=root, fdCmd=self.ud_paramVal)
         if self.paramType == 'dir':
             self.fdDir.setFileMode(QtGui.QFileDialog.DirectoryOnly)
         elif self.paramType == 'file':
             self.fdDir.setFileMode(QtGui.QFileDialog.AnyFile)
         self.fdDir.exec_()
+
+    @property
+    def _getRootDir(self):
+        """ Get selected shot fileDialog rootDir
+            @return: (str) : FileDialog rootDir """
+        if str(self.paramVal.text()) == '':
+            if self._getWorkDir is None:
+                if self.pm.project.projectWorkDir == '':
+                    return prodManager.rootDisk
+                else:
+                    return self.pm.project.projectWorkDir
+            else:
+                return self._getWorkDir
+        else:
+            return str(self.paramVal.text())
+
+    @property
+    def _getWorkDir(self):
+        """ Get selected shot work directory
+            @return: (str) : Work directory """
+        allItems = pQt.getTopItems(self.mainUi.twShotParams)
+        for item in allItems:
+            if item.paramName == 'workDir':
+                workDir = str(item.widget.paramVal.text())
+                if workDir in ['', ' ']:
+                    return None
+                else:
+                    return str(item.widget.paramVal.text())
+        return None
 
     def ud_paramVal(self):
         """ Update param value with selected path """

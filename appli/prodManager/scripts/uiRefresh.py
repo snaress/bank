@@ -405,12 +405,13 @@ class PopulateTrees(object):
         """ Populate shotParams tree QTreeWidget """
         selItems = self.mainUi.twShotInfo.selectedItems()
         if selItems:
-            selItem = selItems[0]
-            treeObj = getattr(self.pm, '%sTree' % selItem.nodeType)
+            treeObj = getattr(self.pm, '%sTree' % selItems[0].nodeType)
+            nodeObj = self.pm.getNodeFromNodePath(selItems[0].nodeType, selItems[0].nodePath)
+            nodeObj.ud_paramsFromFile()
             for attrDict in treeObj.treeAttrs:
                 attrName = attrDict.keys()[0]
                 attrType = attrDict[attrName]
-                newItem, newWidget = self.newShotParamItem(attrName, attrType)
+                newItem, newWidget = self.newShotParamItem(attrName, attrType, nodeObj.params)
                 self.mainUi.twShotParams.addTopLevelItem(newItem)
                 if newWidget is None:
                     print "!!! Error: Can't create new shot param widget !!!"
@@ -575,36 +576,82 @@ class PopulateTrees(object):
                 setattr(newItem, k, v)
         return newItem
 
-    def newShotParamItem(self, paramName, paramType):
+    def newShotParamItem(self, paramName, paramType, nodeParams):
         """ Create new shotInfo tree QTreeWidgetItem
             @param paramName: (str) : Param name
             @param paramType: (str) : Param type ('file', 'string', 'int', 'float', 'bool')
+            @param nodeParams: (dict) : Node params dict
             @return: (object), (object) : New QTreeWidgetItem, New QWidget """
         newItem = QtGui.QTreeWidgetItem()
         newItem.setText(0, paramName)
         newItem.paramName = paramName
         newItem.paramType = paramType
-        if paramType in ['dir', 'file']:
-            newWidget = self.newShotParamFile(paramType, '')
-        elif paramType == 'string':
-            newWidget = self.newShotParamStr('')
-        elif paramType == 'int':
-            newWidget = self.newShotParamInt(0)
-        elif paramType == 'float':
-            newWidget = self.newShotParamFloat(0.0)
-        elif paramType == 'bool':
-            newWidget = self.newShotParamBool(False)
-        else:
-            newWidget = None
+        newWidget = self._getShotParamWidget(paramName, paramType, nodeParams)
         newItem.widget = newWidget
         return newItem, newWidget
 
     #========================================== WIDGETS ===========================================#
 
+    def _getShotParamWidget(self, paramName, paramType, nodeParams):
+        """ Get shot param widget
+            @param paramName: (str) : Param name
+            @param paramType: (str) : Param type ('file', 'string', 'int', 'float', 'bool')
+            @param nodeParams: (dict) : Node params dict
+            @return: (object) : New QWidget """
+        if paramType in ['dir', 'file']:
+            if paramName in nodeParams:
+                if isinstance(nodeParams[paramName], str):
+                    newWidget = self.newShotParamFile(paramType, nodeParams[paramName])
+                else:
+                    newWidget = self.newShotParamFile(paramType, '')
+                    print "!!! Warning: Param value for %s has not the good type !!!" % paramName
+            else:
+                newWidget = self.newShotParamFile(paramType, '')
+        elif paramType == 'string':
+            if paramName in nodeParams:
+                if isinstance(nodeParams[paramName], str):
+                    newWidget = self.newShotParamStr(nodeParams[paramName])
+                else:
+                    newWidget = self.newShotParamStr('')
+                    print "!!! Warning: Param value for %s has not the good type !!!" % paramName
+            else:
+                newWidget = self.newShotParamStr('')
+        elif paramType == 'int':
+            if paramName in nodeParams:
+                if isinstance(nodeParams[paramName], int):
+                    newWidget = self.newShotParamInt(nodeParams[paramName])
+                else:
+                    newWidget = self.newShotParamInt(0)
+                    print "!!! Warning: Param value for %s has not the good type !!!" % paramName
+            else:
+                newWidget = self.newShotParamInt(0)
+        elif paramType == 'float':
+            if paramName in nodeParams:
+                if isinstance(nodeParams[paramName], float):
+                    newWidget = self.newShotParamFloat(nodeParams[paramName])
+                else:
+                    newWidget = self.newShotParamFloat(0.0)
+                    print "!!! Warning: Param value for %s has not the good type !!!" % paramName
+            else:
+                newWidget = self.newShotParamFloat(0.0)
+        elif paramType == 'bool':
+            if paramName in nodeParams:
+                if isinstance(nodeParams[paramName], bool):
+                    newWidget = self.newShotParamBool(nodeParams[paramName])
+                else:
+                    newWidget = self.newShotParamBool(False)
+                    print "!!! Warning: Param value for %s has not the good type !!!" % paramName
+            else:
+                newWidget = self.newShotParamBool(False)
+        else:
+            newWidget = None
+            print "!!! Warning: Param type for %s has not the good type !!!" % paramName
+        return newWidget
+
     def newShotParamFile(self, paramType, value):
         """ Create new shot param file widget
-            @param value: (str) : Param value
             @param paramType: (str) : 'dir', 'file'
+            @param value: (str) : Param value
             @return: (object) : new QWidget """
         newWidget = self.wnd.ShotParamFileWidget(self.mainUi, paramType, value)
         return newWidget
