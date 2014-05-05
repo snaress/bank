@@ -1,0 +1,75 @@
+#! C:/Program Files (x86)/Nuke5.0v2/nuke5.0.exe -nx
+version 5.0200
+define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
+<layout version="1.0">
+    <window x="-1680" y="73" w="1680" h="870" screen="1">
+        <splitter orientation="1">
+            <split size="1053"></split>
+            <splitter orientation="1">
+                <split size="40"></split>
+                <dock id="" hideTitles="1" activePageId="Toolbar.1">
+                    <page id="Toolbar.1"></page>
+                </dock>
+                <split size="1011"></split>
+                <splitter orientation="2">
+                    <split size="402"></split>
+                    <dock id="" activePageId="Viewer.1">
+                        <page id="Viewer.1"></page>
+                    </dock>
+                    <split size="402"></split>
+                    <dock id="" activePageId="DAG.1">
+                        <page id="DAG.1"></page>
+                        <page id="Curve Editor.1"></page>
+                    </dock>
+                </splitter>
+            </splitter>
+            <split size="609"></split>
+            <dock id="" activePageId="Properties.1">
+                <page id="Properties.1"></page>
+            </dock>
+        </splitter>
+    </window>
+</layout>
+}
+Root {
+ inputs 0
+ name F:/rnd/workspace/bank/lib/nuke/_lib/nkFiles/resizeImage.nk
+ format "640 480 0 0 640 480 1 PC_Video"
+ proxy_type scale
+ proxy_format "640 480 0 0 640 480 1 PC_Video"
+}
+Read {
+ inputs 0
+ file G:/imageAbsPath.jpg
+ format "1000 2000 0 0 1000 2000 1 "
+ name Read1
+ xpos -260
+ ypos -58
+}
+Reformat {
+ type "to box"
+ box_width 500
+ box_height 250
+ box_fixed true
+ resize fit
+ black_outside true
+ name Reformat1
+ xpos -150
+ ypos -34
+}
+set N4eb91b8 [stack 0]
+Write {
+ file G:/imageAbsPath.png
+ views {main}
+ file_type png
+ name Write1
+ xpos -40
+ ypos -34
+}
+push $N4eb91b8
+Viewer {
+ frame 1
+ name Viewer1
+ xpos -67
+ ypos 110
+}
