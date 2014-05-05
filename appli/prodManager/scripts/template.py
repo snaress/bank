@@ -14,6 +14,12 @@ class DefaultTemplate(object):
         return 300, 150
 
     @staticmethod
+    def shotInfoPreviewMaxSize():
+        """ Give shotInfo preview image default max size
+            @return: (int) : maxWidth, (int) : maxHeight """
+        return 150, 75
+
+    @staticmethod
     def projectTreeNodeAttr(nodeType, nodeLabel, nodeName, nodePath):
         """ Get default project tree node attributes
             @param nodeType: (str) : 'container' or 'node'

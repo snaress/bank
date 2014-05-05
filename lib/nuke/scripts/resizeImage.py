@@ -80,10 +80,3 @@ class NukeResize(object):
         except:
             print "[RI] ERROR: Can't Write tmpFile: %s" % tmpFile
             return None
-
-
-if __name__ == '__main__':
-    imaIn = "G:/ddd/assets/chars/main/anglaigus/design/ima/anglaigus.jpg"
-    imaOut = "G:/ddd/assets/chars/main/anglaigus/design/ima/anglaigus_test.png"
-    ri = NukeResize(imaIn, imaOut, 1390, 2438, 300, 150)
-    ri.resize()

@@ -18,27 +18,9 @@ class PreviewImage(object):
             @param ima: (str) : Preview image absolut path """
         self.mainUi.previewIma = QtGui.QPixmap(ima)
         self.mainUi.lPreview.setPixmap(self.mainUi.previewIma)
-        self.rf_previewSize()
-        self.rf_previewAttr(ima)
-
-    def rf_previewSize(self):
-        """ Refresh preview size """
         maxWidth, maxHeight = self.defaultTemplate.previewMaxSize()
-        imaWidth = self.mainUi.previewIma.width()
-        imaHeight = self.mainUi.previewIma.height()
-        maxRatio = float(maxWidth)/float(maxHeight)
-        imaRatio = float(imaWidth)/float(imaHeight)
-        if imaRatio < maxRatio:
-            newWidth = int(maxHeight*imaRatio)
-            self.mainUi.lPreview.setMinimumSize(QtCore.QSize(newWidth, maxHeight))
-            self.mainUi.lPreview.setMaximumSize(QtCore.QSize(newWidth, maxHeight))
-        elif imaRatio == maxRatio:
-            self.mainUi.lPreview.setMinimumSize(QtCore.QSize(maxWidth, maxHeight))
-            self.mainUi.lPreview.setMaximumSize(QtCore.QSize(maxWidth, maxHeight))
-        elif imaRatio > maxRatio:
-            newHeight = int(maxWidth/imaRatio)
-            self.mainUi.lPreview.setMinimumSize(QtCore.QSize(maxWidth, newHeight))
-            self.mainUi.lPreview.setMaximumSize(QtCore.QSize(maxWidth, newHeight))
+        pQt.resizePixmap(maxWidth, maxHeight, self.mainUi.previewIma, self.mainUi.lPreview)
+        self.rf_previewAttr(ima)
 
     def rf_previewAttr(self, ima):
         """ Refresh preview attribute with given image
@@ -395,6 +377,8 @@ class PopulateTrees(object):
             self.mainUi.lShotNodePath.setText(selItem.nodePath)
             for item in allItems:
                 if not 'Ctnr' in item.nodeType and item.nodePath.startswith(selItem.nodePath):
+                    nodeObj = self.pm.getNodeFromNodePath(item.nodeType, item.nodePath)
+                    nodeObj.ud_paramsFromFile()
                     newItem = self.newShotInfoItem(**item.__dict__)
                     newWidget = self.mainUi.pmWindow.ShotNodeWidget(self.mainUi, **item.__dict__)
                     newItem.widget = newWidget

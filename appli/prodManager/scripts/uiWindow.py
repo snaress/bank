@@ -1,8 +1,8 @@
 import os
-from PyQt4 import QtGui, uic
 from functools import partial
 from appli import prodManager
 from lib.qt.scripts import dialog
+from PyQt4 import QtGui, QtCore, uic
 from lib.qt.scripts import procQt as pQt
 from appli.prodManager.scripts import uiRefresh as pmRefresh
 from appli.prodManager.scripts import template as pmTemplate
@@ -322,8 +322,10 @@ class ShotNodeWidget(shotNodeClass, shotNodeUiClass):
         self.mainUi = mainUi
         self.params = kwargs
         self.pm = self.mainUi.pm
+        self.defaultTemplate = pmTemplate.DefaultTemplate
         super(ShotNodeWidget, self).__init__()
         self._setupUi()
+        self.rf_prevIma()
 
     def _setupUi(self):
         """ Setup Widget """
@@ -331,6 +333,27 @@ class ShotNodeWidget(shotNodeClass, shotNodeUiClass):
         self.lNameVal.setText(self.params['nodeName'])
         self.lTypeVal.setText(self.params['nodeType'])
         self.lPathVal.setText(self.params['nodePath'])
+
+    def rf_prevIma(self):
+        """ Refresh widget prevIma """
+        ima = self.getPrevIma()
+        if ima is not None:
+            self.prevIma = QtGui.QPixmap(ima)
+            self.lPreview.setPixmap(self.prevIma)
+            maxWidth, maxHeight = self.defaultTemplate.shotInfoPreviewMaxSize()
+            pQt.resizePixmap(maxWidth, maxHeight, self.prevIma, self.lPreview)
+
+    def getPrevIma(self):
+        """ Get shotInfo prevIma absolut path
+            @return: (str) : shotInfo prevIma absolut path """
+        node = self.pm.getNodeFromNodePath(self.params['nodeType'], self.params['nodePath'])
+        ima  = prodManager.imaList['prodManager.png']
+        if node is not None:
+            if hasattr(node, 'params'):
+                if 'prevIma' in node.params:
+                    if not node.params['prevIma'] in ['', ' ']:
+                        ima = node.params['prevIma']
+        return ima
 
 
 shotParamFileClass, shotParamFileUiClass = uic.loadUiType(prodManager.uiList['shotParamFile'])
