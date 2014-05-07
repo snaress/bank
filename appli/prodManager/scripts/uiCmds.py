@@ -374,7 +374,7 @@ class ProjectTab(object):
             for tree in self.pm.project.projectTrees:
                 treeObj = getattr(self.pm, '%sTree' % tree)
                 treeObj.writeTreeToFile()
-            self.mainUi.uiRf_mainTrees.rf_mainTreesSwitch()
+            self.mainUi.uiRf_mainTrees.rf_mainTreeSwitch()
         self.mainUi.uiRf_projectTab.rf_projectTabVis(state=checkState)
 
     def on_cancelProjectTab(self):
