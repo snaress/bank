@@ -362,7 +362,7 @@ class TreeNode(object):
 
     def ud_paramsFromFile(self):
         """ Update node params with file values """
-        dataPath, dataFile, nodeName = self.getDataFile()
+        dataPath, dataFile, nodeName = self.dataInfo
         if dataPath is not None and dataFile is not None and nodeName is not None:
             _dataFile = os.path.join(dataPath, dataFile)
             if os.path.exists(_dataFile):
@@ -372,7 +372,7 @@ class TreeNode(object):
 
     def writeNodeToFile(self):
         """ Write node object to file """
-        dataPath, dataFile, nodeName = self.getDataFile()
+        dataPath, dataFile, nodeName = self.dataInfo
         if dataPath is not None and dataFile is not None and nodeName is not None:
             _dataFile = os.path.join(dataPath, dataFile)
             dataTxt = "nodeParams = %s" % self.params
@@ -385,9 +385,10 @@ class TreeNode(object):
         else:
             print "!!! Error: Can't get dataFile for node %s" % nodeName
 
-    def getDataFile(self):
-        """ Get dataPath and dataFile
-            @return: (str), (str), (str) : Data path, Data file, None name """
+    @property
+    def dataInfo(self):
+        """ Get dataPath, dataFile and nodeName
+            @return: (str), (str), (str) : Data path, Data file, Node name """
         if hasattr(self, 'nodeName') and hasattr(self, 'nodeType') and hasattr(self, 'nodePath'):
             nodeName = getattr(self, 'nodeName')
             nodeType = getattr(self, 'nodeType')
@@ -396,6 +397,20 @@ class TreeNode(object):
             return dataPath, dataFile, nodeName
         else:
             return None, None, None
+
+    @property
+    def dataPath(self):
+        """ Get node data path
+            @return: (str) : Node data path """
+        dataPath, dataFile, nodeName = self.dataInfo
+        return dataPath
+
+    @property
+    def dataFile(self):
+        """ Get node data file
+            @return: (str) : Node data file """
+        dataPath, dataFile, nodeName = self.dataInfo
+        return dataFile
 
     @property
     def getParams(self):

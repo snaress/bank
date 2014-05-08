@@ -338,9 +338,10 @@ class ShotNodeWidget(shotNodeClass, shotNodeUiClass):
         """ Refresh widget prevIma """
         ima = self.getPrevIma()
         if ima is not None:
+            maxWidth, maxHeight = self.defaultTemplate.shotInfoPreviewMaxSize()
             self.prevIma = QtGui.QPixmap(ima)
             self.lPreview.setPixmap(self.prevIma)
-            maxWidth, maxHeight = self.defaultTemplate.shotInfoPreviewMaxSize()
+            self.prevIma.scaled(maxWidth, maxHeight, QtCore.Qt.IgnoreAspectRatio)
             pQt.resizePixmap(maxWidth, maxHeight, self.prevIma, self.lPreview)
 
     def getPrevIma(self):
@@ -349,11 +350,40 @@ class ShotNodeWidget(shotNodeClass, shotNodeUiClass):
         node = self.pm.getNodeFromNodePath(self.params['nodeType'], self.params['nodePath'])
         ima  = prodManager.imaList['prodManager.png']
         if node is not None:
+            preview = os.path.join(node.dataPath, 'prevIma.png')
+            if os.path.exists(preview):
+                ima = preview
+        return ima
+
+    def ud_prevIma(self):
+        node = self.pm.getNodeFromNodePath(self.params['nodeType'], self.params['nodePath'])
+        if node is not None:
             if hasattr(node, 'params'):
                 if 'prevIma' in node.params:
                     if not node.params['prevIma'] in ['', ' ']:
-                        ima = node.params['prevIma']
-        return ima
+                        maxWidth, maxHeight = self.defaultTemplate.previewMaxSize()
+                        self.tmpIma = QtGui.QPixmap(node.params['prevIma'])
+                        self.tmpIma.scaled(maxWidth, maxHeight, QtCore.Qt.IgnoreAspectRatio)
+                        img = self.tmpIma.toImage().scaled(maxWidth, maxHeight,
+                                                           QtCore.Qt.KeepAspectRatio)
+                        preview = os.path.join(node.dataPath, 'prevIma.png')
+                        try:
+                            img.save(preview, 'png')
+                            print "Saving preview image: %s" % preview
+                        except:
+                            print "ERROR: Can't save preview image: %s" % preview
+
+    def saveIma(self):
+        """ Save preview image """
+        node = self.pm.getNodeFromNodePath(self.params['nodeType'], self.params['nodePath'])
+        preview = os.path.join(node.dataPath, 'prevIma.png')
+        maxWidth, maxHeight = self.defaultTemplate.previewMaxSize()
+        img = self.prevIma.toImage().scaled(maxWidth, maxHeight, QtCore.Qt.KeepAspectRatio)
+        try:
+            img.save(preview, 'png')
+            print "Saving preview image: %s" % preview
+        except:
+            print "ERROR: Can't save preview image: %s" % preview
 
 
 shotParamFileClass, shotParamFileUiClass = uic.loadUiType(prodManager.uiList['shotParamFile'])

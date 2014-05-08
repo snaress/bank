@@ -1,3 +1,4 @@
+import os
 from PyQt4 import QtGui
 from appli import prodManager
 from functools import partial
@@ -613,3 +614,5 @@ class ShotInfoTab(object):
             if node is not None:
                 node.ud_paramsFromUi(self.mainUi)
                 node.writeNodeToFile()
+                items[0].widget.ud_prevIma()
+                items[0].widget.rf_prevIma()
