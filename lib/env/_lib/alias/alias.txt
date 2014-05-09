@@ -8,7 +8,7 @@ ws = cd F:\rnd\workspace
 
 ma = "C:\Program Files\Autodesk\Maya2012\bin\maya.exe"
 textPad = "C:\Program Files (x86)\TextPad 6\TextPad.exe"
-designer = "C:\Program Files\Autodesk\Maya2012\bin\designer.exe"
+designer = "C:\Python27\Lib\site-packages\PyQt4\designer.exe"
 
 my = "F:\rnd\workspace\bank\lib\env\_lib\alias\alias.txt"
 aliasSync = python F:\rnd\workspace\bank\lib\env\scripts\aliasSync.py
