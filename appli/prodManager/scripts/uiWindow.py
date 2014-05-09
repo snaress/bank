@@ -356,6 +356,7 @@ class ShotNodeWidget(shotNodeClass, shotNodeUiClass):
         return ima
 
     def ud_prevIma(self):
+        """ Update shot preview imageFile """
         node = self.pm.getNodeFromNodePath(self.params['nodeType'], self.params['nodePath'])
         if node is not None:
             if hasattr(node, 'params'):

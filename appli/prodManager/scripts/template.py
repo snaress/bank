@@ -358,6 +358,7 @@ class TreeNode(object):
                 params[item.paramName] = item.widget.value()
             elif item.paramType == 'bool':
                 params[item.paramName] = item.widget.isChecked()
+        params['comment'] = str(mainUi.shotTextEditor.teText.toHtml())
         self.params = params
 
     def ud_paramsFromFile(self):

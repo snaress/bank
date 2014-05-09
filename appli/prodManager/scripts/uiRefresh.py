@@ -1,6 +1,7 @@
 import os
 from functools import partial
 from PyQt4 import QtGui, QtCore
+from lib.qt.scripts import textEditor
 from lib.qt.scripts import procQt as pQt
 from appli.prodManager.scripts import template as pmTemplate
 
@@ -263,6 +264,10 @@ class ShotInfoTab(object):
         self.mainUi.lShotNodePath.setText('')
         self.mainUi.twShotParams.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
         self.mainUi.twShotParams.header().setResizeMode(1, QtGui.QHeaderView.ResizeToContents)
+        self.mainUi.shotTextEditor = textEditor.TextEditorWidget()
+        self.mainUi.shotTextEditor.bLoadFile.setEnabled(False)
+        self.mainUi.shotTextEditor.bSaveFile.setEnabled(False)
+        self.mainUi.glShotComment.addWidget(self.mainUi.shotTextEditor)
         self.rf_shotParamsVis()
 
     def rf_shotParamsVis(self, state=False):
@@ -279,6 +284,9 @@ class ShotInfoTab(object):
                     item.widget.bOpen.setVisible(state)
                 else:
                     item.widget.setReadOnly(not state)
+        self.mainUi.shotTextEditor.qfFileBtns.setEnabled(state)
+        self.mainUi.shotTextEditor.qfTextBtns.setEnabled(state)
+        self.mainUi.shotTextEditor.teText.setReadOnly(not state)
 
     def rf_shotInfoTree(self):
         """ Refresh shotInfo QTreeWidget """
@@ -288,8 +296,23 @@ class ShotInfoTab(object):
 
     def rf_shotParamsTree(self):
         """ Refresh shotParams QTreeWidget """
+        if self.mainUi.twShotInfo.selectedItems():
+            self.mainUi.bEditShotParams.setEnabled(True)
+        else:
+            self.mainUi.bEditShotParams.setEnabled(False)
         self.mainUi.twShotParams.clear()
         self.populate.shotParamsTree()
+
+    def rf_shotComment(self):
+        """ Refresh shot comment """
+        self.mainUi.shotTextEditor.teText.clear()
+        selItems = self.mainUi.twShotInfo.selectedItems()
+        if selItems:
+            nodeObj = self.pm.getNodeFromNodePath(selItems[0].nodeType, selItems[0].nodePath)
+            nodeObj.ud_paramsFromFile()
+            if 'comment' in nodeObj.params:
+                self.mainUi.shotTextEditor.teText.setHtml(nodeObj.params['comment'])
+
 
 
 class PopulateTrees(object):

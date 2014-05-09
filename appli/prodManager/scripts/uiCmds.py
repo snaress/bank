@@ -1,4 +1,3 @@
-import os
 from PyQt4 import QtGui
 from appli import prodManager
 from functools import partial
@@ -346,12 +345,15 @@ class MainTree(object):
             @param treeLabel: (str) : Tree label """
         self.mainUi.selectedTree = treeLabel
         self.mainUi.uiRf_mainTrees.rf_mainTree()
+        self.on_treeItem()
 
     def on_treeItem(self):
         """ Refresh selected tab params """
         selTab = self.mainUi.tabProdManager.tabText(self.mainUi.tabProdManager.currentIndex())
         if selTab == 'Shot Info':
             self.mainUi.uiRf_shotInfoTab.rf_shotInfoTree()
+            self.mainUi.uiRf_shotInfoTab.rf_shotParamsTree()
+            self.mainUi.uiRf_shotInfoTab.rf_shotComment()
 
 
 class ProjectTab(object):
@@ -588,6 +590,7 @@ class ShotInfoTab(object):
     def on_shotInfoItem(self):
         """ Refresh selected item params """
         self.mainUi.uiRf_shotInfoTab.rf_shotParamsTree()
+        self.mainUi.uiRf_shotInfoTab.rf_shotComment()
 
     def on_editShotParams(self):
         """ Command launch when bEditShotParams is clicked """
@@ -598,13 +601,18 @@ class ShotInfoTab(object):
             self.mainUi.bEditShotParams.setText("Edit")
             self.ud_shotParams()
         self.mainUi.uiRf_shotInfoTab.rf_shotParamsVis(state=checkState)
+        self.mainUi.twProject.setEnabled(not checkState)
+        self.mainUi.twShotInfo.setEnabled(not checkState)
 
     def on_cancelShotParams(self):
         """ Command launch when bCancelShotParams is clicked """
         self.mainUi.bEditShotParams.setText("Edit")
         self.mainUi.bEditShotParams.setChecked(False)
-        self.mainUi.uiRf_shotInfoTab.rf_shotParamsTree()
         self.mainUi.uiRf_shotInfoTab.rf_shotParamsVis()
+        self.mainUi.uiRf_shotInfoTab.rf_shotParamsTree()
+        self.mainUi.uiRf_shotInfoTab.rf_shotComment()
+        self.mainUi.twProject.setEnabled(True)
+        self.mainUi.twShotInfo.setEnabled(True)
 
     def ud_shotParams(self):
         """ Update ProdManager instance """

@@ -34,6 +34,7 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         """ Setup main window """
         self.setupUi(self)
         self._setupMenu()
+        self._setupMainWnd()
         self._setupProject()
         self._setupShotInfo()
         self.windowInit()
@@ -44,6 +45,12 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.miLoadProject.triggered.connect(self.uiCmds_menu.loadProject)
         self.miProdManagerParams.triggered.connect(self.uiCmds_menu.printProdManagerParams)
         self.miProjectParams.triggered.connect(self.uiCmds_menu.printProjectParams)
+
+    def _setupMainWnd(self):
+        """ Setup main window """
+        self.twProject.clicked.connect(self.uiCmds_mainTree.on_treeItem)
+        #To remove for speed optimisation
+        self.tabProdManager.currentChanged.connect(self.uiCmds_mainTree.on_treeItem)
 
     def _setupProject(self):
         """ Setup project tab """
@@ -82,7 +89,6 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
 
     def _setupShotInfo(self):
         """ Setup shotInfo tab """
-        self.twProject.clicked.connect(self.uiCmds_mainTree.on_treeItem)
         self.twShotInfo.clicked.connect(self.uiCmds_shotInfoTab.on_shotInfoItem)
         self.bEditShotParams.clicked.connect(self.uiCmds_shotInfoTab.on_editShotParams)
         self.bCancelShotParams.clicked.connect(self.uiCmds_shotInfoTab.on_cancelShotParams)
