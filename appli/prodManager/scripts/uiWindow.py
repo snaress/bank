@@ -381,7 +381,7 @@ class ShotNodeWidget(shotNodeClass, shotNodeUiClass):
         maxWidth, maxHeight = self.defaultTemplate.previewMaxSize()
         img = self.prevIma.toImage().scaled(maxWidth, maxHeight, QtCore.Qt.KeepAspectRatio)
         try:
-            img.save(preview, 'png')
+            img.save(preview, 'png', 100)
             print "Saving preview image: %s" % preview
         except:
             print "ERROR: Can't save preview image: %s" % preview
