@@ -314,6 +314,18 @@ class ShotInfoTab(object):
                 self.mainUi.shotTextEditor.teText.setHtml(nodeObj.params['comment'])
 
 
+class LinetestTab(object):
+    """ Class used by the ProdManagerUi for linetestTab updates and refresh
+        @param mainUi: (object) : ProdManager QMainWindow """
+
+    def __init__(self, mainUi):
+        self.mainUi = mainUi
+        self.pm = self.mainUi.pm
+        self.populate = PopulateTrees(self.mainUi)
+
+    def initShotInfoTab(self):
+        """ Initialize shotInfo tab """
+
 
 class PopulateTrees(object):
     """ Populate prodManager trees QTreeWidget

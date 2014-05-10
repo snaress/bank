@@ -362,12 +362,12 @@ class ShotNodeWidget(shotNodeClass, shotNodeUiClass):
             if hasattr(node, 'params'):
                 if 'prevIma' in node.params:
                     if not node.params['prevIma'] in ['', ' ']:
+                        preview = os.path.join(node.dataPath, 'prevIma.png')
                         maxWidth, maxHeight = self.defaultTemplate.previewMaxSize()
                         self.tmpIma = QtGui.QPixmap(node.params['prevIma'])
                         self.tmpIma.scaled(maxWidth, maxHeight, QtCore.Qt.IgnoreAspectRatio)
                         img = self.tmpIma.toImage().scaled(maxWidth, maxHeight,
                                                            QtCore.Qt.KeepAspectRatio)
-                        preview = os.path.join(node.dataPath, 'prevIma.png')
                         try:
                             img.save(preview, 'png')
                             print "Saving preview image: %s" % preview
