@@ -594,15 +594,34 @@ class ShotInfoTab(object):
 
     def on_editShotParams(self):
         """ Command launch when bEditShotParams is clicked """
-        checkState = self.mainUi.bEditShotParams.isChecked()
-        if checkState:
-            self.mainUi.bEditShotParams.setText("Save")
+        if self.checkComment():
+            checkState = self.mainUi.bEditShotParams.isChecked()
+            if checkState:
+                self.mainUi.bEditShotParams.setText("Save")
+            else:
+                self.mainUi.bEditShotParams.setText("Edit")
+                self.ud_shotParams()
+            self.mainUi.uiRf_shotInfoTab.rf_shotParamsVis(state=checkState)
+            self.mainUi.twProject.setEnabled(not checkState)
+            self.mainUi.twShotInfo.setEnabled(not checkState)
         else:
-            self.mainUi.bEditShotParams.setText("Edit")
-            self.ud_shotParams()
-        self.mainUi.uiRf_shotInfoTab.rf_shotParamsVis(state=checkState)
-        self.mainUi.twProject.setEnabled(not checkState)
-        self.mainUi.twShotInfo.setEnabled(not checkState)
+            self.mainUi.bEditShotParams.setChecked(True)
+
+    def checkComment(self):
+        """ Check shot comment validity
+            @return: (bool) : True if valid, False if not """
+        try:
+            str(self.mainUi.shotTextEditor.teText.toHtml())
+            return True
+        except:
+            warn = "!!! ERROR: Comment not valid !!!\nDon't use special caracters."
+            self.warnDial0 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept0])
+            self.warnDial0.show()
+            return False
+
+    def on_dialAccept0(self):
+        """ Command launch when Qbutton 'Ok' of dialog is clicked """
+        self.warnDial0.close()
 
     def on_cancelShotParams(self):
         """ Command launch when bCancelShotParams is clicked """
