@@ -1,3 +1,4 @@
+import os
 from PyQt4 import QtGui
 from appli import prodManager
 from functools import partial
@@ -641,5 +642,14 @@ class ShotInfoTab(object):
             if node is not None:
                 node.ud_paramsFromUi(self.mainUi)
                 node.writeNodeToFile()
-                items[0].widget.ud_prevIma()
+                if 'prevIma' in node.params and not node.params['prevIma'] in ['', ' ']:
+                    src = node.params['prevIma']
+                    dst = os.path.join(node.dataPath, 'prevIma.png')
+                    if not os.path.exists(dst):
+                        items[0].widget.ud_prevIma()
+                    else:
+                        if os.path.getmtime(src) > os.path.getmtime(dst):
+                            items[0].widget.ud_prevIma()
+                        else:
+                            print "%s preview image is up to date" % items[0].nodeName
                 items[0].widget.rf_prevIma()

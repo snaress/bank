@@ -351,8 +351,13 @@ class ShotNodeWidget(shotNodeClass, shotNodeUiClass):
         ima  = prodManager.imaList['prodManager.png']
         if node is not None:
             preview = os.path.join(node.dataPath, 'prevIma.png')
-            if os.path.exists(preview):
-                ima = preview
+            if not 'prevIma' in node.params:
+                if os.path.exists(preview):
+                    ima = preview
+            else:
+                if not node.params['prevIma'] in ['', ' ']:
+                    if os.path.exists(preview):
+                        ima = preview
         return ima
 
     def ud_prevIma(self):
