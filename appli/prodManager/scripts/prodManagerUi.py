@@ -22,10 +22,12 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.uiRf_mainTrees = pmRefresh.MainTree(self)
         self.uiRf_projectTab = pmRefresh.ProjectTab(self)
         self.uiRf_shotInfoTab = pmRefresh.ShotInfoTab(self)
+        self.uiRf_linetestTab = pmRefresh.LinetestTab(self)
         self.uiCmds_menu = pmUiCmds.MenuCmds(self)
         self.uiCmds_mainTree = pmUiCmds.MainTree(self)
         self.uiCmds_projectTab = pmUiCmds.ProjectTab(self)
         self.uiCmds_shotInfoTab = pmUiCmds.ShotInfoTab(self)
+        self.uiCmds_linetestTab = pmUiCmds.LinetestTab(self)
         self.selectedTree = None
         super(ProdManagerUi, self).__init__()
         self._setupUi()
@@ -37,6 +39,7 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self._setupMainWnd()
         self._setupProject()
         self._setupShotInfo()
+        self._setupLinetest()
         self.windowInit()
 
     def _setupMenu(self):
@@ -93,6 +96,10 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.bEditShotParams.clicked.connect(self.uiCmds_shotInfoTab.on_editShotParams)
         self.bCancelShotParams.clicked.connect(self.uiCmds_shotInfoTab.on_cancelShotParams)
 
+    def _setupLinetest(self):
+        """ Setup linetest tab """
+        self.bLtNew.clicked.connect(self.uiCmds_linetestTab.on_newLt)
+
     def windowInit(self):
         """ Main ui inititialize """
         self.setGeometry(QtCore.QRect(100, 50, 1200, 800))
@@ -107,6 +114,7 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.uiRf_projectTab.rf_projectTab()
         self.uiRf_mainTrees.rf_mainTreeSwitch()
         self.uiRf_mainTrees.rf_mainTree()
+        self.uiRf_linetestTab.initLinetestTab()
 
     def loadProject(self, projectName, projectAlias):
         """ Load given project
@@ -207,7 +215,6 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
             for item in allItems:
                 if item.nodePath == path:
                     return item
-
 
 
 if __name__ == '__main__':

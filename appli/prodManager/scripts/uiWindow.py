@@ -396,6 +396,7 @@ shotParamFileClass, shotParamFileUiClass = uic.loadUiType(prodManager.uiList['sh
 class ShotParamFileWidget(shotParamFileClass, shotParamFileUiClass):
     """ ShotParamFile tree widget
         @param mainUi: (object) : ProdManager QMainWindow
+        @param paramType: (str) : Param type ('file', 'dir', 'string', 'int', 'float', 'bool')
         @param value: (str) : Param value """
 
     def __init__(self, mainUi, paramType, value):
@@ -458,3 +459,18 @@ class ShotParamFileWidget(shotParamFileClass, shotParamFileUiClass):
         selPath = self.fdDir.selectedFiles()
         if selPath:
             self.paramVal.setText(str(selPath[0]))
+
+
+linetestClass, linetestUiClass = uic.loadUiType(prodManager.uiList['ltNode'])
+class LineTestWidget(linetestClass, linetestUiClass):
+    """ Linetest tree widget
+        @param mainUi: (object) : ProdManager QMainWindow """
+
+    def __init__(self, mainUi):
+        self.mainUi = mainUi
+        super(LineTestWidget, self).__init__()
+        self._setupUi()
+
+    def _setupUi(self):
+        """ Setup Widget """
+        self.setupUi(self)

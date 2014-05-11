@@ -44,17 +44,31 @@ class MainTree(object):
 
     def rf_mainTreeSwitch(self):
         """ Refresh main trees switch """
+        widgets = self.cleanTreeSwitch()
         for n, tree in enumerate(self.pm.project.projectTrees):
-            newWidget = QtGui.QRadioButton()
-            newWidget.setText(tree)
-            newWidget.treeName = tree
-            newWidget.treeLabel = '%sTree' % tree
-            if n == 0:
-                newWidget.setChecked(True)
-                self.mainUi.selectedTree = newWidget.treeLabel
-            newWidget.connect(newWidget, QtCore.SIGNAL("clicked()"),
-                              partial(self.mainUi.uiCmds_mainTree.on_switchTree, newWidget.treeLabel))
-            self.mainUi.hlMainTrees.addWidget(newWidget)
+            if not tree in widgets:
+                newWidget = QtGui.QRadioButton()
+                newWidget.setText(tree)
+                newWidget.treeName = tree
+                newWidget.treeLabel = '%sTree' % tree
+                if n == 0:
+                    newWidget.setChecked(True)
+                    self.mainUi.selectedTree = newWidget.treeLabel
+                newWidget.connect(newWidget, QtCore.SIGNAL("clicked()"),
+                                  partial(self.mainUi.uiCmds_mainTree.on_switchTree, newWidget.treeLabel))
+                self.mainUi.hlMainTrees.addWidget(newWidget)
+
+    def cleanTreeSwitch(self):
+        """ Clean main tree switch
+            @return: (list) : Tree switch contents """
+        widgets = []
+        for i in range(self.mainUi.hlMainTrees.count()):
+            widget = self.mainUi.hlMainTrees.itemAt(i).widget()
+            if not widget.treeName in self.pm.project.projectTrees:
+                widget.hide()
+            else:
+                widgets.append(widget.treeName)
+        return widgets
 
     def rf_mainTree(self):
         """ Refresh main trees QTreeWidget """
@@ -277,7 +291,7 @@ class ShotInfoTab(object):
         allItems = pQt.getTopItems(self.mainUi.twShotParams)
         for item in allItems:
             if item.paramType == 'bool':
-                item.widget.setEnabled(not state)
+                item.widget.setEnabled(state)
             else:
                 if item.paramType in ['dir', 'file']:
                     item.widget.paramVal.setReadOnly(not state)
@@ -323,8 +337,16 @@ class LinetestTab(object):
         self.pm = self.mainUi.pm
         self.populate = PopulateTrees(self.mainUi)
 
-    def initShotInfoTab(self):
+    def initLinetestTab(self):
         """ Initialize shotInfo tab """
+        self.rf_stepSwitch()
+
+    def rf_stepSwitch(self):
+        """ Populate step switch widget """
+        self.mainUi.cbLtStep.clear()
+        if self.mainUi.selectedTree is not None:
+            treeObj = getattr(self.pm, self.mainUi.selectedTree)
+            self.mainUi.cbLtStep.addItems(treeObj.treeSteps)
 
 
 class PopulateTrees(object):
@@ -609,12 +631,19 @@ class PopulateTrees(object):
         newItem.widget = newWidget
         return newItem, newWidget
 
+    def newLinetestItem(self):
+        """ Create new linetest QTreeWidgetItem
+            @return: (object), (object) : New QTreeWidget Item, New linetest widget"""
+        newItem = QtGui.QTreeWidgetItem()
+        newWidget = self.newLinetest()
+        return newItem, newWidget
+
     #========================================== WIDGETS ===========================================#
 
     def _getShotParamWidget(self, paramName, paramType, nodeParams):
         """ Get shot param widget
             @param paramName: (str) : Param name
-            @param paramType: (str) : Param type ('file', 'string', 'int', 'float', 'bool')
+            @param paramType: (str) : Param type ('file', 'dir', 'string', 'int', 'float', 'bool')
             @param nodeParams: (dict) : Node params dict
             @return: (object) : New QWidget """
         if paramType in ['dir', 'file']:
@@ -717,8 +746,14 @@ class PopulateTrees(object):
     def newShotParamBool(value):
         """ Create new shot param bool widget
             @param value: (bool) : Param value
-            @return: (object) : new QCheckBox """
+            @return: (object) : New QCheckBox """
         newWidget = QtGui.QCheckBox()
-        newWidget.setValue(value)
+        newWidget.setChecked(value)
         newWidget.setEnabled(False)
+        return newWidget
+
+    def newLinetest(self):
+        """ Create new linetest widget
+            @return: (object) : New linetest widget """
+        newWidget = self.wnd.LineTestWidget(self.mainUi)
         return newWidget

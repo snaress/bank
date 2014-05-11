@@ -346,6 +346,9 @@ class MainTree(object):
             @param treeLabel: (str) : Tree label """
         self.mainUi.selectedTree = treeLabel
         self.mainUi.uiRf_mainTrees.rf_mainTree()
+        selTab = self.mainUi.tabProdManager.tabText(self.mainUi.tabProdManager.currentIndex())
+        if selTab == 'Linetest':
+            self.mainUi.uiRf_linetestTab.rf_stepSwitch()
         self.on_treeItem()
 
     def on_treeItem(self):
@@ -653,3 +656,19 @@ class ShotInfoTab(object):
                         else:
                             print "%s preview image is up to date" % items[0].nodeName
                 items[0].widget.rf_prevIma()
+
+
+class LinetestTab(object):
+    """ Class used by the ProdManagerUi for Linetest tab actions
+        @param mainUi: (object) : ProdManager QMainWindow """
+
+    def __init__(self, mainUi):
+        self.mainUi = mainUi
+        self.pm = self.mainUi.pm
+        self.populate = pmRefresh.PopulateTrees(self.mainUi)
+
+    def on_newLt(self):
+        """ Add new linetest """
+        newItem, newWidget = self.populate.newLinetestItem()
+        self.mainUi.twLinetest.addTopLevelItem(newItem)
+        self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)

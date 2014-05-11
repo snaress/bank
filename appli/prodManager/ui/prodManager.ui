@@ -1490,7 +1490,7 @@
               <property name="orientation">
                <enum>Qt::Vertical</enum>
               </property>
-              <widget class="QWidget" name="">
+              <widget class="QWidget" name="layoutWidget">
                <layout class="QVBoxLayout" name="verticalLayout_4">
                 <property name="spacing">
                  <number>2</number>
@@ -1662,10 +1662,16 @@
         </property>
         <item row="0" column="0">
          <widget class="QSplitter" name="splitter">
+          <property name="baseSize">
+           <size>
+            <width>0</width>
+            <height>200</height>
+           </size>
+          </property>
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget">
            <layout class="QVBoxLayout" name="vlLtZone">
             <property name="spacing">
              <number>2</number>
@@ -1740,6 +1746,9 @@
             </item>
             <item>
              <widget class="QTreeWidget" name="twLinetest">
+              <property name="indentation">
+               <number>0</number>
+              </property>
               <attribute name="headerVisible">
                <bool>false</bool>
               </attribute>
@@ -1762,7 +1771,7 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget">
            <layout class="QHBoxLayout" name="hlLtShots">
             <property name="spacing">
              <number>2</number>
