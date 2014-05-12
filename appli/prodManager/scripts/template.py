@@ -1,4 +1,5 @@
 import os
+import time
 from lib.qt.scripts import procQt as pQt
 from lib.system.scripts import procFile as pFile
 from appli.prodManager.scripts import core as pmCore
@@ -370,6 +371,23 @@ class TreeNode(object):
                 _params = {}
                 execfile(_dataFile, _params)
                 self.params = _params['nodeParams']
+
+    def newLt(self, step):
+        """ Add linetest in bdd
+            @param step: (str) : Selected step
+            @return: (str) : New linetest file or None """
+        _date = time.strftime("%Y_%m_%d", time.localtime())
+        _time = time.strftime("%H_%M_%S", time.localtime())
+        stepPath = os.path.join(self.dataPath, 'lt', step)
+        fileName = "lt-%s-%s.py" % (_date, _time)
+        ltFile = os.path.join(stepPath, fileName)
+        if os.path.exists(ltFile):
+            print "!!! ERROR: Can not create ltFile: %s !!!" % ltFile
+        else:
+            if pmCore.createDataPath(ltFile):
+                if pmCore.createLtFile(ltFile):
+                    return ltFile
+        return None
 
     def writeNodeToFile(self):
         """ Write node object to file """

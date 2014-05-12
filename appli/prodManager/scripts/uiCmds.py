@@ -669,6 +669,17 @@ class LinetestTab(object):
 
     def on_newLt(self):
         """ Add new linetest """
-        newItem, newWidget = self.populate.newLinetestItem()
-        self.mainUi.twLinetest.addTopLevelItem(newItem)
-        self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)
+        step = str(self.mainUi.cbLtStep.currentText())
+        selShot = self.mainUi.twProject.selectedItems()
+        if selShot:
+            if not 'Ctnr' in selShot[0].nodeType:
+                node = self.pm.getNodeFromNodePath(selShot[0].nodeType, selShot[0].nodePath)
+                if step is not None and not step in ['', ' ']:
+                    ltFile = node.newLt(step)
+                    if ltFile is not None:
+                        params = {}
+                        execfile(ltFile, params)
+                        newItem, newWidget = self.populate.newLinetestItem(**params)
+                        self.mainUi.twLinetest.insertTopLevelItems(0, [newItem])
+                        self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)
+

@@ -341,6 +341,11 @@ class LinetestTab(object):
         """ Initialize shotInfo tab """
         self.rf_stepSwitch()
 
+    def rf_lineTestTabVis(self, state=False):
+        """ Refresh linetest tab ui visibility
+            @param state: (bool) : Visibility state """
+        #TODO:
+
     def rf_stepSwitch(self):
         """ Populate step switch widget """
         self.mainUi.cbLtStep.clear()
@@ -631,11 +636,21 @@ class PopulateTrees(object):
         newItem.widget = newWidget
         return newItem, newWidget
 
-    def newLinetestItem(self):
+    def newLinetestItem(self, **kwargs):
         """ Create new linetest QTreeWidgetItem
+            @param kwargs: (dict) : New linetest params
+                @keyword ltTitle: (str) : Linetest title
+                @keyword ltUser: (str) : Linetest author
+                @keyword ltDate: (str) : Linetest creation date
+                @keyword ltTime : (str) : Linetest creatio time
+                @keyword ltComments: (list) : Linetest comments (html)
             @return: (object), (object) : New QTreeWidget Item, New linetest widget"""
         newItem = QtGui.QTreeWidgetItem()
         newWidget = self.newLinetest()
+        newItem.widget = newWidget
+        for k, v in kwargs.items():
+            if k.startswith('lt'):
+                setattr(newItem, k, v)
         return newItem, newWidget
 
     #========================================== WIDGETS ===========================================#
