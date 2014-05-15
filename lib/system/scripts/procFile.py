@@ -15,14 +15,27 @@ def readFile(filePath):
     else:
         print "!!! Error: Can't read, file doesn't exists !!!"
 
-def readPyFile(filePath):
+def readPyFile(filePath, filterIn=None):
     """ Get text from pyFile
         @param filePath: (str) : Python file absolut path
+        @param filterIn: (list) : Keep only key starting with filterIn
         @return: (dict) : File dict """
     if os.path.exists(filePath):
         params = {}
         execfile(filePath, params)
-        return params
+        if filterIn is None:
+            return params
+        else:
+            filterParams = {}
+            for k, v in params.iteritems():
+                check = False
+                for ft in filterIn:
+                    if k.startswith(ft):
+                        check = True
+                        break
+                if check:
+                    filterParams[k] = v
+            return filterParams
     else:
         print "!!! Error: Can't read, file doesn't exists !!!"
 
@@ -31,6 +44,7 @@ def writeFile(filePath, textToWrite, add=False):
         @param filePath: (str) : File absolut path
         @param textToWrite: (str or list) : Text to edit in file
         @param add: (bool) : Add text to existing one in file """
+    oldTxt = ""
     if add:
         oldTxt = ''.join(readFile(filePath))
         if not oldTxt.endswith('\n'):
