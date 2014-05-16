@@ -52,7 +52,6 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
     def _setupMainWnd(self):
         """ Setup main window """
         self.twProject.clicked.connect(self.uiCmds_mainTree.on_treeItem)
-        #To remove for speed optimisation
         self.tabProdManager.currentChanged.connect(self.uiCmds_mainTree.on_treeItem)
 
     def _setupProject(self):
@@ -104,17 +103,18 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         """ Main ui inititialize """
         self.setGeometry(QtCore.QRect(100, 50, 1200, 800))
         self.setWindowTitle("ProdManager: Untitled")
+        self.setStyleSheet("background: lightgrey")
         self.tabProdManager.setCurrentIndex(0)
         self.uiRf_previewImage.rf_previewIma(prodManager.imaList['prodManager.png'])
         self.uiRf_projectTab.initProjectTab()
         self.uiRf_shotInfoTab.initShotInfoTab()
+        self.uiRf_linetestTab.initLinetestTab()
 
     def windowRefresh(self):
         """ Main ui updates """
         self.uiRf_projectTab.rf_projectTab()
         self.uiRf_mainTrees.rf_mainTreeSwitch()
         self.uiRf_mainTrees.rf_mainTree()
-        self.uiRf_linetestTab.initLinetestTab()
 
     def loadProject(self, projectName, projectAlias):
         """ Load given project

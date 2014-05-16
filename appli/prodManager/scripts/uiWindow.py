@@ -464,13 +464,30 @@ class ShotParamFileWidget(shotParamFileClass, shotParamFileUiClass):
 linetestClass, linetestUiClass = uic.loadUiType(prodManager.uiList['ltNode'])
 class LineTestWidget(linetestClass, linetestUiClass):
     """ Linetest tree widget
-        @param mainUi: (object) : ProdManager QMainWindow """
+        @param mainUi: (object) : ProdManager QMainWindow
+        @param treeItem: (object) : Linetest QTreeWidgetItem
+        @param kwargs: (dict) : New linetest params
+            @keyword ltTitle: (str) : Linetest title
+            @keyword ltUser: (str) : Linetest author
+            @keyword ltDate: (str) : Linetest creation date
+            @keyword ltTime : (str) : Linetest creatio time
+            @keyword ltComments: (list) : Linetest comments (html) """
 
-    def __init__(self, mainUi):
+    def __init__(self, mainUi, treeItem, **kwargs):
         self.mainUi = mainUi
+        self.ltItem = treeItem
+        self.params = kwargs
         super(LineTestWidget, self).__init__()
         self._setupUi()
 
     def _setupUi(self):
         """ Setup Widget """
         self.setupUi(self)
+        self.leLtTitle.setText(self.params['ltTitle'])
+        self.lLtUser.setText(self.params['ltUser'])
+        self.dtLtDate.setDate(QtCore.QDate(int(self.params['ltDate'].split('_')[0]),
+                                           int(self.params['ltDate'].split('_')[1]),
+                                           int(self.params['ltDate'].split('_')[2])))
+        self.dtLtTime.setTime(QtCore.QTime(int(self.params['ltTime'].split('_')[0]),
+                                           int(self.params['ltTime'].split('_')[1]),
+                                           int(self.params['ltTime'].split('_')[2])))

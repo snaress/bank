@@ -3,6 +3,7 @@ from functools import partial
 from PyQt4 import QtGui, QtCore
 from lib.qt.scripts import textEditor
 from lib.qt.scripts import procQt as pQt
+from lib.system.scripts import procFile as pFile
 from appli.prodManager.scripts import template as pmTemplate
 
 
@@ -339,12 +340,14 @@ class LinetestTab(object):
 
     def initLinetestTab(self):
         """ Initialize shotInfo tab """
-        self.rf_stepSwitch()
+        self.rf_lineTestTabVis()
 
     def rf_lineTestTabVis(self, state=False):
         """ Refresh linetest tab ui visibility
             @param state: (bool) : Visibility state """
-        #TODO:
+        self.mainUi.cbLtStep.setEnabled(state)
+        self.mainUi.bLtNew.setEnabled(state)
+        self.mainUi.bLtDel.setEnabled(state)
 
     def rf_stepSwitch(self):
         """ Populate step switch widget """
@@ -352,6 +355,12 @@ class LinetestTab(object):
         if self.mainUi.selectedTree is not None:
             treeObj = getattr(self.pm, self.mainUi.selectedTree)
             self.mainUi.cbLtStep.addItems(treeObj.treeSteps)
+
+    def rf_ltTree(self):
+        """ Refresh linetest QTreeWidget """
+        self.mainUi.twLinetest.clear()
+        self.populate.linetestTree()
+
 
 
 class PopulateTrees(object):
@@ -463,6 +472,21 @@ class PopulateTrees(object):
                     print "!!! Error: Can't create new shot param widget !!!"
                 else:
                     self.mainUi.twShotParams.setItemWidget(newItem, 1, newWidget)
+
+    def linetestTree(self):
+        """ Populate linetest tree QTreeWidget """
+        selItems = self.mainUi.twProject.selectedItems()
+        if selItems:
+            selStep = str(self.mainUi.cbLtStep.currentText())
+            ltPath = os.path.join(selItems[0].dataPath, 'lt', selStep)
+            ltList = os.listdir(ltPath) or []
+            for lt in sorted(ltList, reverse=True):
+                if lt.startswith('lt-') and lt.endswith('.py'):
+                    ltAbsPath = os.path.join(ltPath, lt)
+                    ltParams = pFile.readPyFile(ltAbsPath, filterIn=['lt'])
+                    newItem, newWidget = self.newLinetestItem(ltPath, lt, **ltParams)
+                    self.mainUi.twLinetest.addTopLevelItem(newItem)
+                    self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)
 
     #=========================================== ITEMS ============================================#
 
@@ -636,8 +660,10 @@ class PopulateTrees(object):
         newItem.widget = newWidget
         return newItem, newWidget
 
-    def newLinetestItem(self, **kwargs):
+    def newLinetestItem(self, ltPath, ltFile, **kwargs):
         """ Create new linetest QTreeWidgetItem
+            @param ltPath: (str) : New linetest bdd path
+            @param ltFile: (str) : New linetest bdd fileName
             @param kwargs: (dict) : New linetest params
                 @keyword ltTitle: (str) : Linetest title
                 @keyword ltUser: (str) : Linetest author
@@ -646,11 +672,11 @@ class PopulateTrees(object):
                 @keyword ltComments: (list) : Linetest comments (html)
             @return: (object), (object) : New QTreeWidget Item, New linetest widget"""
         newItem = QtGui.QTreeWidgetItem()
-        newWidget = self.newLinetest()
+        newWidget = self.wnd.LineTestWidget(self.mainUi, newItem, **kwargs)
         newItem.widget = newWidget
-        for k, v in kwargs.items():
-            if k.startswith('lt'):
-                setattr(newItem, k, v)
+        newItem._ltPath = ltPath
+        newItem._ltFile = ltFile
+        newItem._ltAbsPath = os.path.join(ltPath, ltFile)
         return newItem, newWidget
 
     #========================================== WIDGETS ===========================================#
@@ -765,10 +791,4 @@ class PopulateTrees(object):
         newWidget = QtGui.QCheckBox()
         newWidget.setChecked(value)
         newWidget.setEnabled(False)
-        return newWidget
-
-    def newLinetest(self):
-        """ Create new linetest widget
-            @return: (object) : New linetest widget """
-        newWidget = self.wnd.LineTestWidget(self.mainUi)
         return newWidget

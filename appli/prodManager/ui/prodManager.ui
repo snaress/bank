@@ -1747,7 +1747,7 @@
             <item>
              <widget class="QTreeWidget" name="twLinetest">
               <property name="indentation">
-               <number>0</number>
+               <number>20</number>
               </property>
               <attribute name="headerVisible">
                <bool>false</bool>

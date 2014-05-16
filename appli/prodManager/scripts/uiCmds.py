@@ -4,6 +4,7 @@ from appli import prodManager
 from functools import partial
 from lib.qt.scripts import dialog
 from lib.qt.scripts import procQt as pQt
+from lib.system.scripts import procFile as pFile
 from appli.prodManager.scripts import uiWindow as pmWindow
 from appli.prodManager.scripts import uiRefresh as pmRefresh
 from appli.prodManager.scripts import template as pmTemplate
@@ -354,10 +355,23 @@ class MainTree(object):
     def on_treeItem(self):
         """ Refresh selected tab params """
         selTab = self.mainUi.tabProdManager.tabText(self.mainUi.tabProdManager.currentIndex())
+        selItems = self.mainUi.twProject.selectedItems()
         if selTab == 'Shot Info':
             self.mainUi.uiRf_shotInfoTab.rf_shotInfoTree()
             self.mainUi.uiRf_shotInfoTab.rf_shotParamsTree()
             self.mainUi.uiRf_shotInfoTab.rf_shotComment()
+        elif selTab == 'Linetest':
+            self.mainUi.uiRf_linetestTab.rf_stepSwitch()
+            if selItems:
+                if not 'Ctnr' in selItems[0].nodeType:
+                    self.mainUi.uiRf_linetestTab.rf_lineTestTabVis(state=True)
+                    self.mainUi.uiRf_linetestTab.rf_ltTree()
+                else:
+                    self.mainUi.uiRf_linetestTab.rf_lineTestTabVis(state=False)
+                    self.mainUi.twLinetest.clear()
+            else:
+                self.mainUi.uiRf_linetestTab.rf_lineTestTabVis(state=False)
+                self.mainUi.twLinetest.clear()
 
 
 class ProjectTab(object):
@@ -677,9 +691,11 @@ class LinetestTab(object):
                 if step is not None and not step in ['', ' ']:
                     ltFile = node.newLt(step)
                     if ltFile is not None:
-                        params = {}
-                        execfile(ltFile, params)
-                        newItem, newWidget = self.populate.newLinetestItem(**params)
+                        params = pFile.readPyFile(ltFile, filterIn=['lt'])
+                        newLtPath = os.sep.join(ltFile.split(os.sep)[0:-1])
+                        newLtFile = ltFile.split(os.sep)[-1]
+                        newItem, newWidget = self.populate.newLinetestItem(newLtPath, newLtFile,
+                                                                           **params)
                         self.mainUi.twLinetest.insertTopLevelItems(0, [newItem])
                         self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)
 
