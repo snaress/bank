@@ -66,13 +66,13 @@
    <item row="1" column="2">
     <widget class="QSlider" name="hsCamZoom">
      <property name="maximum">
-      <number>500</number>
+      <number>100</number>
      </property>
      <property name="singleStep">
-      <number>10</number>
+      <number>1</number>
      </property>
      <property name="pageStep">
-      <number>50</number>
+      <number>10</number>
      </property>
      <property name="value">
       <number>100</number>
