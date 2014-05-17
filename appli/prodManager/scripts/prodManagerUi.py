@@ -52,7 +52,7 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
     def _setupMainWnd(self):
         """ Setup main window """
         self.twProject.clicked.connect(self.uiCmds_mainTree.on_treeItem)
-        self.tabProdManager.currentChanged.connect(self.uiCmds_mainTree.on_treeItem)
+        self.tabProdManager.currentChanged.connect(self.uiCmds_mainTree.on_tabItem)
 
     def _setupProject(self):
         """ Setup project tab """
@@ -97,13 +97,14 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
 
     def _setupLinetest(self):
         """ Setup linetest tab """
+        self.cbLtStep.currentIndexChanged.connect(self.uiCmds_linetestTab.on_stepSwitch)
         self.bLtNew.clicked.connect(self.uiCmds_linetestTab.on_newLt)
+        self.bLtDel.clicked.connect(self.uiCmds_linetestTab.on_delLt)
 
     def windowInit(self):
         """ Main ui inititialize """
         self.setGeometry(QtCore.QRect(100, 50, 1200, 800))
         self.setWindowTitle("ProdManager: Untitled")
-        self.setStyleSheet("background: lightgrey")
         self.tabProdManager.setCurrentIndex(0)
         self.uiRf_previewImage.rf_previewIma(prodManager.imaList['prodManager.png'])
         self.uiRf_projectTab.initProjectTab()

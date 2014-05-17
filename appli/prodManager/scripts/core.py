@@ -121,10 +121,10 @@ def createLtFile(ltFile):
     """ Create new linetest in bdd
         @param ltFile: (str) : New linetest absolut path
         @return: (bool) : True if success, False if fail """
-    _date = ltFile.split(os.sep)[-1].split('.')[0].split('-')[1]
-    _time = ltFile.split(os.sep)[-1].split('.')[0].split('-')[2]
     data = ["ltTitle = 'NewLineTest'", "ltUser = %r" % prodManager.user,
-            "ltDate = %r" % _date, "ltTime = %r" % _time, "ltComments = []"]
+            "ltDate = %r" % ltFile.split(os.sep)[-1].split('.')[0].split('-')[1],
+            "ltTime = %r" % ltFile.split(os.sep)[-1].split('.')[0].split('-')[2],
+            "ltIma = ''", "ltSeq = ''", "ltMov = ''", "ltComments = []"]
     try:
         pFile.writeFile(ltFile, '\n'.join(data))
         print "Create linetest file in dataBase:\n%s" % ltFile

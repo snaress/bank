@@ -4,6 +4,7 @@ from appli import prodManager
 from lib.qt.scripts import dialog
 from PyQt4 import QtGui, QtCore, uic
 from lib.qt.scripts import procQt as pQt
+from lib.system.scripts import procFile as pFile
 from appli.prodManager.scripts import uiRefresh as pmRefresh
 from appli.prodManager.scripts import template as pmTemplate
 
@@ -471,12 +472,16 @@ class LineTestWidget(linetestClass, linetestUiClass):
             @keyword ltUser: (str) : Linetest author
             @keyword ltDate: (str) : Linetest creation date
             @keyword ltTime : (str) : Linetest creatio time
+            @keyword ltIma : (str) : Linetest preview image
+            @keyword ltSeq : (str) : Linetest sequence player
+            @keyword ltMov : (str) : Linetest movie
             @keyword ltComments: (list) : Linetest comments (html) """
 
     def __init__(self, mainUi, treeItem, **kwargs):
         self.mainUi = mainUi
         self.ltItem = treeItem
         self.params = kwargs
+        self.populate = pmRefresh.PopulateTrees(self.mainUi)
         super(LineTestWidget, self).__init__()
         self._setupUi()
 
@@ -484,10 +489,152 @@ class LineTestWidget(linetestClass, linetestUiClass):
         """ Setup Widget """
         self.setupUi(self)
         self.leLtTitle.setText(self.params['ltTitle'])
+        self.leLtTitle.setReadOnly(True)
         self.lLtUser.setText(self.params['ltUser'])
         self.dtLtDate.setDate(QtCore.QDate(int(self.params['ltDate'].split('_')[0]),
                                            int(self.params['ltDate'].split('_')[1]),
                                            int(self.params['ltDate'].split('_')[2])))
+        self.dtLtDate.setReadOnly(True)
         self.dtLtTime.setTime(QtCore.QTime(int(self.params['ltTime'].split('_')[0]),
                                            int(self.params['ltTime'].split('_')[1]),
                                            int(self.params['ltTime'].split('_')[2])))
+        self.dtLtTime.setReadOnly(True)
+        self.bLtEdit.clicked.connect(self.on_edit)
+
+    def on_edit(self):
+        """ Command launch when bLtEdit is clicked """
+        self.ltEditor = LineTestEditor(self.ltItem, self)
+        self.ltEditor.show()
+
+    def writeLtToFile(self):
+        """ Write linetest file in the bdd """
+        ltText = []
+        for k, v in self.params.iteritems():
+            if k.startswith('lt'):
+                if isinstance(v, str):
+                    ltText.extend(["%s = %r" % (k, v)])
+                else:
+                    ltText.extend(["%s = %s" % (k, v)])
+        try:
+            pFile.writeFile(self.ltItem._ltAbsPath, '\n'.join(ltText))
+            print "Writing linetest file: %s" % self.ltItem._ltFile
+        except:
+            print "!!! ERROR : Can't write linetest file: %s" % self.ltItem._ltFile
+
+    def on_AddComment(self):
+        newItem, newWidget = self.populate.newLtCommentItem()
+        self.ltItem.addChild(newItem)
+        self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)
+
+
+linetestEditorClass, linetestEditorUiClass = uic.loadUiType(prodManager.uiList['ltNodeEditor'])
+class LineTestEditor(linetestEditorClass, linetestEditorUiClass):
+    """ Linetest tree widget
+        @param ltItem: (object) : Parent QTreeWidgetItem
+        @param ltWidget: (object) : Parent widget """
+
+    def __init__(self, ltItem, ltWidget):
+        self.ltItem = ltItem
+        self.ltWidget = ltWidget
+        self.mainUi = self.ltWidget.mainUi
+        super(LineTestEditor, self).__init__()
+        self._setupUi()
+
+    def _setupUi(self):
+        """ Setup Widget """
+        self.setupUi(self)
+        self.leTitle.setText(str(self.ltWidget.leLtTitle.text()))
+        self.dtDate.setDate(QtCore.QDate(self._getDate[0], self._getDate[1], self._getDate[2]))
+        self.dtTime.setTime(QtCore.QTime(self._getTime[0], self._getTime[1], self._getTime[2]))
+        self.leImaPath.setText(self.ltWidget.params['ltIma'])
+        self.bImaOpen.clicked.connect(partial(self.on_open, self.leImaPath))
+        self.leSeqPath.setText(self.ltWidget.params['ltSeq'])
+        self.bSeqOpen.clicked.connect(partial(self.on_open, self.leSeqPath))
+        self.leMovPath.setText(self.ltWidget.params['ltMov'])
+        self.bMovOpen.clicked.connect(partial(self.on_open, self.leMovPath))
+        self.bSave.clicked.connect(self.on_save)
+        self.bCancel.clicked.connect(self.close)
+
+    def on_open(self, lineEdit):
+        """ Open fileDialog for given path type
+            @param lineEdit: (object) : Given QLineEdit """
+        if not str(lineEdit.text()) == '':
+            rootDir = str(lineEdit.text())
+        else:
+            rootDir = self._getRootDir
+        self.fdPath = dialog.fileDialog(fdRoot=rootDir, fdCmd=partial(self.fd_accept, lineEdit))
+        self.fdPath.setFileMode(QtGui.QFileDialog.AnyFile)
+        self.fdPath.show()
+
+    def fd_accept(self, lineEdit):
+        """ Command launch when the fileDialog bAccept is clicked
+            @param lineEdit: (object) : Given QLineEdit """
+        selPath = self.fdPath.selectedFiles()
+        if selPath:
+            lineEdit.setText(selPath[0])
+            self.fdPath.close()
+
+    def on_save(self):
+        """ Command launch when widget bSave is clicked """
+        dateTimeChanged = False
+        self.ltWidget.leLtTitle.setText(str(self.leTitle.text()))
+        self.ltWidget.params['ltTitle'] = str(self.leTitle.text())
+        if not self._getDate == self._setDate or not self._getTime == self._setTime:
+            dateTimeChanged = True
+            self.ltWidget.dtLtDate.setDate(QtCore.QDate(self._setDate[0], self._setDate[1],
+                                                        self._setDate[2]))
+            self.ltWidget.params['ltDate'] = '%s_%s_%s' % (self._setDate[0], self._setDate[1],
+                                                           self._setDate[2])
+            self.ltWidget.dtLtTime.setTime(QtCore.QTime(self._setTime[0], self._setTime[1],
+                                                        self._setTime[2]))
+            self.ltWidget.params['ltTime'] = '%s_%s_%s' % (self._setTime[0], self._setTime[1],
+                                                           self._setTime[2])
+        self.ltWidget.params['ltIma'] = str(self.leImaPath.text())
+        self.ltWidget.params['ltSeq'] = str(self.leSeqPath.text())
+        self.ltWidget.params['ltMov'] = str(self.leMovPath.text())
+        self.close()
+        self.ltWidget.writeLtToFile()
+        if dateTimeChanged:
+            self.mainUi.uiRf_linetestTab.rf_ltTree()
+
+    @property
+    def _getDate(self):
+        """ Get linetest widget date
+            @return: (list) : Year, Month, Day """
+        _date = self.ltWidget.dtLtDate.date()
+        return [_date.year(), _date.month(), _date.day()]
+
+    @property
+    def _setDate(self):
+        """ Set linetest widget date
+            @return: (list) : Year, Month, Day """
+        _date = self.dtDate.date()
+        return [_date.year(), _date.month(), _date.day()]
+
+    @property
+    def _getTime(self):
+        """ Get linetest widget time
+            @return: (list) : Hour, Minute, Second """
+        _time =  self.ltWidget.dtLtTime.time()
+        return [_time.hour(), _time.minute(), _time.second()]
+
+    @property
+    def _setTime(self):
+        """ Set linetest widget time
+            @return: (list) : Hour, Minute, Second """
+        _time =  self.dtTime.time()
+        return [_time.hour(), _time.minute(), _time.second()]
+
+    @property
+    def _getRootDir(self):
+        """ get fileDialog rootDir
+            @return: (dtr) : Root directory """
+        dataFile = self.ltItem._ltLink.dataFile
+        params = pFile.readPyFile(dataFile, filterIn='node')
+        if not params['nodeParams']['workDir'] == '':
+            return params['nodeParams']['workDir']
+        else:
+            if hasattr(self.mainUi.pm.project, 'projectWorkDir'):
+                return self.mainUi.pm.project.projectWorkDir
+            else:
+                return prodManager.rootDisk

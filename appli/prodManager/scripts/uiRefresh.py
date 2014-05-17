@@ -479,14 +479,15 @@ class PopulateTrees(object):
         if selItems:
             selStep = str(self.mainUi.cbLtStep.currentText())
             ltPath = os.path.join(selItems[0].dataPath, 'lt', selStep)
-            ltList = os.listdir(ltPath) or []
-            for lt in sorted(ltList, reverse=True):
-                if lt.startswith('lt-') and lt.endswith('.py'):
-                    ltAbsPath = os.path.join(ltPath, lt)
-                    ltParams = pFile.readPyFile(ltAbsPath, filterIn=['lt'])
-                    newItem, newWidget = self.newLinetestItem(ltPath, lt, **ltParams)
-                    self.mainUi.twLinetest.addTopLevelItem(newItem)
-                    self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)
+            if os.path.exists(ltPath):
+                ltList = os.listdir(ltPath) or []
+                for lt in sorted(ltList, reverse=True):
+                    if lt.startswith('lt-') and lt.endswith('.py'):
+                        ltAbsPath = os.path.join(ltPath, lt)
+                        ltParams = pFile.readPyFile(ltAbsPath, filterIn=['lt'])
+                        newItem, newWidget = self.newLinetestItem(selItems[0], ltPath, lt, **ltParams)
+                        self.mainUi.twLinetest.addTopLevelItem(newItem)
+                        self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)
 
     #=========================================== ITEMS ============================================#
 
@@ -660,23 +661,30 @@ class PopulateTrees(object):
         newItem.widget = newWidget
         return newItem, newWidget
 
-    def newLinetestItem(self, ltPath, ltFile, **kwargs):
+    def newLinetestItem(self, selItem, ltPath, ltFile, **kwargs):
         """ Create new linetest QTreeWidgetItem
+            @param selItem: (object) : Selected project QTreeWidgetItem
             @param ltPath: (str) : New linetest bdd path
             @param ltFile: (str) : New linetest bdd fileName
             @param kwargs: (dict) : New linetest params
-                @keyword ltTitle: (str) : Linetest title
-                @keyword ltUser: (str) : Linetest author
-                @keyword ltDate: (str) : Linetest creation date
-                @keyword ltTime : (str) : Linetest creatio time
-                @keyword ltComments: (list) : Linetest comments (html)
             @return: (object), (object) : New QTreeWidget Item, New linetest widget"""
         newItem = QtGui.QTreeWidgetItem()
         newWidget = self.wnd.LineTestWidget(self.mainUi, newItem, **kwargs)
         newItem.widget = newWidget
+        newItem.setBackgroundColor(0, QtGui.QColor(255, 80, 80))
         newItem._ltPath = ltPath
         newItem._ltFile = ltFile
         newItem._ltAbsPath = os.path.join(ltPath, ltFile)
+        newItem._ltLink = selItem
+        return newItem, newWidget
+
+    def newLtCommentItem(self):
+        """ Create new linetest comment QTreeWidgetItem
+            @return: (object), (object) : New QTreeWidgetItem, NewTextEditor """
+        newItem = QtGui.QTreeWidgetItem()
+        newWidget = textEditor.TextEditorWidget()
+        newItem.widget = newWidget
+        newWidget.parent = newItem
         return newItem, newWidget
 
     #========================================== WIDGETS ===========================================#

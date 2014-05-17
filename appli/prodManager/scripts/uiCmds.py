@@ -4,7 +4,6 @@ from appli import prodManager
 from functools import partial
 from lib.qt.scripts import dialog
 from lib.qt.scripts import procQt as pQt
-from lib.system.scripts import procFile as pFile
 from appli.prodManager.scripts import uiWindow as pmWindow
 from appli.prodManager.scripts import uiRefresh as pmRefresh
 from appli.prodManager.scripts import template as pmTemplate
@@ -361,7 +360,6 @@ class MainTree(object):
             self.mainUi.uiRf_shotInfoTab.rf_shotParamsTree()
             self.mainUi.uiRf_shotInfoTab.rf_shotComment()
         elif selTab == 'Linetest':
-            self.mainUi.uiRf_linetestTab.rf_stepSwitch()
             if selItems:
                 if not 'Ctnr' in selItems[0].nodeType:
                     self.mainUi.uiRf_linetestTab.rf_lineTestTabVis(state=True)
@@ -372,6 +370,12 @@ class MainTree(object):
             else:
                 self.mainUi.uiRf_linetestTab.rf_lineTestTabVis(state=False)
                 self.mainUi.twLinetest.clear()
+
+    def on_tabItem(self):
+        self.on_treeItem()
+        selTab = self.mainUi.tabProdManager.tabText(self.mainUi.tabProdManager.currentIndex())
+        if selTab == 'Linetest':
+            self.mainUi.uiRf_linetestTab.rf_stepSwitch()
 
 
 class ProjectTab(object):
@@ -681,6 +685,17 @@ class LinetestTab(object):
         self.pm = self.mainUi.pm
         self.populate = pmRefresh.PopulateTrees(self.mainUi)
 
+    def on_stepSwitch(self):
+        """ Update linetest tree with given step """
+        selShot = self.mainUi.twProject.selectedItems()
+        if not selShot:
+            self.mainUi.twLinetest.clear()
+        else:
+            if 'Ctnr' in selShot[0].nodeType:
+                self.mainUi.twLinetest.clear()
+            else:
+                self.mainUi.uiRf_linetestTab.rf_ltTree()
+
     def on_newLt(self):
         """ Add new linetest """
         step = str(self.mainUi.cbLtStep.currentText())
@@ -691,11 +706,19 @@ class LinetestTab(object):
                 if step is not None and not step in ['', ' ']:
                     ltFile = node.newLt(step)
                     if ltFile is not None:
-                        params = pFile.readPyFile(ltFile, filterIn=['lt'])
-                        newLtPath = os.sep.join(ltFile.split(os.sep)[0:-1])
-                        newLtFile = ltFile.split(os.sep)[-1]
-                        newItem, newWidget = self.populate.newLinetestItem(newLtPath, newLtFile,
-                                                                           **params)
-                        self.mainUi.twLinetest.insertTopLevelItems(0, [newItem])
-                        self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)
+                        self.mainUi.uiRf_linetestTab.rf_ltTree()
 
+    def on_delLt(self):
+        """ Delete selected linetest """
+        selLt = self.mainUi.twLinetest.selectedItems()
+        if selLt:
+            if os.path.exists(selLt[0]._ltAbsPath):
+                try:
+                    os.remove(selLt[0]._ltAbsPath)
+                    check = True
+                    print "Deleting linetest: %s ..." % selLt[0]._ltFile
+                except:
+                    check = False
+                    print "!!! ERROR : Cannot delete linetest: %s !!!" % selLt[0]._ltFile
+                if check:
+                    self.mainUi.uiRf_linetestTab.rf_ltTree()

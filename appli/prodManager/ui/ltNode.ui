@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>758</width>
-    <height>33</height>
+    <width>814</width>
+    <height>30</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -80,8 +80,14 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="11">
-    <widget class="QPushButton" name="bDelComment">
+   <item row="1" column="10">
+    <widget class="QPushButton" name="bLtEdit">
+     <property name="minimumSize">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
      <property name="maximumSize">
       <size>
        <width>40</width>
@@ -89,7 +95,10 @@
       </size>
      </property>
      <property name="text">
-      <string>Del</string>
+      <string>Edit</string>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
@@ -97,13 +106,6 @@
     <widget class="QLabel" name="lLtDateLab">
      <property name="text">
       <string>Date:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0" colspan="12">
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -133,19 +135,6 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="10">
-    <widget class="QPushButton" name="bAddComment">
-     <property name="maximumSize">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Add</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="4">
     <spacer name="horizontalSpacer_2">
      <property name="orientation">
@@ -159,7 +148,52 @@
      </property>
     </spacer>
    </item>
-   <item row="2" column="0" colspan="12">
+   <item row="0" column="0" colspan="13">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="12">
+    <widget class="QPushButton" name="bLtDelCmt">
+     <property name="minimumSize">
+      <size>
+       <width>85</width>
+       <height>20</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>85</width>
+       <height>20</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>DelComment</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="11">
+    <widget class="QPushButton" name="bLtAddCmt">
+     <property name="minimumSize">
+      <size>
+       <width>85</width>
+       <height>20</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>85</width>
+       <height>20</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>AddComment</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="13">
     <widget class="Line" name="line_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
