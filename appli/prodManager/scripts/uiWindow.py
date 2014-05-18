@@ -1,4 +1,5 @@
 import os
+import shutil
 from functools import partial
 from appli import prodManager
 from lib.qt.scripts import dialog
@@ -576,26 +577,42 @@ class LineTestEditor(linetestEditorClass, linetestEditorUiClass):
 
     def on_save(self):
         """ Command launch when widget bSave is clicked """
+        #-- Check Edited --#
         dateTimeChanged = False
-        self.ltWidget.leLtTitle.setText(str(self.leTitle.text()))
-        self.ltWidget.params['ltTitle'] = str(self.leTitle.text())
+        checkNewFile = False
+        newLtFile = None
         if not self._getDate == self._setDate or not self._getTime == self._setTime:
             dateTimeChanged = True
-            self.ltWidget.dtLtDate.setDate(QtCore.QDate(self._setDate[0], self._setDate[1],
-                                                        self._setDate[2]))
-            self.ltWidget.params['ltDate'] = '%s_%s_%s' % (self._setDate[0], self._setDate[1],
-                                                           self._setDate[2])
-            self.ltWidget.dtLtTime.setTime(QtCore.QTime(self._setTime[0], self._setTime[1],
-                                                        self._setTime[2]))
-            self.ltWidget.params['ltTime'] = '%s_%s_%s' % (self._setTime[0], self._setTime[1],
-                                                           self._setTime[2])
-        self.ltWidget.params['ltIma'] = str(self.leImaPath.text())
-        self.ltWidget.params['ltSeq'] = str(self.leSeqPath.text())
-        self.ltWidget.params['ltMov'] = str(self.leMovPath.text())
-        self.close()
-        self.ltWidget.writeLtToFile()
-        if dateTimeChanged:
-            self.mainUi.uiRf_linetestTab.rf_ltTree()
+            newLtFile = 'lt-%s_%02d_%02d-%02d_%02d_%02d.py' % (self._setDate[0], self._setDate[1],
+                                                               self._setDate[2], self._setTime[0],
+                                                               self._setTime[1], self._setTime[2])
+            if not os.path.exists(os.path.join(self.ltItem._ltPath, newLtFile)):
+                checkNewFile = True
+        if dateTimeChanged and not checkNewFile:
+            print "!!! ERROR : Linetest date and time already exists !!!"
+        else:
+            #-- Update LtWidget --#
+            self.ltWidget.leLtTitle.setText(str(self.leTitle.text()))
+            self.ltWidget.params['ltTitle'] = str(self.leTitle.text())
+            if dateTimeChanged:
+                self.ltWidget.dtLtDate.setDate(QtCore.QDate(self._setDate[0], self._setDate[1],
+                                                            self._setDate[2]))
+                self.ltWidget.params['ltDate'] = '%s_%s_%s' % (self._setDate[0], self._setDate[1],
+                                                               self._setDate[2])
+                self.ltWidget.dtLtTime.setTime(QtCore.QTime(self._setTime[0], self._setTime[1],
+                                                            self._setTime[2]))
+                self.ltWidget.params['ltTime'] = '%s_%s_%s' % (self._setTime[0], self._setTime[1],
+                                                               self._setTime[2])
+            self.ltWidget.params['ltIma'] = str(self.leImaPath.text())
+            self.ltWidget.params['ltSeq'] = str(self.leSeqPath.text())
+            self.ltWidget.params['ltMov'] = str(self.leMovPath.text())
+            #-- Update LtFile --#
+            self.ltWidget.writeLtToFile()
+            if dateTimeChanged:
+                print "Rename linetest: %s ---> %s" % (self.ltItem._ltFile, newLtFile)
+                shutil.move(self.ltItem._ltAbsPath, os.path.join(self.ltItem._ltPath, newLtFile))
+                self.mainUi.uiRf_linetestTab.rf_ltTree()
+            self.close()
 
     @property
     def _getDate(self):
