@@ -1,9 +1,11 @@
 import os
+import time
 import shutil
 from functools import partial
 from appli import prodManager
 from lib.qt.scripts import dialog
 from PyQt4 import QtGui, QtCore, uic
+from lib.qt.scripts import textEditor
 from lib.qt.scripts import procQt as pQt
 from lib.system.scripts import procFile as pFile
 from appli.prodManager.scripts import uiRefresh as pmRefresh
@@ -472,7 +474,7 @@ class LineTestWidget(linetestClass, linetestUiClass):
             @keyword ltTitle: (str) : Linetest title
             @keyword ltUser: (str) : Linetest author
             @keyword ltDate: (str) : Linetest creation date
-            @keyword ltTime : (str) : Linetest creatio time
+            @keyword ltTime : (str) : Linetest creation time
             @keyword ltIma : (str) : Linetest preview image
             @keyword ltSeq : (str) : Linetest sequence player
             @keyword ltMov : (str) : Linetest movie
@@ -501,11 +503,37 @@ class LineTestWidget(linetestClass, linetestUiClass):
                                            int(self.params['ltTime'].split('_')[2])))
         self.dtLtTime.setReadOnly(True)
         self.bLtEdit.clicked.connect(self.on_edit)
+        self.bLtAddCmt.clicked.connect(self.on_AddComment)
 
     def on_edit(self):
         """ Command launch when bLtEdit is clicked """
         self.ltEditor = LineTestEditor(self.ltItem, self)
         self.ltEditor.show()
+
+    def on_AddComment(self):
+        """ Add comment to linetest """
+        cmtDict = {'cmtUser': prodManager.user,
+                   'cmtDate': time.strftime("%Y_%m_%d", time.localtime()),
+                   'cmtTime': time.strftime("%H_%M_%S", time.localtime()),
+                   'cmtText': "", 'cmtHtml': ""}
+        self.params['ltComments'].insert(0, cmtDict)
+        self.writeLtToFile()
+        newItem, newWidget = self.populate.newLtCommentItem(**cmtDict)
+        self.ltItem.insertChild(0, newItem)
+        self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)
+        self.ltItem.setExpanded(False)
+        self.ltItem.setExpanded(True)
+
+    def rf_comments(self):
+        """ Refresh Comments list """
+        #-- Clear Comments --#
+        for i in range(self.ltItem.childCount(), 0, -1):
+            self.ltItem.takeChild(i-1)
+        #-- Populate Comments --#
+        for cmtDict in self.params['ltComments']:
+            newItem, newWidget = self.populate.newLtCommentItem(**cmtDict)
+            self.ltItem.addChild(newItem)
+            self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)
 
     def writeLtToFile(self):
         """ Write linetest file in the bdd """
@@ -522,15 +550,10 @@ class LineTestWidget(linetestClass, linetestUiClass):
         except:
             print "!!! ERROR : Can't write linetest file: %s" % self.ltItem._ltFile
 
-    def on_AddComment(self):
-        newItem, newWidget = self.populate.newLtCommentItem()
-        self.ltItem.addChild(newItem)
-        self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)
-
 
 linetestEditorClass, linetestEditorUiClass = uic.loadUiType(prodManager.uiList['ltNodeEditor'])
 class LineTestEditor(linetestEditorClass, linetestEditorUiClass):
-    """ Linetest tree widget
+    """ Linetest tree widget editor
         @param ltItem: (object) : Parent QTreeWidgetItem
         @param ltWidget: (object) : Parent widget """
 
@@ -597,12 +620,14 @@ class LineTestEditor(linetestEditorClass, linetestEditorUiClass):
             if dateTimeChanged:
                 self.ltWidget.dtLtDate.setDate(QtCore.QDate(self._setDate[0], self._setDate[1],
                                                             self._setDate[2]))
-                self.ltWidget.params['ltDate'] = '%s_%s_%s' % (self._setDate[0], self._setDate[1],
-                                                               self._setDate[2])
+                self.ltWidget.params['ltDate'] = '%s_%02d_%02d' % (self._setDate[0],
+                                                                   self._setDate[1],
+                                                                   self._setDate[2])
                 self.ltWidget.dtLtTime.setTime(QtCore.QTime(self._setTime[0], self._setTime[1],
                                                             self._setTime[2]))
-                self.ltWidget.params['ltTime'] = '%s_%s_%s' % (self._setTime[0], self._setTime[1],
-                                                               self._setTime[2])
+                self.ltWidget.params['ltTime'] = '%02d_%02d_%02d' % (self._setTime[0],
+                                                                     self._setTime[1],
+                                                                     self._setTime[2])
             self.ltWidget.params['ltIma'] = str(self.leImaPath.text())
             self.ltWidget.params['ltSeq'] = str(self.leSeqPath.text())
             self.ltWidget.params['ltMov'] = str(self.leMovPath.text())
@@ -655,3 +680,198 @@ class LineTestEditor(linetestEditorClass, linetestEditorUiClass):
                 return self.mainUi.pm.project.projectWorkDir
             else:
                 return prodManager.rootDisk
+
+
+ltCommentClass, ltCommentUiClass = uic.loadUiType(prodManager.uiList['ltCmtNode'])
+class LtCommentWidget(ltCommentClass, ltCommentUiClass):
+    """ Linetest comment tree widget
+        @param mainUi: (object) : ProdManager QMainWindow
+        @param cmtItem: (object) : Parent QTreeWidgetItem
+        @param kwargs: (dict) : New linetest comment params
+            @keyword cmtUser: (str) : Comment author
+            @keyword cmtDate: (str) : Comment creation date
+            @keyword cmtTime : (str) : Comment creation time
+            @keyword cmtText: (str) : Comment plain text
+            @keyword cmtHtml: (str) : Comment html text """
+
+    def __init__(self, mainUi, cmtItem, **kwargs):
+        self.mainUi = mainUi
+        self.cmtItem = cmtItem
+        self.params = kwargs
+        super(LtCommentWidget, self).__init__()
+        self._setupUi()
+        self.rf_textEditSize()
+
+    def _setupUi(self):
+        """ Setup Widget """
+        self.setupUi(self)
+        self.lCmtUser.setText(self.params['cmtUser'])
+        self.dtCmtDate.setDate(QtCore.QDate(int(self.params['cmtDate'].split('_')[0]),
+                                            int(self.params['cmtDate'].split('_')[1]),
+                                            int(self.params['cmtDate'].split('_')[2])))
+        self.dtCmtDate.setReadOnly(True)
+        self.dtCmtTime.setTime(QtCore.QTime(int(self.params['cmtTime'].split('_')[0]),
+                                            int(self.params['cmtTime'].split('_')[1]),
+                                            int(self.params['cmtTime'].split('_')[2])))
+        self.dtCmtTime.setReadOnly(True)
+        self.teComment.setHtml(self.params['cmtHtml'])
+        self.teComment.setReadOnly(True)
+        self.bCmtEdit.clicked.connect(self.on_edit)
+        self.teComment.setHtml(self.params['cmtHtml'])
+        self.teComment.setReadOnly(True)
+
+    def rf_textEditSize(self):
+        """ Refresh QTextEdit size """
+        if self.params['cmtText'] == '' or self.params['cmtText'] == '\n':
+            self.teComment.setMaximumHeight(30)
+        else:
+            self.teComment.setMaximumHeight(30*len(self.params['cmtText'].split('\n')))
+
+    def on_edit(self):
+        """ Command launch when bCmtEdit is clicked """
+        self.cmtEditor = LtCmtEditor(self.cmtItem, self)
+        self.cmtEditor.show()
+
+
+ltCmtEditorClass, ltCmtEditorUiClass = uic.loadUiType(prodManager.uiList['ltCmtNodeEditor'])
+class LtCmtEditor(ltCmtEditorClass, ltCmtEditorUiClass):
+    """ Linetest comment tree widget editor
+        @param cmtItem: (object) : Parent QTreeWidgetItem
+        @param cmtWidget: (object) : Parent widget """
+
+    def __init__(self, cmtItem, cmtWidget):
+        self.cmtItem = cmtItem
+        self.cmtWidget = cmtWidget
+        self.ltItem = self.cmtItem.parent()
+        self.mainUi = self.cmtWidget.mainUi
+        super(LtCmtEditor, self).__init__()
+        self._setupUi()
+
+    def _setupUi(self):
+        """ Setup Widget """
+        self.setupUi(self)
+        self.initTextEditor()
+        self.dtDate.setDate(QtCore.QDate(self._getDate[0], self._getDate[1], self._getDate[2]))
+        self.dtTime.setTime(QtCore.QTime(self._getTime[0], self._getTime[1], self._getTime[2]))
+        self.comment.teText.setHtml(str(self.cmtWidget.teComment.toHtml()))
+        self.bSave.clicked.connect(self.on_save)
+        self.bCancel.clicked.connect(self.close)
+
+    def initTextEditor(self):
+        """ Initialized text editor """
+        self.comment = textEditor.TextEditorWidget()
+        self.comment.bClearText.setEnabled(False)
+        self.comment.bLoadFile.setEnabled(False)
+        self.comment.bSaveFile.setEnabled(False)
+        self.vlComment.addWidget(self.comment)
+        self.vlComment.setMargin(1)
+
+    def on_save(self):
+        """ Command launch when widget bSave is clicked """
+        #-- Check Edited --#
+        dateTimeChanged = False
+        checkNewCmt = True
+        oldIndex = self._getOldIndex
+        newIndex = None
+        newDate = "%s_%02d_%02d" % (self._setDate[0], self._setDate[1], self._setDate[2])
+        newTime = "%02d_%02d_%02d" % (self._setTime[0], self._setTime[1], self._setTime[2])
+        if not self._getDate == self._setDate or not self._getTime == self._setTime:
+            dateTimeChanged = True
+            checkNewCmt, newIndex = self._checkNewCmt(newDate, newTime)
+        if dateTimeChanged and not checkNewCmt:
+            print "!!! ERROR : Linetest comment date and time already exists !!!"
+        else:
+            #-- Update CmtWidget --#
+            self.cmtWidget.teComment.setText(str(self.comment.teText.toPlainText()))
+            self.cmtWidget.teComment.setHtml(str(self.comment.teText.toHtml()))
+            self.cmtWidget.params['cmtText'] = str(self.comment.teText.toPlainText())
+            self.cmtWidget.params['cmtHtml'] = str(self.comment.teText.toHtml())
+            if dateTimeChanged:
+                self.cmtWidget.dtCmtDate.setDate(QtCore.QDate(self._setDate[0], self._setDate[1],
+                                                              self._setDate[2]))
+                self.cmtWidget.params['cmtDate'] = '%s_%02d_%02d' % (self._setDate[0],
+                                                                     self._setDate[1],
+                                                                     self._setDate[2])
+                self.cmtWidget.dtCmtTime.setTime(QtCore.QTime(self._setTime[0], self._setTime[1],
+                                                              self._setTime[2]))
+                self.cmtWidget.params['cmtTime'] = '%02d_%02d_%02d' % (self._setTime[0],
+                                                                       self._setTime[1],
+                                                                       self._setTime[2])
+            #-- Update LtItem --#
+            self.ltItem.widget.params['ltComments'].pop(oldIndex)
+            if dateTimeChanged:
+                self.ltItem.widget.params['ltComments'].insert(newIndex, self.cmtWidget.params)
+            else:
+                self.ltItem.widget.params['ltComments'].insert(oldIndex, self.cmtWidget.params)
+            #-- Update LtFile --#
+            self.ltItem.widget.writeLtToFile()
+            if dateTimeChanged:
+                self.ltItem.widget.rf_comments()
+            self.close()
+
+    def _checkNewCmt(self, newDate, newTime):
+        """ Check comment new date validity
+            @param newDate: (str) : yyyy_mm_dd
+            @param newTime: (dtr) : hh_mm_ss
+            @return: (bool), (int) : True if new date is valide, False if not
+                                     New comment index in ltCmtParams list """
+        cmts = self.ltItem.widget.params['ltComments']
+        for cmtDict in cmts:
+            if cmtDict['cmtDate'] == newDate and cmtDict['cmtTime'] == newTime:
+                return False, None, None
+        dates = ['%s_%s' % (newDate, newTime)]
+        for cmtDict in cmts:
+            fullDate =  '%s_%s' % (cmtDict['cmtDate'], cmtDict['cmtTime'])
+            _oldDate, _oldTime = self._getOldDateTime
+            if not fullDate == '%s_%s' % (_oldDate, _oldTime):
+                dates.append('%s_%s' % (cmtDict['cmtDate'], cmtDict['cmtTime']))
+        dateList = sorted(dates, reverse=True)
+        newInd = dateList.index('%s_%s' % (newDate, newTime))
+        return True, newInd
+
+    @property
+    def _getOldDateTime(self):
+        """ Get linetest comment current date and time
+            @return: (str), (str) : Comment date (yyyy/mm/dd), Comment Time (hh/mm/ss) """
+        oldDate = "%s_%02d_%02d" % (self._getDate[0], self._getDate[1], self._getDate[2])
+        oldTime = "%02d_%02d_%02d" % (self._getTime[0], self._getTime[1], self._getTime[2])
+        return oldDate, oldTime
+
+    @property
+    def _getOldIndex(self):
+        """ Get linetest comment index in ltItem.params['ltComments']
+            @return: (int) : Old index """
+        oldDate, oldTime = self._getOldDateTime
+        oldInd = None
+        for n, cmtDict in enumerate(self.ltItem.widget.params['ltComments']):
+            if cmtDict['cmtDate'] == oldDate and cmtDict['cmtTime'] == oldTime:
+                oldInd = n
+        return oldInd
+
+    @property
+    def _getDate(self):
+        """ Get linetest widget date
+            @return: (list) : Year, Month, Day """
+        _date = self.cmtWidget.dtCmtDate.date()
+        return [_date.year(), _date.month(), _date.day()]
+
+    @property
+    def _setDate(self):
+        """ Set linetest widget date
+            @return: (list) : Year, Month, Day """
+        _date = self.dtDate.date()
+        return [_date.year(), _date.month(), _date.day()]
+
+    @property
+    def _getTime(self):
+        """ Get linetest widget time
+            @return: (list) : Hour, Minute, Second """
+        _time =  self.cmtWidget.dtCmtTime.time()
+        return [_time.hour(), _time.minute(), _time.second()]
+
+    @property
+    def _setTime(self):
+        """ Set linetest widget time
+            @return: (list) : Hour, Minute, Second """
+        _time =  self.dtTime.time()
+        return [_time.hour(), _time.minute(), _time.second()]

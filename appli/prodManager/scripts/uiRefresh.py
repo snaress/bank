@@ -280,6 +280,7 @@ class ShotInfoTab(object):
         self.mainUi.twShotParams.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
         self.mainUi.twShotParams.header().setResizeMode(1, QtGui.QHeaderView.ResizeToContents)
         self.mainUi.shotTextEditor = textEditor.TextEditorWidget()
+        self.mainUi.shotTextEditor.bClearText.setEnabled(False)
         self.mainUi.shotTextEditor.bLoadFile.setEnabled(False)
         self.mainUi.shotTextEditor.bSaveFile.setEnabled(False)
         self.mainUi.glShotComment.addWidget(self.mainUi.shotTextEditor)
@@ -360,7 +361,6 @@ class LinetestTab(object):
         """ Refresh linetest QTreeWidget """
         self.mainUi.twLinetest.clear()
         self.populate.linetestTree()
-
 
 
 class PopulateTrees(object):
@@ -488,6 +488,7 @@ class PopulateTrees(object):
                         newItem, newWidget = self.newLinetestItem(selItems[0], ltPath, lt, **ltParams)
                         self.mainUi.twLinetest.addTopLevelItem(newItem)
                         self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)
+                        newWidget.rf_comments()
 
     #=========================================== ITEMS ============================================#
 
@@ -678,13 +679,14 @@ class PopulateTrees(object):
         newItem._ltLink = selItem
         return newItem, newWidget
 
-    def newLtCommentItem(self):
+    def newLtCommentItem(self, **kwargs):
         """ Create new linetest comment QTreeWidgetItem
+            @param kwargs: (dict) : New linetest comment params
             @return: (object), (object) : New QTreeWidgetItem, NewTextEditor """
         newItem = QtGui.QTreeWidgetItem()
-        newWidget = textEditor.TextEditorWidget()
+        newWidget = self.wnd.LtCommentWidget(self.mainUi, newItem, **kwargs)
         newItem.widget = newWidget
-        newWidget.parent = newItem
+        newItem.setBackgroundColor(0, QtGui.QColor(150, 150, 150))
         return newItem, newWidget
 
     #========================================== WIDGETS ===========================================#

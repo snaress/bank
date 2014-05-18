@@ -32,7 +32,7 @@
       </size>
      </property>
      <property name="text">
-      <string>ltTitle</string>
+      <string>Linetest Title</string>
      </property>
     </widget>
    </item>
@@ -159,18 +159,18 @@
     <widget class="QPushButton" name="bLtDelCmt">
      <property name="minimumSize">
       <size>
-       <width>85</width>
+       <width>55</width>
        <height>20</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>85</width>
+       <width>55</width>
        <height>20</height>
       </size>
      </property>
      <property name="text">
-      <string>DelComment</string>
+      <string>DelCmt</string>
      </property>
     </widget>
    </item>
@@ -178,18 +178,18 @@
     <widget class="QPushButton" name="bLtAddCmt">
      <property name="minimumSize">
       <size>
-       <width>85</width>
+       <width>55</width>
        <height>20</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>85</width>
+       <width>55</width>
        <height>20</height>
       </size>
      </property>
      <property name="text">
-      <string>AddComment</string>
+      <string>AddCmt</string>
      </property>
     </widget>
    </item>
