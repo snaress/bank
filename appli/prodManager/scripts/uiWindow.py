@@ -346,7 +346,7 @@ class ShotNodeWidget(shotNodeClass, shotNodeUiClass):
             self.prevIma = QtGui.QPixmap(ima)
             self.lPreview.setPixmap(self.prevIma)
             self.prevIma.scaled(maxWidth, maxHeight, QtCore.Qt.IgnoreAspectRatio)
-            pQt.resizePixmap(maxWidth, maxHeight, self.prevIma, self.lPreview)
+            self.mainUi.resizePixmap(maxWidth, maxHeight, self.prevIma, self.lPreview)
 
     def getPrevIma(self):
         """ Get shotInfo prevIma absolut path

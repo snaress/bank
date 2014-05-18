@@ -217,6 +217,29 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
                 if item.nodePath == path:
                     return item
 
+    @staticmethod
+    def resizePixmap(maxWidth, maxHeight, pixMap, item):
+        """ Resize given pixmap of given label
+            @param maxWidth: (int) : Pixmap max width
+            @param maxHeight: (int) : Pixmap maxHeight
+            @param pixMap: (object) : QPixmap
+            @param item: (object) : QLabel """
+        imaWidth = pixMap.width()
+        imaHeight = pixMap.height()
+        maxRatio = float(maxWidth)/float(maxHeight)
+        imaRatio = float(imaWidth)/float(imaHeight)
+        if imaRatio < maxRatio:
+            newWidth = int(maxHeight*imaRatio)
+            item.setMinimumSize(QtCore.QSize(newWidth, maxHeight))
+            item.setMaximumSize(QtCore.QSize(newWidth, maxHeight))
+        elif imaRatio == maxRatio:
+            item.setMinimumSize(QtCore.QSize(maxWidth, maxHeight))
+            item.setMaximumSize(QtCore.QSize(maxWidth, maxHeight))
+        elif imaRatio > maxRatio:
+            newHeight = int(maxWidth/imaRatio)
+            item.setMinimumSize(QtCore.QSize(maxWidth, newHeight))
+            item.setMaximumSize(QtCore.QSize(maxWidth, newHeight))
+
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

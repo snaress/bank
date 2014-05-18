@@ -21,7 +21,7 @@ class PreviewImage(object):
         self.mainUi.previewIma = QtGui.QPixmap(ima)
         self.mainUi.lPreview.setPixmap(self.mainUi.previewIma)
         maxWidth, maxHeight = self.defaultTemplate.previewMaxSize()
-        pQt.resizePixmap(maxWidth, maxHeight, self.mainUi.previewIma, self.mainUi.lPreview)
+        self.mainUi.resizePixmap(maxWidth, maxHeight, self.mainUi.previewIma, self.mainUi.lPreview)
         self.rf_previewAttr(ima)
 
     def rf_previewAttr(self, ima):
