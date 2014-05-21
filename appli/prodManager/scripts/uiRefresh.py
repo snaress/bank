@@ -481,13 +481,15 @@ class PopulateTrees(object):
             ltPath = os.path.join(selItems[0].dataPath, 'lt', selStep)
             if os.path.exists(ltPath):
                 ltList = os.listdir(ltPath) or []
-                for lt in sorted(ltList, reverse=True):
+                for n, lt in enumerate(sorted(ltList, reverse=True)):
                     if lt.startswith('lt-') and lt.endswith('.py'):
                         ltAbsPath = os.path.join(ltPath, lt)
                         ltParams = pFile.readPyFile(ltAbsPath, filterIn=['lt'])
                         newItem, newWidget = self.newLinetestItem(selItems[0], ltPath, lt, **ltParams)
                         self.mainUi.twLinetest.addTopLevelItem(newItem)
                         self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)
+                        if n == 0:
+                            newItem.setExpanded(True)
                         newWidget.rf_comments()
 
     #=========================================== ITEMS ============================================#

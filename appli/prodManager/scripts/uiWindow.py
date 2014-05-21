@@ -723,9 +723,9 @@ class LtCommentWidget(ltCommentClass, ltCommentUiClass):
     def rf_textEditSize(self):
         """ Refresh QTextEdit size """
         if self.params['cmtText'] == '' or self.params['cmtText'] == '\n':
-            self.teComment.setMaximumHeight(30)
+            self.teComment.setMaximumHeight(22)
         else:
-            self.teComment.setMaximumHeight(30*len(self.params['cmtText'].split('\n')))
+            self.teComment.setMaximumHeight(22*len(self.params['cmtText'].split('\n')))
 
     def on_edit(self):
         """ Command launch when bCmtEdit is clicked """

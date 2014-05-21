@@ -100,6 +100,7 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.cbLtStep.currentIndexChanged.connect(self.uiCmds_linetestTab.on_stepSwitch)
         self.bLtNew.clicked.connect(self.uiCmds_linetestTab.on_newLt)
         self.bLtDel.clicked.connect(self.uiCmds_linetestTab.on_delLt)
+        self.twLinetest.clicked.connect(self.uiCmds_linetestTab.on_linetest)
 
     def windowInit(self):
         """ Main ui inititialize """

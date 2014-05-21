@@ -713,12 +713,43 @@ class LinetestTab(object):
         selLt = self.mainUi.twLinetest.selectedItems()
         if selLt:
             if os.path.exists(selLt[0]._ltAbsPath):
-                try:
-                    os.remove(selLt[0]._ltAbsPath)
-                    check = True
-                    print "Deleting linetest: %s ..." % selLt[0]._ltFile
-                except:
-                    check = False
-                    print "!!! ERROR : Cannot delete linetest: %s !!!" % selLt[0]._ltFile
-                if check:
-                    self.mainUi.uiRf_linetestTab.rf_ltTree()
+                warn = ["!!! WARNING !!!",
+                        "Delete linetest %s ?" % selLt[0]._ltFile.split('.')[0],
+                        "LT User: %s" % selLt[0].widget.params['ltUser'],
+                        "LT Title: %s" % selLt[0].widget.params['ltTitle'],
+                        "LT Date: %s %s" % (selLt[0].widget.params['ltDate'].replace('_', '/'),
+                                            selLt[0].widget.params['ltTime'].replace('_', ':'))]
+                self.warnDial0 = dialog.ConfirmDialog('\n'.join(warn), btns=['Ok', 'Cancel'],
+                                                      cmds=[self.on_dialAccept0, self.on_dialCancel0])
+                self.warnDial0.exec_()
+
+    def on_dialAccept0(self):
+        """ Command launch when Qbutton 'Ok' of dialog is clicked """
+        selLt = self.mainUi.twLinetest.selectedItems()
+        try:
+            os.remove(selLt[0]._ltAbsPath)
+            check = True
+            print "Deleting linetest: %s ..." % selLt[0]._ltFile
+        except:
+            check = False
+            print "!!! ERROR : Cannot delete linetest: %s !!!" % selLt[0]._ltFile
+        if check:
+            self.mainUi.uiRf_linetestTab.rf_ltTree()
+            self.warnDial0.close()
+
+    def on_dialCancel0(self):
+        """ Command launch when Qbutton 'Cancel' of dialog is clicked """
+        self.warnDial0.close()
+
+    def on_linetest(self):
+        """ Refresh preview image """
+        selLt = self.mainUi.twLinetest.selectedItems()
+        if selLt:
+            if hasattr(selLt[0], '_ltLink'):
+                params = selLt[0].widget.params
+            else:
+                params = selLt[0].parent().widget.params
+            if not params['ltIma'] == '' and not params['ltIma'] == ' ':
+                self.mainUi.uiRf_previewImage.rf_previewIma(params['ltIma'])
+            else:
+                self.mainUi.uiRf_previewImage.rf_previewIma(prodManager.imaList['prodManager.png'])
