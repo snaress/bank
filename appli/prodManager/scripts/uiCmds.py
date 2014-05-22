@@ -333,6 +333,28 @@ class MenuCmds(object):
         self.warnDial6.close()
 
 
+class PreviewImage(object):
+    """ Class used by the ProdManagerUi for previewImage actions
+        @param mainUi: (object) : ProdManager QMainWindow """
+
+    def __init__(self, mainUi):
+        self.mainUi = mainUi
+        self.template = pmTemplate.DefaultTemplate
+
+    def on_image(self):
+        """ Open previewImage in external player """
+        os.system('start %s %s' % (self.template.imageLauncher(), self.mainUi.lPreview.imaAbsPath))
+
+    def on_xplorer(self):
+        """ Open explorer with stored path """
+        os.system('start %s' % (self.mainUi.bPreviewXterm.absPath))
+
+    def on_xterm(self):
+        """ Open xterm with stored path """
+        os.system('start %s /K "cd /d %s"' % (self.template.xtermLauncher(),
+                                              self.mainUi.bPreviewXterm.absPath))
+
+
 class MainTree(object):
     """ Class used by the ProdManagerUi for main tree actions
         @param mainUi: (object) : ProdManager QMainWindow """
@@ -355,6 +377,9 @@ class MainTree(object):
         """ Refresh selected tab params """
         selTab = self.mainUi.tabProdManager.tabText(self.mainUi.tabProdManager.currentIndex())
         selItems = self.mainUi.twProject.selectedItems()
+        if selItems:
+            self.mainUi.uiRf_previewImage.rf_xterm()
+            self.mainUi.uiRf_previewImage.rf_xplorer()
         if selTab == 'Shot Info':
             self.mainUi.uiRf_shotInfoTab.rf_shotInfoTree()
             self.mainUi.uiRf_shotInfoTab.rf_shotParamsTree()
@@ -749,7 +774,10 @@ class LinetestTab(object):
                 params = selLt[0].widget.params
             else:
                 params = selLt[0].parent().widget.params
+            #-- Preview Image --#
             if not params['ltIma'] == '' and not params['ltIma'] == ' ':
                 self.mainUi.uiRf_previewImage.rf_previewIma(params['ltIma'])
+                self.mainUi.bPreviewImage.setEnabled(True)
             else:
                 self.mainUi.uiRf_previewImage.rf_previewIma(prodManager.imaList['prodManager.png'])
+                self.mainUi.bPreviewImage.setEnabled(False)

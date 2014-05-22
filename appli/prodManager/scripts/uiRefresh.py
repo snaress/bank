@@ -24,6 +24,16 @@ class PreviewImage(object):
         self.mainUi.resizePixmap(maxWidth, maxHeight, self.mainUi.previewIma, self.mainUi.lPreview)
         self.rf_previewAttr(ima)
 
+    def rf_previewBtnsVis(self, state=False):
+        """ Refresh preview buttons visibility
+            @param state: (bool) : Visibility state """
+        self.mainUi.bPreviewImage.setEnabled(state)
+        self.mainUi.bPreviewSequence.setEnabled(state)
+        self.mainUi.bPreviewMovie.setEnabled(state)
+        self.mainUi.bPreviewExplorer.setEnabled(state)
+        self.mainUi.bPreviewXterm.setEnabled(state)
+        self.mainUi.bPreviewGrapher.setEnabled(state)
+
     def rf_previewAttr(self, ima):
         """ Refresh preview attribute with given image
             @param ima: (str) : Preview image absolut path """
@@ -32,6 +42,59 @@ class PreviewImage(object):
         self.mainUi.lPreview.imaDirPath = os.path.dirname(ima)
         self.mainUi.lPreview.imaWidth = self.mainUi.previewIma.width()
         self.mainUi.lPreview.imaHeight = self.mainUi.previewIma.height()
+
+    def rf_xterm(self):
+        """ Refresh xterm launcher with selected project item """
+        selItems = self.mainUi.twProject.selectedItems()
+        if selItems:
+            if hasattr(selItems[0], 'dataFile'):
+                if os.path.exists(selItems[0].dataFile):
+                    shotParams = pFile.readPyFile(selItems[0].dataFile, filterIn=['nodeParams'])
+                    self._getWorkDir(shotParams['nodeParams'])
+                    self.mainUi.bPreviewXterm.setEnabled(True)
+                    self.mainUi.bPreviewXterm.absPath = self._getWorkDir(shotParams['nodeParams']['workDir'])
+                else:
+                    self.mainUi.bPreviewXterm.setEnabled(False)
+                    self.mainUi.bPreviewXterm.absPath = None
+            else:
+                self.mainUi.bPreviewXterm.setEnabled(False)
+                self.mainUi.bPreviewXterm.absPath = None
+
+    def rf_xplorer(self):
+        """ Refresh explorer launcher with selected project item """
+        selItems = self.mainUi.twProject.selectedItems()
+        if selItems:
+            if hasattr(selItems[0], 'dataFile'):
+                if os.path.exists(selItems[0].dataFile):
+                    shotParams = pFile.readPyFile(selItems[0].dataFile, filterIn=['nodeParams'])
+                    self._getWorkDir(shotParams['nodeParams'])
+                    self.mainUi.bPreviewExplorer.setEnabled(True)
+                    self.mainUi.bPreviewExplorer.absPath = self._getWorkDir(shotParams['nodeParams']['workDir'])
+                else:
+                    self.mainUi.bPreviewExplorer.setEnabled(False)
+                    self.mainUi.bPreviewExplorer.absPath = None
+            else:
+                self.mainUi.bPreviewExplorer.setEnabled(False)
+                self.mainUi.bPreviewExplorer.absPath = None
+
+    def _getWorkDir(self, workDir):
+        """ Get work directory
+            @param workDir: (str) : Stored shotNode work directory
+            @return: (str) : Work directory """
+        if not workDir == '' and not workDir == ' ':
+            return workDir
+        else:
+            if hasattr(self.mainUi.pm, 'project'):
+                if hasattr(self.mainUi.pm.project, 'projectWorkDir'):
+                    wd = self.mainUi.pm.project.projectWorkDir
+                    if not wd == '' and not wd == ' ':
+                        return self.mainUi.pm.project.projectWorkDir
+                    else:
+                        return None
+                else:
+                    return None
+            else:
+                return None
 
 
 class MainTree(object):

@@ -15,6 +15,16 @@ class DefaultTemplate(object):
         return 300, 150
 
     @staticmethod
+    def imageLauncher():
+        """ Default image launcher """
+        return 'fcheck.exe'
+
+    @staticmethod
+    def xtermLauncher():
+        """ Default xterm launcher """
+        return 'cmd.exe'
+
+    @staticmethod
     def shotInfoPreviewMaxSize():
         """ Give shotInfo preview image default max size
             @return: (int) : maxWidth, (int) : maxHeight """

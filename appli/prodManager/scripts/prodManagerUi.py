@@ -24,6 +24,7 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.uiRf_shotInfoTab = pmRefresh.ShotInfoTab(self)
         self.uiRf_linetestTab = pmRefresh.LinetestTab(self)
         self.uiCmds_menu = pmUiCmds.MenuCmds(self)
+        self.uiCmds_previewImage = pmUiCmds.PreviewImage(self)
         self.uiCmds_mainTree = pmUiCmds.MainTree(self)
         self.uiCmds_projectTab = pmUiCmds.ProjectTab(self)
         self.uiCmds_shotInfoTab = pmUiCmds.ShotInfoTab(self)
@@ -51,6 +52,9 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
 
     def _setupMainWnd(self):
         """ Setup main window """
+        self.bPreviewImage.clicked.connect(self.uiCmds_previewImage.on_image)
+        self.bPreviewExplorer.clicked.connect(self.uiCmds_previewImage.on_xplorer)
+        self.bPreviewXterm.clicked.connect(self.uiCmds_previewImage.on_xterm)
         self.twProject.clicked.connect(self.uiCmds_mainTree.on_treeItem)
         self.tabProdManager.currentChanged.connect(self.uiCmds_mainTree.on_tabItem)
 
@@ -108,6 +112,7 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.setWindowTitle("ProdManager: Untitled")
         self.tabProdManager.setCurrentIndex(0)
         self.uiRf_previewImage.rf_previewIma(prodManager.imaList['prodManager.png'])
+        self.uiRf_previewImage.rf_previewBtnsVis()
         self.uiRf_projectTab.initProjectTab()
         self.uiRf_shotInfoTab.initShotInfoTab()
         self.uiRf_linetestTab.initLinetestTab()
