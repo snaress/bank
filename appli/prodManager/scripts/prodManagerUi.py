@@ -53,6 +53,8 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
     def _setupMainWnd(self):
         """ Setup main window """
         self.bPreviewImage.clicked.connect(self.uiCmds_previewImage.on_image)
+        self.bPreviewSequence.clicked.connect(self.uiCmds_previewImage.on_sequence)
+        self.bPreviewMovie.clicked.connect(self.uiCmds_previewImage.on_movie)
         self.bPreviewExplorer.clicked.connect(self.uiCmds_previewImage.on_xplorer)
         self.bPreviewXterm.clicked.connect(self.uiCmds_previewImage.on_xterm)
         self.twProject.clicked.connect(self.uiCmds_mainTree.on_treeItem)

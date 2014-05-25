@@ -16,13 +16,23 @@ class DefaultTemplate(object):
 
     @staticmethod
     def imageLauncher():
-        """ Default image launcher """
-        return 'fcheck.exe'
+        """ Default image player """
+        return "fcheck.exe"
+
+    @staticmethod
+    def sequenceLauncher():
+        """ Default sequence player """
+        return "fcheck.exe"
+
+    @staticmethod
+    def movieLauncher():
+        """ Default movie player """
+        return "vlc"
 
     @staticmethod
     def xtermLauncher():
         """ Default xterm launcher """
-        return 'cmd.exe'
+        return "cmd.exe"
 
     @staticmethod
     def shotInfoPreviewMaxSize():

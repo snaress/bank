@@ -132,3 +132,42 @@ def createLtFile(ltFile):
     except:
         print "!!! Error: Linetest file creation failed !!!\n!!! %s !!!" % ltFile
         return False
+
+def getSequenceInfo(imaFile):
+    """ Get sequence info from fileName
+        @param imaFile: (str) : Image absolute path
+        @return: (dict) : Sequence info """
+    seqInfo = {}
+    fileName = os.path.basename(imaFile)
+    filePath = os.path.dirname(imaFile)
+    if not len(fileName.split('.')) == 3:
+        print "!!! ERROR : Wrong file type, should be imaName.xxxx.ext !!!"
+        return None
+    else:
+        seqList = []
+        for f in os.listdir(filePath):
+            if f.startswith('%s.' % fileName.split('.')[0]) and f.endswith('.%s' % fileName.split('.')[2]):
+                seqList.append(f)
+        if not seqList:
+            print "!!! ERROR : Wrong file type, can't find sequence !!!"
+            return None
+        else:
+            first = int(sorted(seqList)[0].split('.')[1])
+            last = int(sorted(seqList)[-1].split('.')[1])
+            padd = len(fileName.split('.')[1])
+            step = 1
+            if not len(seqList) == ((last - first) + 1):
+                print "!!! ERROR : Sequence is not complete !!!"
+                return None
+            else:
+                seqInfo['fileName'] = os.path.basename(imaFile)
+                seqInfo['filePath'] = os.path.dirname(imaFile)
+                seqInfo['padding'] = padd
+                seqInfo['first'] = first
+                seqInfo['last'] = last
+                seqInfo['step'] = step
+                seqInfo['label'] = "%s.[%s:%s:%s].%s" % (fileName.split('.')[0],
+                                                         str(first).zfill(padd),
+                                                         str(last).zfill(padd),
+                                                         step, fileName.split('.')[2])
+                return seqInfo

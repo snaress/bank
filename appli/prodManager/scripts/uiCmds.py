@@ -4,6 +4,7 @@ from appli import prodManager
 from functools import partial
 from lib.qt.scripts import dialog
 from lib.qt.scripts import procQt as pQt
+from appli.prodManager.scripts import core as pmCore
 from appli.prodManager.scripts import uiWindow as pmWindow
 from appli.prodManager.scripts import uiRefresh as pmRefresh
 from appli.prodManager.scripts import template as pmTemplate
@@ -343,7 +344,34 @@ class PreviewImage(object):
 
     def on_image(self):
         """ Open previewImage in external player """
-        os.system('start %s %s' % (self.template.imageLauncher(), self.mainUi.lPreview.imaAbsPath))
+        print "Launching image: %s" % self.mainUi.lPreview.imaAbsPath
+        os.system('start %s %s' % (self.template.imageLauncher(),
+                                   os.path.normcase(self.mainUi.lPreview.imaAbsPath)))
+
+    def on_sequence(self):
+        """ Open sequence in external player """
+        seqInfo = pmCore.getSequenceInfo(self.mainUi.bPreviewSequence.absPath)
+        if seqInfo is not None:
+            seqName = "%s.%s.%s" % (seqInfo['fileName'].split('.')[0], '@' * seqInfo['padding'],
+                                    seqInfo['fileName'].split('.')[2])
+            seq = os.path.normpath(os.path.join(seqInfo['filePath'], seqName))
+            seqLabel = "%s.[%s:%s:%s].%s" % (seqInfo['fileName'].split('.')[0],
+                                             str(seqInfo['first']).zfill(seqInfo['padding']),
+                                             str(seqInfo['last']).zfill(seqInfo['padding']),
+                                             seqInfo['step'], seqInfo['fileName'].split('.')[2])
+            print '-' * 100
+            print "Launching sequence: %s" % os.path.normpath(os.path.join(seqInfo['filePath'], seqLabel))
+            for k, v in seqInfo.iteritems():
+                print k, ' = ', v
+            os.system('start %s -n %s %s %s %s' % (self.template.sequenceLauncher(),
+                                                   seqInfo['first'], seqInfo['last'],
+                                                   seqInfo['step'], seq))
+
+    def on_movie(self):
+        """ Open movie in external player """
+        print "Launching movie: %s" % self.mainUi.bPreviewMovie.absPath
+        os.system('start %s %s' % (self.template.movieLauncher(),
+                                   os.path.normcase(self.mainUi.bPreviewMovie.absPath)))
 
     def on_xplorer(self):
         """ Open explorer with stored path """
@@ -395,10 +423,13 @@ class MainTree(object):
             else:
                 self.mainUi.uiRf_linetestTab.rf_lineTestTabVis(state=False)
                 self.mainUi.twLinetest.clear()
+            self.mainUi.uiCmds_linetestTab.on_linetest()
 
     def on_tabItem(self):
         self.on_treeItem()
         selTab = self.mainUi.tabProdManager.tabText(self.mainUi.tabProdManager.currentIndex())
+        self.mainUi.twLinetest.clear()
+        self.mainUi.uiCmds_linetestTab.on_linetest()
         if selTab == 'Linetest':
             self.mainUi.uiRf_linetestTab.rf_stepSwitch()
 
@@ -720,6 +751,7 @@ class LinetestTab(object):
                 self.mainUi.twLinetest.clear()
             else:
                 self.mainUi.uiRf_linetestTab.rf_ltTree()
+                self.on_linetest()
 
     def on_newLt(self):
         """ Add new linetest """
@@ -776,8 +808,29 @@ class LinetestTab(object):
                 params = selLt[0].parent().widget.params
             #-- Preview Image --#
             if not params['ltIma'] == '' and not params['ltIma'] == ' ':
-                self.mainUi.uiRf_previewImage.rf_previewIma(params['ltIma'])
                 self.mainUi.bPreviewImage.setEnabled(True)
+                self.mainUi.uiRf_previewImage.rf_previewIma(params['ltIma'])
             else:
-                self.mainUi.uiRf_previewImage.rf_previewIma(prodManager.imaList['prodManager.png'])
                 self.mainUi.bPreviewImage.setEnabled(False)
+                self.mainUi.uiRf_previewImage.rf_previewIma(prodManager.imaList['prodManager.png'])
+            #-- LT Sequence --#
+            if not params['ltSeq'] == '' and not params['ltSeq'] == ' ':
+                self.mainUi.bPreviewSequence.setEnabled(True)
+                self.mainUi.bPreviewSequence.absPath = params['ltSeq']
+            else:
+                self.mainUi.bPreviewSequence.setEnabled(False)
+                self.mainUi.bPreviewSequence.absPath = None
+            #-- LT Movie --#
+            if not params['ltMov'] == '' and not params['ltMov'] == ' ':
+                self.mainUi.bPreviewMovie.setEnabled(True)
+                self.mainUi.bPreviewMovie.absPath = params['ltMov']
+            else:
+                self.mainUi.bPreviewMovie.setEnabled(False)
+                self.mainUi.bPreviewMovie.absPath = None
+        else:
+            self.mainUi.bPreviewImage.setEnabled(False)
+            self.mainUi.uiRf_previewImage.rf_previewIma(prodManager.imaList['prodManager.png'])
+            self.mainUi.bPreviewSequence.setEnabled(False)
+            self.mainUi.bPreviewSequence.absPath = None
+            self.mainUi.bPreviewMovie.setEnabled(False)
+            self.mainUi.bPreviewMovie.absPath = None
