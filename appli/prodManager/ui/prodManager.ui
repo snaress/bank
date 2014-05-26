@@ -1779,22 +1779,31 @@
             <item>
              <layout class="QVBoxLayout" name="vlLtShotsColumn">
               <item>
-               <widget class="QLabel" name="lColumns">
-                <property name="text">
-                 <string>Columns:</string>
+               <widget class="QSpinBox" name="sbLtColumns">
+                <property name="wrapping">
+                 <bool>false</bool>
                 </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="sbColumns">
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
                 </property>
                 <property name="prefix">
-                 <string/>
+                 <string>Columns = </string>
                 </property>
                 <property name="value">
-                 <number>10</number>
+                 <number>5</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="cbLtAutoRf">
+                <property name="text">
+                 <string>Auto Refresh</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1820,6 +1829,9 @@
                 <width>0</width>
                 <height>150</height>
                </size>
+              </property>
+              <property name="contextMenuPolicy">
+               <enum>Qt::DefaultContextMenu</enum>
               </property>
               <property name="currentIndex">
                <number>0</number>
@@ -1847,7 +1859,7 @@
                    <number>0</number>
                   </property>
                   <property name="columnCount">
-                   <number>10</number>
+                   <number>5</number>
                   </property>
                   <attribute name="headerVisible">
                    <bool>false</bool>
@@ -1875,31 +1887,6 @@
                   <column>
                    <property name="text">
                     <string notr="true">5</string>
-                   </property>
-                  </column>
-                  <column>
-                   <property name="text">
-                    <string notr="true">6</string>
-                   </property>
-                  </column>
-                  <column>
-                   <property name="text">
-                    <string notr="true">7</string>
-                   </property>
-                  </column>
-                  <column>
-                   <property name="text">
-                    <string notr="true">8</string>
-                   </property>
-                  </column>
-                  <column>
-                   <property name="text">
-                    <string notr="true">9</string>
-                   </property>
-                  </column>
-                  <column>
-                   <property name="text">
-                    <string notr="true">10</string>
                    </property>
                   </column>
                  </widget>

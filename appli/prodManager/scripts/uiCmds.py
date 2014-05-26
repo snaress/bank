@@ -355,14 +355,12 @@ class PreviewImage(object):
             seqName = "%s.%s.%s" % (seqInfo['fileName'].split('.')[0], '@' * seqInfo['padding'],
                                     seqInfo['fileName'].split('.')[2])
             seq = os.path.normpath(os.path.join(seqInfo['filePath'], seqName))
-            seqLabel = "%s.[%s:%s:%s].%s" % (seqInfo['fileName'].split('.')[0],
-                                             str(seqInfo['first']).zfill(seqInfo['padding']),
-                                             str(seqInfo['last']).zfill(seqInfo['padding']),
-                                             seqInfo['step'], seqInfo['fileName'].split('.')[2])
             print '-' * 100
-            print "Launching sequence: %s" % os.path.normpath(os.path.join(seqInfo['filePath'], seqLabel))
-            for k, v in seqInfo.iteritems():
-                print k, ' = ', v
+            print "Launching sequence: %s" % os.path.normpath(os.path.join(seqInfo['filePath'],
+                                                                           seqInfo['label']))
+            for k, v in sorted(seqInfo.iteritems()):
+                if not k == 'label':
+                    print k, ' = ', v
             os.system('start %s -n %s %s %s %s' % (self.template.sequenceLauncher(),
                                                    seqInfo['first'], seqInfo['last'],
                                                    seqInfo['step'], seq))
@@ -424,6 +422,7 @@ class MainTree(object):
                 self.mainUi.uiRf_linetestTab.rf_lineTestTabVis(state=False)
                 self.mainUi.twLinetest.clear()
             self.mainUi.uiCmds_linetestTab.on_linetest()
+            self.mainUi.uiRf_linetestTab.rf_ltShots()
 
     def on_tabItem(self):
         self.on_treeItem()
@@ -799,7 +798,7 @@ class LinetestTab(object):
         self.warnDial0.close()
 
     def on_linetest(self):
-        """ Refresh preview image """
+        """ Refresh preview image, sequence and movie info """
         selLt = self.mainUi.twLinetest.selectedItems()
         if selLt:
             if hasattr(selLt[0], '_ltLink'):

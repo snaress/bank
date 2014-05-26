@@ -107,6 +107,8 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.bLtNew.clicked.connect(self.uiCmds_linetestTab.on_newLt)
         self.bLtDel.clicked.connect(self.uiCmds_linetestTab.on_delLt)
         self.twLinetest.clicked.connect(self.uiCmds_linetestTab.on_linetest)
+        self.sbLtColumns.valueChanged.connect(self.uiRf_linetestTab.rf_ltShots)
+        self.cbLtAutoRf.clicked.connect(self.uiRf_linetestTab.rf_ltShots)
 
     def windowInit(self):
         """ Main ui inititialize """

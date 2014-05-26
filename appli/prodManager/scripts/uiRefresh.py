@@ -425,6 +425,63 @@ class LinetestTab(object):
         self.mainUi.twLinetest.clear()
         self.populate.linetestTree()
 
+    def rf_ltShots(self):
+        """ Refresh linetest QTreeWidget """
+        if self.mainUi.cbLtAutoRf.isChecked():
+            selInd = self.mainUi.tabLtShots.currentIndex()
+            tree = self.mainUi.tabLtShots.widget(selInd).layout().itemAtPosition(0, 0).widget()
+            tree.clear()
+            self.populate.linetestShots(tree)
+
+    def getLt(self, item=None):
+        """ Get linetest file list from selected shotNode
+            @param item: (object) : Main tree QTreeWidgetItem
+            @return: (list) : Linetest file list """
+        if item is None:
+            selItems = self.mainUi.twProject.selectedItems()
+        else:
+            selItems = [item]
+        ltFileList = []
+        if selItems:
+            selStep = str(self.mainUi.cbLtStep.currentText())
+            ltPath = os.path.join(selItems[0].dataPath, 'lt', selStep)
+            if os.path.exists(ltPath):
+                ltList = os.listdir(ltPath) or []
+                for lt in sorted(ltList, reverse=True):
+                    if lt.startswith('lt-') and lt.endswith('.py'):
+                        ltFileList.append(os.path.join(ltPath, lt))
+        return ltFileList
+
+    def getLtShots(self):
+        """ Get shotNode list from ui
+            @return: (dict) : ShotNodes params """
+        selItems = self.mainUi.twProject.selectedItems()
+        ltShots = {'item': [], 'ltFile': []}
+        check = False
+        if selItems:
+            if not 'Ctnr' in selItems[0].nodeType:
+                selItems = [selItems[0].parent()]
+                check = True
+            else:
+                if selItems[0].childCount():
+                    if not 'Ctnr' in selItems[0].child(0).nodeType:
+                        check = True
+            if check:
+                if selItems[0].childCount():
+                    for i in range(selItems[0].childCount()):
+                        item = selItems[0].child(i)
+                        if item.nodeType == self.mainUi.selectedTree.replace('Tree', ''):
+                            ltShots['item'].append(item)
+                            ltList = self.mainUi.uiRf_linetestTab.getLt(item=item)
+                            if ltList:
+                                ltShots['ltFile'].append(ltList[0])
+                            else:
+                                ltShots['ltFile'].append(None)
+                        else:
+                            ltShots['item'].append(None)
+                            ltShots['ltFile'].append(None)
+        return ltShots
+
 
 class PopulateTrees(object):
     """ Populate prodManager trees QTreeWidget
@@ -506,11 +563,10 @@ class PopulateTrees(object):
         """ Populate shotInfo tree QTreeWidget """
         selItems = self.mainUi.twProject.selectedItems()
         if selItems:
-            selItem = selItems[0]
             allItems = pQt.getAllItems(self.mainUi.twProject)
-            self.mainUi.lShotNodePath.setText(selItem.nodePath)
+            self.mainUi.lShotNodePath.setText(selItems[0].nodePath)
             for item in allItems:
-                if not 'Ctnr' in item.nodeType and item.nodePath.startswith(selItem.nodePath):
+                if not 'Ctnr' in item.nodeType and item.nodePath.startswith(selItems[0].nodePath):
                     nodeObj = self.pm.getNodeFromNodePath(item.nodeType, item.nodePath)
                     nodeObj.ud_paramsFromFile()
                     newItem = self.newShotInfoItem(**item.__dict__)
@@ -540,20 +596,41 @@ class PopulateTrees(object):
         """ Populate linetest tree QTreeWidget """
         selItems = self.mainUi.twProject.selectedItems()
         if selItems:
-            selStep = str(self.mainUi.cbLtStep.currentText())
-            ltPath = os.path.join(selItems[0].dataPath, 'lt', selStep)
-            if os.path.exists(ltPath):
-                ltList = os.listdir(ltPath) or []
-                for n, lt in enumerate(sorted(ltList, reverse=True)):
-                    if lt.startswith('lt-') and lt.endswith('.py'):
-                        ltAbsPath = os.path.join(ltPath, lt)
-                        ltParams = pFile.readPyFile(ltAbsPath, filterIn=['lt'])
-                        newItem, newWidget = self.newLinetestItem(selItems[0], ltPath, lt, **ltParams)
-                        self.mainUi.twLinetest.addTopLevelItem(newItem)
-                        self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)
-                        if n == 0:
-                            newItem.setExpanded(True)
-                        newWidget.rf_comments()
+            ltList = self.mainUi.uiRf_linetestTab.getLt()
+            for n, lt in enumerate(ltList):
+                ltParams = pFile.readPyFile(lt, filterIn=['lt'])
+                newItem, newWidget = self.newLinetestItem(selItems[0], os.path.dirname(lt),
+                                                          os.path.basename(lt), **ltParams)
+                self.mainUi.twLinetest.addTopLevelItem(newItem)
+                self.mainUi.twLinetest.setItemWidget(newItem, 0, newWidget)
+                if n == 0:
+                    newItem.setExpanded(True)
+                newWidget.rf_comments()
+
+    def linetestShots(self, tree):
+        """ Populate linetest shots tree QTreeWidget
+            @param tree: (object) : Selected tab page QTreeWidget """
+        ltShots = self.mainUi.uiRf_linetestTab.getLtShots()
+        clns = int(self.mainUi.sbLtColumns.value())
+        self.mainUi.twLtShots.setColumnCount(clns)
+        line = 1
+        newItem = None
+        for n, ltFile in enumerate(ltShots['ltFile']):
+            ind = n+1
+            if n == 0:
+                newItem = self.newLtShotItem()
+                tree.addTopLevelItem(newItem)
+            if ind == (line*clns)+1:
+                line += 1
+                newItem = self.newLtShotItem()
+                tree.addTopLevelItem(newItem)
+            cln = (clns - int((clns * line) - ind))
+            if ltFile is not None:
+                shotParams = pFile.readPyFile(ltFile, filterIn=['lt'])
+            else:
+                shotParams = {}
+            newWidget = self.newLtShotWidget(ltShots['item'][n], tree, **shotParams)
+            tree.setItemWidget(newItem, cln-1, newWidget)
 
     #=========================================== ITEMS ============================================#
 
@@ -754,6 +831,12 @@ class PopulateTrees(object):
         newItem.setBackgroundColor(0, QtGui.QColor(150, 150, 150))
         return newItem, newWidget
 
+    def newLtShotItem(self):
+        """ Create new linetest comment QTreeWidgetItem
+            @return: (object) : New QTreeWidgetItem """
+        newItem = QtGui.QTreeWidgetItem()
+        return newItem
+
     #========================================== WIDGETS ===========================================#
 
     def _getShotParamWidget(self, paramName, paramType, nodeParams):
@@ -866,4 +949,13 @@ class PopulateTrees(object):
         newWidget = QtGui.QCheckBox()
         newWidget.setChecked(value)
         newWidget.setEnabled(False)
+        return newWidget
+
+    def newLtShotWidget(self, mainTreeItem, tree, **kwargs):
+        """ Create new linetest shot item
+            @param mainTreeItem: (object) : Main tree QTreeWidgetItem
+            @param tree: (object) : Linetest shot tab QTreeWidget
+            @param kwargs: (dict) : Linetest shot params
+            @return: (object) : New linetest shot widget"""
+        newWidget = self.wnd.LtShotWidget(self.mainUi, mainTreeItem, tree, **kwargs)
         return newWidget

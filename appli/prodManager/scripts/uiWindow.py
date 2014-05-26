@@ -875,3 +875,55 @@ class LtCmtEditor(ltCmtEditorClass, ltCmtEditorUiClass):
             @return: (list) : Hour, Minute, Second """
         _time =  self.dtTime.time()
         return [_time.hour(), _time.minute(), _time.second()]
+
+
+ltShotClass, ltShotUiClass = uic.loadUiType(prodManager.uiList['ltShot'])
+class LtShotWidget(ltShotClass, ltShotUiClass):
+    """ Linetest shot widget ui class
+        @param kwargs: (dict) : Linetest shot params """
+
+    def __init__(self, mainUi, mainTreeItem, tree, **kwargs):
+        self.mainUi = mainUi
+        self.treeLink = mainTreeItem
+        self.tree = tree
+        self.params = kwargs
+        super(LtShotWidget, self).__init__()
+        self._setupUi()
+        self.rf_imaPreview()
+
+    def _setupUi(self):
+        """ Setup Widget """
+        self.setupUi(self)
+        self.bShotName.setText(self.treeLink.nodeName)
+        self.bShotName.clicked.connect(self.on_ltShot)
+
+    def rf_imaPreview(self):
+        """ Refresh preview image """
+        clns = int(self.mainUi.sbLtColumns.value())
+        maxWidth = int(self.tree.width() / clns)
+        maxHeight = int(maxWidth / 2)
+        self.pmapShot = QtGui.QPixmap(self.imaPreview)
+        self.lShot.setPixmap(self.pmapShot)
+        self.pmapShot.scaled(maxWidth, maxHeight, QtCore.Qt.IgnoreAspectRatio)
+        self.mainUi.resizePixmap(maxWidth, maxHeight, self.pmapShot, self.lShot)
+        for c in range(int(self.mainUi.sbLtColumns.value())):
+            self.tree.setColumnWidth(c, maxWidth)
+
+    def on_ltShot(self):
+        """ Refresh linetest tree """
+        selItems = self.mainUi.twProject.selectedItems()
+        if selItems:
+            selItems[0].setSelected(False)
+        self.treeLink.setSelected(True)
+        self.mainUi.uiRf_linetestTab.rf_ltTree()
+
+    @property
+    def imaPreview(self):
+        """ Get image preview
+            @return: (str) : ShotNode image preview """
+        ima = prodManager.imaList['prodManager.png']
+        if 'ltIma' in self.params:
+            preview = self.params['ltIma']
+            if not preview == '' and not preview == ' ':
+                ima = preview
+        return ima
