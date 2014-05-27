@@ -68,8 +68,8 @@ class MenuCmds(object):
         selNode = self.mainUi.twProjectTree.selectedItems()
         create, warn = self.init_newProjectTreeItem(itemType)
         if not create:
-            self.warnDial0 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept0])
-            self.warnDial0.show()
+            errorDial = QtGui.QErrorMessage(self.mainUi)
+            errorDial.showMessage(warn)
         else:
             mess = self._getTreeDialMessage(itemType)
             if selNode:
@@ -89,10 +89,9 @@ class MenuCmds(object):
             @param itemType: (str) : 'container' or 'node' """
         selNode = self.mainUi.twProjectTree.selectedItems()
         create, warn = self.init_newProjectTreeItem(itemType)
-        print create
         if not create:
-            self.warnDial0 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept0])
-            self.warnDial0.show()
+            errorDial = QtGui.QErrorMessage(self.mainUi)
+            errorDial.showMessage(warn)
         else:
             mess = self._getTreeDialMessage(itemType)
             if selNode:
@@ -113,10 +112,6 @@ class MenuCmds(object):
         elif itemType == 'node':
             mess = ["Enter new node name,", "Don't use special caracter or space."]
         return mess
-
-    def on_dialAccept0(self):
-        """ Command launch when Qbutton 'Ok' of dialog is clicked """
-        self.warnDial0.close()
 
     def newProjectTreeItem(self, itemType, itemName=None, itemLabel=None):
         """ Command launch when 'Ok' of confirmDialog is clicked
@@ -147,8 +142,8 @@ class MenuCmds(object):
                 self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
             else:
                 warn = "!!! Warning !!!\n%s\nalready exists" % nodePath
-                self.warnDial1 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept1])
-                self.warnDial1.exec_()
+                errorDial = QtGui.QErrorMessage(self.mainUi)
+                errorDial.showMessage(warn)
 
     def _getProjectTreePath(self, nodeName, nodeLabel):
         """ Get parent item params
@@ -169,10 +164,6 @@ class MenuCmds(object):
                 check = False
                 print "!!! Warning: Node name already exists: %s !!!" % nodeName
         return check, nodePath
-
-    def on_dialAccept1(self):
-        """ Command launch when Qbutton 'Ok' of dialog is clicked """
-        self.warnDial1.close()
 
     def newProjectTreeCancel(self):
         """ Command launch when 'Cancel' of confirmDialog is clicked """
@@ -201,8 +192,8 @@ class MenuCmds(object):
         """ Command launch when miNewStep is clicked """
         create, warn = self.init_newProjectStepItem()
         if not create:
-            self.warnDial2 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept2])
-            self.warnDial2.show()
+            errorDial = QtGui.QErrorMessage(self.mainUi)
+            errorDial.showMessage(warn)
         else:
             mess = ["Enter new step name,", "Don't use special caracter or space."]
             self.pdNewProjectStep = dialog.PromptDialog('\n'.join(mess), self.newProjectStepItem,
@@ -220,9 +211,10 @@ class MenuCmds(object):
                 self.mainUi.twProjectStep.addTopLevelItem(newItem)
                 self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
             else:
+                self.pdNewProjectStep.close()
                 warn = "!!! Warning !!!\n%s\nalready exists" % stepName
-                self.warnDial3 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept3])
-                self.warnDial3.exec_()
+                errorDial = QtGui.QErrorMessage(self.mainUi)
+                errorDial.showMessage(warn)
 
     def _checkNewStepItem(self, stepName):
         """ Check new step name validity
@@ -233,14 +225,6 @@ class MenuCmds(object):
             if item.nodeName == stepName:
                 return False
         return True
-
-    def on_dialAccept2(self):
-        """ Command launch when Qbutton 'Ok' of dialog is clicked """
-        self.warnDial2.close()
-
-    def on_dialAccept3(self):
-        """ Command launch when Qbutton 'Ok' of dialog is clicked """
-        self.warnDial3.close()
 
     def newProjectStepCancel(self):
         """ Command launch when 'Cancel' of confirmDialog is clicked """
@@ -269,8 +253,8 @@ class MenuCmds(object):
         """ Command launch when miNewAttr is clicked """
         create, warn = self.init_newProjectAttrItem()
         if not create:
-            self.warnDial4 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept4])
-            self.warnDial4.show()
+            errorDial = QtGui.QErrorMessage(self.mainUi)
+            errorDial.showMessage(warn)
         else:
             mess = ["Enter new attribute name,", "Don't use special caracter or space."]
             self.pdNewProjectAttr = dialog.PromptDialog('\n'.join(mess), self.newProjectAttrItem,
@@ -289,9 +273,10 @@ class MenuCmds(object):
                 self.mainUi.twProjectAttr.setItemWidget(newItem, 1, newChoice)
                 self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
             else:
+                self.pdNewProjectAttr.close()
                 warn = "!!! Warning !!!\n%s\nalready exists" % attrName
-                self.warnDial5 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept5])
-                self.warnDial5.exec_()
+                errorDial = QtGui.QErrorMessage(self.mainUi)
+                errorDial.showMessage(warn)
 
     def _checkNewAttrItem(self, attrName):
         """ Check new atribute name validity
@@ -302,14 +287,6 @@ class MenuCmds(object):
             if item.nodeName == attrName:
                 return False
         return True
-
-    def on_dialAccept4(self):
-        """ Command launch when Qbutton 'Ok' of dialog is clicked """
-        self.warnDial4.close()
-
-    def on_dialAccept5(self):
-        """ Command launch when Qbutton 'Ok' of dialog is clicked """
-        self.warnDial5.close()
 
     def newProjectAttrCancel(self):
         """ Command launch when 'Cancel' of confirmDialog is clicked """
@@ -325,13 +302,36 @@ class MenuCmds(object):
                 selTrees = self.mainUi.twProjectTrees.selectedItems()
                 self.mainUi.uiRf_projectTab.ud_projectTreesItem(selTrees[0])
             else:
-                warn = "!!! Warning: Remove 'workDir' attribute not allowed !!!"
-                self.warnDial6 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept6])
-                self.warnDial6.exec_()
+                warn = "WARNING: Removing 'workDir' or 'prevIma attribute is not allowed..."
+                errorDial = QtGui.QErrorMessage(self.mainUi)
+                errorDial.showMessage(warn)
 
-    def on_dialAccept6(self):
-        """ Command launch when Qbutton 'Ok' of dialog is clicked """
-        self.warnDial6.close()
+    #==================================== POPUP MENU LT SHOTS ====================================#
+
+    def on_newLtShotTab(self):
+        """ Command launch when miNewTab is clicked """
+        newLayout = QtGui.QGridLayout()
+        newLayout.setContentsMargins(0, 0, 0, 0)
+        newWidget = QtGui.QWidget()
+        newWidget.setLayout(newLayout)
+        newTree = QtGui.QTreeWidget()
+        newTree.setColumnCount(int(self.mainUi.sbLtColumns.value()))
+        newTree.setHeaderHidden(True)
+        newTree.setIndentation(0)
+        newTree.setSelectionMode(QtGui.QTreeWidget.NoSelection)
+        newLayout.addWidget(newTree)
+        self.mainUi.tabLtShots.addTab(newWidget, 'New_Tab')
+        self.mainUi.tabLtShots.setCurrentIndex(self.mainUi.tabLtShots.count() - 1)
+
+    def on_delLtShotTab(self):
+        """ Command launch when miDelTab is clicked """
+        selInd = self.mainUi.tabLtShots.currentIndex()
+        if not selInd == 0:
+            self.mainUi.tabLtShots.setCurrentIndex(selInd - 1)
+            self.mainUi.tabLtShots.removeTab(selInd)
+        else:
+            errorDial = QtGui.QErrorMessage(self.mainUi)
+            errorDial.showMessage("WARNING: The first tab is undeletable...")
 
 
 class PreviewImage(object):
@@ -500,14 +500,10 @@ class ProjectTab(object):
             self.mainUi.twProjectTasks.setItemWidget(newTask, 1, newCol)
             self.mainUi.twProjectTasks.setItemWidget(newTask, 2, newStat)
         else:
-            mess = "Warning: Task name already exists (%s) !!!" % taskName
-            self.cdAddTaskError = dialog.ConfirmDialog(mess, btns=['ok'],
-                                                       cmds=[self.addTaskDialAccept])
-            self.cdAddTaskError.exec_()
-
-    def addTaskDialAccept(self):
-        """ Command launch when the confirmDialog bOk is clicked """
-        self.cdAddTaskError.close()
+            self.pdAddTask.close()
+            warn = "Warning: Task name already exists (%s) !!!" % taskName
+            errorDial = QtGui.QErrorMessage(self.mainUi)
+            errorDial.showMessage(warn)
 
     def addTaskCancel(self):
         """ Command launch when the promptDialog bCancel is clicked """
@@ -560,13 +556,9 @@ class ProjectTab(object):
         else:
             mess = "Warning: Tree name not valid !!!"
         if mess is not None:
-            self.cdAddTreeError = dialog.ConfirmDialog(mess, btns=['ok'],
-                                                       cmds=[self.addTreeDialAccept])
-            self.cdAddTreeError.exec_()
-
-    def addTreeDialAccept(self):
-        """ Command launch when the confirmDialog bOk is clicked """
-        self.cdAddTreeError.close()
+            self.pdAddTree.close()
+            errorDial = QtGui.QErrorMessage(self.mainUi)
+            errorDial.showMessage(mess)
 
     def addTreeCancel(self):
         """ Command launch when the promptDialog bCancel is clicked """
@@ -692,13 +684,9 @@ class ShotInfoTab(object):
             return True
         except:
             warn = "!!! ERROR: Comment not valid !!!\nDon't use special caracters."
-            self.warnDial0 = dialog.ConfirmDialog(warn, btns=['Ok'], cmds=[self.on_dialAccept0])
-            self.warnDial0.show()
+            errorDial = QtGui.QErrorMessage(self.mainUi)
+            errorDial.showMessage(warn)
             return False
-
-    def on_dialAccept0(self):
-        """ Command launch when Qbutton 'Ok' of dialog is clicked """
-        self.warnDial0.close()
 
     def on_cancelShotParams(self):
         """ Command launch when bCancelShotParams is clicked """

@@ -433,6 +433,21 @@ class LinetestTab(object):
             tree.clear()
             self.populate.linetestShots(tree)
 
+    def pop_ltShotsMenu(self):
+        """ Create linetest Shots QTreeWidget popupMenu """
+        self.mainUi.tbLtShotsMenu = QtGui.QToolBar()
+        self.mainUi.miNewTab = self.mainUi.tbProjectTreeMenu.addAction("New Tab",
+                               self.mainUi.uiCmds_menu.on_newLtShotTab)
+        self.mainUi.miDelTab = self.mainUi.tbProjectTreeMenu.addAction("Delete Tab",
+                               self.mainUi.uiCmds_menu.on_delLtShotTab)
+        self.mainUi.tabLtShots.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.mainUi.connect(self.mainUi.tabLtShots,
+                            QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'),
+                            self.mainUi.on_popLtShotsMenu)
+        self.mainUi.menuLtShots = QtGui.QMenu(self.mainUi)
+        self.mainUi.menuLtShots.addAction(self.mainUi.miNewTab)
+        self.mainUi.menuLtShots.addAction(self.mainUi.miDelTab)
+
     def getLt(self, item=None):
         """ Get linetest file list from selected shotNode
             @param item: (object) : Main tree QTreeWidgetItem
@@ -629,8 +644,20 @@ class PopulateTrees(object):
                 shotParams = pFile.readPyFile(ltFile, filterIn=['lt'])
             else:
                 shotParams = {}
-            newWidget = self.newLtShotWidget(ltShots['item'][n], tree, **shotParams)
+            newWidget = self.newLtShotWidget(tree, ltShots['item'][n].__dict__, **shotParams)
             tree.setItemWidget(newItem, cln-1, newWidget)
+        if ltShots['item']:
+            if 'Ctnr' in ltShots['item'][0].nodeType:
+                self.mainUi.tabLtShots.setTabText(self.mainUi.tabLtShots.currentIndex(),
+                                                  ltShots['item'][0].nodePath)
+            else:
+                parent = self.mainUi.getParentItemFromNodePath(self.mainUi.twProject,
+                                                               ltShots['item'][0].nodePath)
+                self.mainUi.tabLtShots.setTabText(self.mainUi.tabLtShots.currentIndex(),
+                                                  parent.nodePath)
+        else:
+            self.mainUi.tabLtShots.setTabText(self.mainUi.tabLtShots.currentIndex(),
+                                              "New_Tab")
 
     #=========================================== ITEMS ============================================#
 

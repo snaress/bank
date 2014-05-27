@@ -39,17 +39,12 @@ class NewProjectUi(newProjectClass, newProjectUiClass):
                 self.mainUi.windowRefresh()
                 self.close()
             else:
-                self.confUi = dialog.ConfirmDialog('\n'.join(mess), btns=['Ok'], cmds=[self.on_dialogAccept])
-                self.confUi.exec_()
+                errorDial = QtGui.QErrorMessage(self)
+                errorDial.showMessage('\n'.join(mess))
         else:
-            mess = ["#-- Warning --#",
-                    "Project Name or Project Alias can't be empty !!!"]
-            self.confUi = dialog.ConfirmDialog('\n'.join(mess), btns=['Ok'], cmds=[self.on_dialogAccept])
-            self.confUi.exec_()
-
-    def on_dialogAccept(self):
-        """ Command launch when Qbutton 'Ok' of dialog is clicked """
-        self.confUi.close()
+            warn = "!!! WARNING: Project Name or Project Alias can't be empty..."
+            errorDial = QtGui.QErrorMessage(self)
+            errorDial.showMessage(warn)
 
 
 loadProjectClass, loadProjectUiClass = uic.loadUiType(prodManager.uiList['loadProject'])
@@ -117,13 +112,9 @@ class EditProjectTreeItem(editProjectTreeItemClass, editProjectTreeItemUiClass):
         if not name == '' and not label == '':
             self.mainUi.uiCmds_menu.newProjectTreeItem(self.itemType, itemName=name, itemLabel=label)
         else:
-            mess = "!!! Warning: Both name and label should be edited !!!"
-            self.confUi = dialog.ConfirmDialog(mess, btns=['Ok'], cmds=[self.on_dialogAccept])
-            self.confUi.exec_()
-
-    def on_dialogAccept(self):
-        """ Command launch when Qbutton 'Ok' of dialog is clicked """
-        self.confUi.close()
+            warn = "!!! Warning: Both name and label should be edited !!!"
+            errorDial = QtGui.QErrorMessage(self)
+            errorDial.showMessage(warn)
 
 
 editProjectTreeClass, editProjectTreeUiClass = uic.loadUiType(prodManager.uiList['editProjectTree'])
@@ -882,10 +873,10 @@ class LtShotWidget(ltShotClass, ltShotUiClass):
     """ Linetest shot widget ui class
         @param kwargs: (dict) : Linetest shot params """
 
-    def __init__(self, mainUi, mainTreeItem, tree, **kwargs):
+    def __init__(self, mainUi, tree, shotParams, **kwargs):
         self.mainUi = mainUi
-        self.treeLink = mainTreeItem
         self.tree = tree
+        self.shotParams = shotParams
         self.params = kwargs
         super(LtShotWidget, self).__init__()
         self._setupUi()
@@ -894,7 +885,7 @@ class LtShotWidget(ltShotClass, ltShotUiClass):
     def _setupUi(self):
         """ Setup Widget """
         self.setupUi(self)
-        self.bShotName.setText(self.treeLink.nodeName)
+        self.bShotName.setText(self.shotParams['nodeName'])
         self.bShotName.clicked.connect(self.on_ltShot)
 
     def rf_imaPreview(self):
@@ -911,10 +902,27 @@ class LtShotWidget(ltShotClass, ltShotUiClass):
 
     def on_ltShot(self):
         """ Refresh linetest tree """
+        #-- Clear ltShots QTreeWidget --#
         selItems = self.mainUi.twProject.selectedItems()
         if selItems:
             selItems[0].setSelected(False)
-        self.treeLink.setSelected(True)
+        #-- Get Tree Info --#
+        selTreeLabel = self.mainUi.selectedTree
+        selTreeName = selTreeLabel.replace('Tree', '')
+        curTreeName = self.shotParams['nodeType'].replace('Ctnr', '')
+        curTreeLabel = '%sTree' % curTreeName
+        #-- Switch Tree --#
+        if not curTreeName in selTreeName:
+            for i in range(self.mainUi.hlMainTrees.count()):
+                widget = self.mainUi.hlMainTrees.itemAt(i).widget()
+                if widget.treeLabel == curTreeLabel:
+                    widget.setChecked(True)
+            self.mainUi.uiCmds_mainTree.on_switchTree(curTreeLabel)
+        #-- Select Project Tree Item --#
+        item = self.mainUi.getItemFromNodePath(self.mainUi.twProject, self.shotParams['nodePath'])
+        if item is not None:
+            item.setSelected(True)
+            item.parent().setExpanded(True)
         self.mainUi.uiRf_linetestTab.rf_ltTree()
 
     @property

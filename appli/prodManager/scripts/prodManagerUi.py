@@ -108,7 +108,7 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.bLtDel.clicked.connect(self.uiCmds_linetestTab.on_delLt)
         self.twLinetest.clicked.connect(self.uiCmds_linetestTab.on_linetest)
         self.sbLtColumns.valueChanged.connect(self.uiRf_linetestTab.rf_ltShots)
-        self.cbLtAutoRf.clicked.connect(self.uiRf_linetestTab.rf_ltShots)
+        self.uiRf_linetestTab.pop_ltShotsMenu()
 
     def windowInit(self):
         """ Main ui inititialize """
@@ -151,6 +151,10 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         if self.bEditProjectTab.isChecked():
             if self.twProjectTrees.selectedItems():
                 self.menuProjectAttr.exec_(self.twProjectAttr.mapToGlobal(point))
+
+    def on_popLtShotsMenu(self, point):
+        """ Create linetest shots popupMenu launcher """
+        self.menuLtShots.exec_(self.tabLtShots.mapToGlobal(point))
 
     @staticmethod
     def unselectAllItems(twTree):
@@ -212,9 +216,20 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
             tasks.append(task)
         return tasks
 
+    def getItemFromNodePath(self,twTree, nodePath):
+        """ Get QTreeWidgetItem with given nodePath
+            @param twTree: (object) : QTreeWidget
+            @param nodePath: (str) : Node path
+            @return: (object) : QTreeWidgetItem """
+        allItems = pQt.getAllItems(twTree)
+        for item in allItems:
+            if item.nodePath == nodePath:
+                return item
+        return None
+
     @staticmethod
     def getParentItemFromNodePath(twTree, nodePath):
-        """ Get project tree QTreeWidgetItem with given nodePath
+        """ Get parent QTreeWidgetItem with given nodePath
             @param twTree: (object) : QTreeWidget
             @param nodePath: (str) : Node path
             @return: (object) : Parent QTreeWidgetItem """
