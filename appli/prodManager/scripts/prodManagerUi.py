@@ -1,8 +1,10 @@
+import os
 import sys
 from appli import prodManager
 from functools import partial
 from PyQt4 import QtGui, QtCore, uic
 from lib.qt.scripts import procQt as pQt
+from lib.system.scripts import procFile as pFile
 from appli.prodManager.scripts import prodManager as pm
 from appli.prodManager.scripts import uiCmds as pmUiCmds
 from appli.prodManager.scripts import uiRefresh as pmRefresh
@@ -108,6 +110,8 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.bLtDel.clicked.connect(self.uiCmds_linetestTab.on_delLt)
         self.twLinetest.clicked.connect(self.uiCmds_linetestTab.on_linetest)
         self.sbLtColumns.valueChanged.connect(self.uiRf_linetestTab.rf_ltShots)
+        self.cbLtEditMode.clicked.connect(self.uiRf_linetestTab.rf_ltShotStatus)
+        self.tabLtShots.currentChanged.connect(self.uiCmds_linetestTab.on_ltShotTab)
         self.uiRf_linetestTab.pop_ltShotsMenu()
 
     def windowInit(self):
@@ -241,6 +245,39 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
             for item in allItems:
                 if item.nodePath == path:
                     return item
+
+    def getTaskInfo(self, step, selShot):
+        """ Get current task for given step
+            @param step: (str) : Step name
+            @param selShot: (object) : Main tree QTreeWidgetItem
+            @return: (str) : Task """
+        task = "Unassigned"
+        color = (200, 200, 200)
+        stat = False
+        if os.path.exists(selShot.dataFile):
+            params = pFile.readPyFile(selShot.dataFile, filterIn=['node'])
+            if self.pm.project._projectFile is not None:
+                projectFile = self.pm.project._projectFile
+                projectParams = pFile.readPyFile(projectFile, filterIn=['project'])
+                projectTasks = projectParams['projectTasks']
+                #-- Get Task Status --#
+                if 'nodeStatus' in params:
+                    task = params['nodeStatus'][step]
+                else:
+                    for t in projectTasks:
+                        taskKey = t.keys()
+                        if taskKey:
+                            tmpTask = taskKey[0]
+                            if t[tmpTask]['stat']:
+                                task = tmpTask
+                                break
+                #-- Get Task Color --#
+                if task is not 'Unassigned':
+                    for t in projectTasks:
+                        if task in t:
+                            color = t[task]['color']
+                            stat = t[task]['stat']
+        return task, color, stat
 
     @staticmethod
     def resizePixmap(maxWidth, maxHeight, pixMap, item):

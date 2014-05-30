@@ -346,6 +346,8 @@ class ShotInfoTab(object):
         self.mainUi.shotTextEditor.bClearText.setEnabled(False)
         self.mainUi.shotTextEditor.bLoadFile.setEnabled(False)
         self.mainUi.shotTextEditor.bSaveFile.setEnabled(False)
+        self.mainUi.twShotTask.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+        self.mainUi.twShotTask.header().setResizeMode(1, QtGui.QHeaderView.ResizeToContents)
         self.mainUi.glShotComment.addWidget(self.mainUi.shotTextEditor)
         self.rf_shotParamsVis()
 
@@ -392,6 +394,11 @@ class ShotInfoTab(object):
             if 'comment' in nodeObj.params:
                 self.mainUi.shotTextEditor.teText.setHtml(nodeObj.params['comment'])
 
+    def rf_taskStatus(self):
+        """ Refresh step task status """
+        self.mainUi.twShotTask.clear()
+        self.populate.shotTaskTree()
+
 
 class LinetestTab(object):
     """ Class used by the ProdManagerUi for linetestTab updates and refresh
@@ -432,6 +439,24 @@ class LinetestTab(object):
             tree = self.mainUi.tabLtShots.widget(selInd).layout().itemAtPosition(0, 0).widget()
             tree.clear()
             self.populate.linetestShots(tree)
+
+    def rf_ltShotStatus(self):
+        """ Refresh all shotNode status in ltShotsTab """
+        for n in range(self.mainUi.tabLtShots.count()):
+            tree = self.mainUi.tabLtShots.widget(n).layout().itemAtPosition(0, 0).widget()
+            for item in pQt.getTopItems(tree):
+                if hasattr(item, 'widgets'):
+                    for widget in item.widgets:
+                        widget.cbTask.setEnabled(self.mainUi.cbLtEditMode.isChecked())
+
+    def rf_ltShotProgress(self):
+        for n in range(self.mainUi.tabLtShots.count()):
+            tree = self.mainUi.tabLtShots.widget(n).layout().itemAtPosition(0, 0).widget()
+            for item in pQt.getTopItems(tree):
+                if hasattr(item, 'widgets'):
+                    for widget in item.widgets:
+                        widget.rf_taskStatus()
+                        widget.rf_taskProgress()
 
     def pop_ltShotsMenu(self):
         """ Create linetest Shots QTreeWidget popupMenu """
@@ -607,6 +632,20 @@ class PopulateTrees(object):
                 else:
                     self.mainUi.twShotParams.setItemWidget(newItem, 1, newWidget)
 
+    def shotTaskTree(self):
+        """ Populate shotTask tree QTreeWidget """
+        if self.mainUi.selectedTree is not None:
+            selTree = self.mainUi.selectedTree
+            treeObj = getattr(self.pm, selTree)
+            selShots = self.mainUi.twShotInfo.selectedItems()
+            if selShots:
+                selShot = selShots[0]
+                for step in treeObj.treeSteps:
+                    task, color, stat = self.mainUi.getTaskInfo(step, selShot)
+                    newItem, newColor = self.newShotTaskItem(step, task, color)
+                    self.mainUi.twShotTask.addTopLevelItem(newItem)
+                    self.mainUi.twShotTask.setItemWidget(newItem, 2, newColor)
+
     def linetestTree(self):
         """ Populate linetest tree QTreeWidget """
         selItems = self.mainUi.twProject.selectedItems()
@@ -627,9 +666,10 @@ class PopulateTrees(object):
             @param tree: (object) : Selected tab page QTreeWidget """
         ltShots = self.mainUi.uiRf_linetestTab.getLtShots()
         clns = int(self.mainUi.sbLtColumns.value())
-        self.mainUi.twLtShots.setColumnCount(clns)
+        tree.setColumnCount(clns)
         line = 1
         newItem = None
+        widgetList = []
         for n, ltFile in enumerate(ltShots['ltFile']):
             ind = n+1
             if n == 0:
@@ -646,6 +686,9 @@ class PopulateTrees(object):
                 shotParams = {}
             newWidget = self.newLtShotWidget(tree, ltShots['item'][n].__dict__, **shotParams)
             tree.setItemWidget(newItem, cln-1, newWidget)
+            widgetList.append(newWidget)
+        if newItem is not None:
+            newItem.widgets = widgetList
         if ltShots['item']:
             if 'Ctnr' in ltShots['item'][0].nodeType:
                 self.mainUi.tabLtShots.setTabText(self.mainUi.tabLtShots.currentIndex(),
@@ -676,16 +719,18 @@ class PopulateTrees(object):
         newItem.statWidget = newStat
         return newItem, newColor, newStat
 
-    def newProjectTaskColor(self, newItem, taskColor):
+    def newProjectTaskColor(self, newItem, taskColor, dialog=True):
         """ New task color QPushButton
             @param newItem: (object) : New parent QTreeWidgetItem
             @param taskColor: (tuple) : Rgb color
+            @param dialog: (bool) : Color dialog picker enable or not
             @return: (object) : New task color QPushButton """
         newColor = QtGui.QPushButton()
         newColor.setText('')
         newColor.setMaximumWidth(40)
-        newColor.connect(newColor, QtCore.SIGNAL("clicked()"),
-                         partial(self.mainUi.uiCmds_projectTab.on_taskColor, newItem))
+        if dialog:
+            newColor.connect(newColor, QtCore.SIGNAL("clicked()"),
+                             partial(self.mainUi.uiCmds_projectTab.on_taskColor, newItem))
         if taskColor is None:
             newItem.taskColor = (200, 200, 200)
         else:
@@ -830,6 +875,21 @@ class PopulateTrees(object):
         newWidget = self._getShotParamWidget(paramName, paramType, nodeParams)
         newItem.widget = newWidget
         return newItem, newWidget
+
+    def newShotTaskItem(self, step, taskStatus, taskColor):
+        """ Create new shotTask tree QTreeWidgetItem
+            @param step: (str) : Step name
+            @param taskStatus: (str) : Current task
+            @param taskColor: (tuple) : Color rgb
+            @return: (object) : New QTreeWidgetItem """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setText(0, step)
+        newItem.setText(1, taskStatus)
+        newItem.taskStep = step
+        newItem.taskColor = taskColor
+        newItem.taskStatus = taskStatus
+        newColor = self.newProjectTaskColor(newItem, taskColor, dialog=False)
+        return newItem, newColor
 
     def newLinetestItem(self, selItem, ltPath, ltFile, **kwargs):
         """ Create new linetest QTreeWidgetItem

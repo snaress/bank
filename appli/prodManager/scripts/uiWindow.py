@@ -871,22 +871,30 @@ class LtCmtEditor(ltCmtEditorClass, ltCmtEditorUiClass):
 ltShotClass, ltShotUiClass = uic.loadUiType(prodManager.uiList['ltShot'])
 class LtShotWidget(ltShotClass, ltShotUiClass):
     """ Linetest shot widget ui class
-        @param kwargs: (dict) : Linetest shot params """
+        @param mainUi: (object) : ProdManager QMainWindow
+        @param tree: (object) : Selected shot tab QTreeWidget
+        @param shotParams: (dict) : Shot params
+        @param kwargs: (dict) : Linetest params """
 
     def __init__(self, mainUi, tree, shotParams, **kwargs):
         self.mainUi = mainUi
+        self.pm = self.mainUi.pm
         self.tree = tree
         self.shotParams = shotParams
         self.params = kwargs
         super(LtShotWidget, self).__init__()
         self._setupUi()
         self.rf_imaPreview()
+        self.rf_taskStatus()
+        self.rf_taskProgress()
+        self.mainUi.uiRf_linetestTab.rf_ltShotStatus()
 
     def _setupUi(self):
         """ Setup Widget """
         self.setupUi(self)
         self.bShotName.setText(self.shotParams['nodeName'])
         self.bShotName.clicked.connect(self.on_ltShot)
+        self.cbTask.currentIndexChanged.connect(self.on_ltStatus)
 
     def rf_imaPreview(self):
         """ Refresh preview image """
@@ -900,8 +908,46 @@ class LtShotWidget(ltShotClass, ltShotUiClass):
         for c in range(int(self.mainUi.sbLtColumns.value())):
             self.tree.setColumnWidth(c, maxWidth)
 
+    def rf_taskStatus(self):
+        """ Refresh shot status """
+        self.cbTask.clear()
+        step = str(self.mainUi.cbLtStep.currentText())
+        node = self.pm.getNodeFromNodePath(self.shotParams['nodeType'], self.shotParams['nodePath'])
+        node.ud_paramsFromFile()
+        if hasattr(node, 'shotStatus'):
+            if step in node.shotStatus.keys():
+                projectParams = self.pm.project.getParamsFromFile
+                taskList = projectParams['projectTasks']
+                tasks = []
+                ind = 0
+                for n, taskDict in enumerate(taskList):
+                    task = taskDict.keys()[0]
+                    tasks.append(task)
+                    if task == node.shotStatus[step]:
+                        ind = n
+                self.cbTask.addItems(tasks)
+                self.cbTask.setCurrentIndex(ind)
+
+    def rf_taskProgress(self):
+        """ Refresh task progress QProgressBar """
+        currentTask = str(self.cbTask.currentText())
+        tasks = []
+        for taskDict in  self.pm.project.projectTasks:
+            task = taskDict.keys()[0]
+            if taskDict[task]['stat']:
+                tasks.append(task)
+        if tasks:
+            self.pbShot.setMinimum(1)
+            self.pbShot.setMaximum(len(tasks))
+            if currentTask in tasks:
+                self.pbShot.setValue(tasks.index(currentTask) + 1)
+            else:
+                self.pbShot.setValue(1)
+        else:
+            self.pbShot.setValue(1)
+
     def on_ltShot(self):
-        """ Refresh linetest tree """
+        """ Command launch when ltShot QPushButton is clicked """
         #-- Clear ltShots QTreeWidget --#
         selItems = self.mainUi.twProject.selectedItems()
         if selItems:
@@ -923,7 +969,20 @@ class LtShotWidget(ltShotClass, ltShotUiClass):
         if item is not None:
             item.setSelected(True)
             item.parent().setExpanded(True)
+        self.mainUi.uiRf_linetestTab.rf_lineTestTabVis(state=True)
         self.mainUi.uiRf_linetestTab.rf_ltTree()
+
+    def on_ltStatus(self):
+        """ Command launch when ltStatus QComboBox is clicked """
+        if self.mainUi.cbLtEditMode.isChecked():
+            if 'dataFile' in self.shotParams:
+                if os.path.exists(self.shotParams['dataFile']):
+                    node = self.pm.getNodeFromNodePath(self.shotParams['nodeType'],
+                                                       self.shotParams['nodePath'])
+                    status = str(self.cbTask.currentText())
+                    node.ud_taskFromUi(self.mainUi, status)
+                    node.writeNodeToFile()
+                    self.rf_taskProgress()
 
     @property
     def imaPreview(self):

@@ -318,6 +318,7 @@ class MenuCmds(object):
         newTree.setColumnCount(int(self.mainUi.sbLtColumns.value()))
         newTree.setHeaderHidden(True)
         newTree.setIndentation(0)
+        newTree.header().setStretchLastSection(False)
         newTree.setSelectionMode(QtGui.QTreeWidget.NoSelection)
         newLayout.addWidget(newTree)
         self.mainUi.tabLtShots.addTab(newWidget, 'New_Tab')
@@ -423,6 +424,8 @@ class MainTree(object):
                 self.mainUi.twLinetest.clear()
             self.mainUi.uiCmds_linetestTab.on_linetest()
             self.mainUi.uiRf_linetestTab.rf_ltShots()
+        self.mainUi.cbLtEditMode.setChecked(False)
+        self.mainUi.uiRf_linetestTab.rf_ltShotStatus()
 
     def on_tabItem(self):
         self.on_treeItem()
@@ -660,6 +663,7 @@ class ShotInfoTab(object):
         """ Refresh selected item params """
         self.mainUi.uiRf_shotInfoTab.rf_shotParamsTree()
         self.mainUi.uiRf_shotInfoTab.rf_shotComment()
+        self.mainUi.uiRf_shotInfoTab.rf_taskStatus()
 
     def on_editShotParams(self):
         """ Command launch when bEditShotParams is clicked """
@@ -738,6 +742,8 @@ class LinetestTab(object):
                 self.mainUi.twLinetest.clear()
             else:
                 self.mainUi.uiRf_linetestTab.rf_ltTree()
+                self.on_ltShotTab()
+                self.mainUi.uiRf_linetestTab.rf_ltShotProgress()
                 self.on_linetest()
 
     def on_newLt(self):
@@ -821,3 +827,8 @@ class LinetestTab(object):
             self.mainUi.bPreviewSequence.absPath = None
             self.mainUi.bPreviewMovie.setEnabled(False)
             self.mainUi.bPreviewMovie.absPath = None
+
+    def on_ltShotTab(self):
+        """ Command launch when current tab of ltShots QTabWidget changed """
+        self.mainUi.cbLtEditMode.setChecked(False)
+        self.mainUi.uiRf_linetestTab.rf_ltShotStatus()

@@ -127,6 +127,18 @@ class ProjectTemplate(object):
         return params
 
     @property
+    def getParamsFromFile(self):
+        """ Get project params and value from file
+            @return: (dict) : Project params and value """
+        params = {}
+        if self._projectFile is not None:
+            if os.path.exists(self._projectFile):
+                params = pFile.readPyFile(self._projectFile, filterIn=['project'])
+                params['_projectPath'] = self._projectPath
+                params['_projectFile'] = self._projectFile
+        return params
+
+    @property
     def getTrees(self):
         """ Get project tree list
             @return: (list) : Project trees """
@@ -364,11 +376,13 @@ class TreeNode(object):
         for k, v in kwargs.iteritems():
             setattr(self, k, v)
         self.params = {}
+        self.shotStatus = {}
 
     def ud_paramsFromUi(self, mainUi):
         """ Update node params with ui values
             @param mainUi: (object) : QMainWindow """
         allItems = pQt.getTopItems(mainUi.twShotParams)
+        #-- Get Shot Params --#
         params = {}
         for item in allItems:
             if item.paramType in ['dir', 'file']:
@@ -381,6 +395,12 @@ class TreeNode(object):
                 params[item.paramName] = item.widget.isChecked()
         params['comment'] = str(mainUi.shotTextEditor.teText.toHtml())
         self.params = params
+        #-- Get Shot Status --#
+        allSteps = pQt.getTopItems(mainUi.twShotTask)
+        status = {}
+        for item in allSteps:
+            status[item.taskStep] = item.taskStatus
+        self.shotStatus = status
 
     def ud_paramsFromFile(self):
         """ Update node params with file values """
@@ -388,9 +408,19 @@ class TreeNode(object):
         if dataPath is not None and dataFile is not None and nodeName is not None:
             _dataFile = os.path.join(dataPath, dataFile)
             if os.path.exists(_dataFile):
-                _params = {}
-                execfile(_dataFile, _params)
+                _params = pFile.readPyFile(_dataFile, filterIn=['node'])
                 self.params = _params['nodeParams']
+                if 'nodeStatus' in _params:
+                    self.shotStatus = _params['nodeStatus']
+                else:
+                    self.shotStatus = {}
+
+    def ud_taskFromUi(self, mainUi, status):
+        """ Update project task from ui
+            @param mainUi: (object) : QMainWindow
+            @param status: (str) : Task status """
+        step = str(mainUi.cbLtStep.currentText())
+        self.shotStatus[step] = status
 
     def newLt(self, step):
         """ Add linetest in bdd
@@ -414,10 +444,11 @@ class TreeNode(object):
         dataPath, dataFile, nodeName = self.dataInfo
         if dataPath is not None and dataFile is not None and nodeName is not None:
             _dataFile = os.path.join(dataPath, dataFile)
-            dataTxt = "nodeParams = %s" % self.params
+            dataTxt = ["nodeParams = %s" % self.params,
+                       "nodeStatus = %s" % self.shotStatus]
             if pmCore.createDataPath(_dataFile):
                 try:
-                    pFile.writeFile(_dataFile, dataTxt)
+                    pFile.writeFile(_dataFile, '\n'.join(dataTxt))
                     print "Writing %s dataFile" % nodeName
                 except:
                     print "!!! Error: Can't write %s dataFile !!!" % nodeName
