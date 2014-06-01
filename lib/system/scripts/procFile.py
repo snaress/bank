@@ -39,6 +39,7 @@ def readPyFile(filePath, filterIn=None):
     else:
         print "!!! Error: Can't read, file doesn't exists !!!"
 
+# noinspection PyTypeChecker
 def writeFile(filePath, textToWrite, add=False):
     """ Create and edit text file. If file already exists, it is overwritten
         @param filePath: (str) : File absolut path
@@ -80,6 +81,61 @@ def secondsToStr(seconds):
     minutes = S / 60
     seconds = S - (minutes * 60)
     return "%s:%s:%s" % (hours, minutes, seconds)
+
+def dictToList(d):
+    """ Translate dict to str list
+        @param d: (dict) : Dict to translate
+        @return: (list) : List of strings """
+    txt = []
+    if not isinstance(d, dict):
+        raise TypeError, "Argument should be of type 'dict', got %s" % type(d)
+    for k, v in d.iteritems():
+        if isinstance(v, str):
+            txt.append("%s = %r" % (k, v))
+        else:
+            #-- Dict Type --#
+            if isinstance(v, dict):
+                txtDict = []
+                for n, attr in enumerate(sorted(v.keys())):
+                    if n == 0:
+                        if isinstance(v[attr], str):
+                            txtDict.append("%s = {%r: %r," % (k, attr, v[attr]))
+                        else:
+                            txtDict.append("%s = {%r: %s," % (k, attr, v[attr]))
+                    elif n == len(v.keys()) - 1:
+                        if isinstance(v[attr], str):
+                            txtDict.append("%s %r: %r}" % (' ' * (len(k) + 3), attr, v[attr]))
+                        else:
+                            txtDict.append("%s %r: %s}" % (' ' * (len(k) + 3), attr, v[attr]))
+                    else:
+                        if isinstance(v[attr], str):
+                            txtDict.append("%s %r: %r," % (' ' * (len(k) + 3), attr, v[attr]))
+                        else:
+                            txtDict.append("%s %r: %s," % (' ' * (len(k) + 3), attr, v[attr]))
+                txt.extend(txtDict)
+            #-- List Type --#
+            elif isinstance(v, list):
+                txtDict = []
+                for n, attr in enumerate(sorted(v)):
+                    if n == 0:
+                        if isinstance(v[attr], str):
+                            txtDict.append("%s = [%r," % (k, v[attr]))
+                        else:
+                            txtDict.append("%s = [%s," % (k, v[attr]))
+                    elif n == len(v) - 1:
+                        if isinstance(v[attr], str):
+                            txtDict.append("%s %r]" % (len(k) + 3, v[attr]))
+                        else:
+                            txtDict.append("%s %s]" % (len(k) + 3, v[attr]))
+                    else:
+                        if isinstance(v[attr], str):
+                            txtDict.append("%s %r," % (len(k) + 3, v[attr]))
+                        else:
+                            txtDict.append("%s %s," % (len(k) + 3, v[attr]))
+            #-- Other Type --#
+            else:
+                txt.append("%s = %s" % (k, v))
+    return txt
 
 
 class PathToDict(object):
