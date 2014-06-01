@@ -523,6 +523,28 @@ class LinetestTab(object):
         return ltShots
 
 
+class StatisticTab(object):
+    """ Class used by the ProdManagerUi for statisticTab updates and refresh
+        @param mainUi: (object) : ProdManager QMainWindow """
+
+    def __init__(self, mainUi):
+        self.mainUi = mainUi
+        self.pm = self.mainUi.pm
+        self.populate = PopulateTrees(self.mainUi)
+
+    def rf_statTree(self):
+        """ Refresh statisticTab QTreeWidget """
+        self.mainUi.twStat.clear()
+        self.populate.statistic()
+        self.rf_allStat()
+
+    def rf_allStat(self):
+        """ Refresh statistic Value from bdd """
+        allItems = pQt.getAllItems(self.mainUi.twStat)
+        for item in sorted(allItems, reverse=True):
+            item.widget.rf_statNode()
+
+
 class PopulateTrees(object):
     """ Populate prodManager trees QTreeWidget
         @param mainUi: (object) : ProdManager QMainWindow """
@@ -701,6 +723,31 @@ class PopulateTrees(object):
         else:
             self.mainUi.tabLtShots.setTabText(self.mainUi.tabLtShots.currentIndex(),
                                               "New_Tab")
+
+    def statistic(self):
+        """ Populate statistic tree QTreeWidget """
+        for t in self.pm.project.projectTrees:
+            tree = getattr(self.pm, '%sTree' % t)
+            newTreeItem, newTreeWidget = self.newStatItem(tree, 'tree')
+            self.mainUi.twStat.addTopLevelItem(newTreeItem)
+            self.mainUi.twStat.setItemWidget(newTreeItem, 0, newTreeWidget)
+            for node in tree.treeOrder:
+                if 'Ctnr' in node.nodeType:
+                    newNodeItem, newNodeWidget = self.newStatItem(node, 'ctnr')
+                else:
+                    newNodeItem, newNodeWidget = self.newStatItem(node, 'node')
+                if len(node.nodePath.split('/')) > 1:
+                    parent = self.mainUi.getParentItemFromNodePath(self.mainUi.twStat,
+                                                                   node.nodePath)
+                    parent.addChild(newNodeItem)
+                else:
+                    newTreeItem.addChild(newNodeItem)
+                self.mainUi.twStat.setItemWidget(newNodeItem, 0, newNodeWidget)
+                for step in tree.treeSteps:
+                    if not 'Ctnr' in node.nodeType:
+                        newStepItem, newStepWidget = self.newStatItem(step, 'step')
+                        newNodeItem.addChild(newStepItem)
+                        self.mainUi.twStat.setItemWidget(newStepItem, 0, newStepWidget)
 
     #=========================================== ITEMS ============================================#
 
@@ -923,6 +970,22 @@ class PopulateTrees(object):
             @return: (object) : New QTreeWidgetItem """
         newItem = QtGui.QTreeWidgetItem()
         return newItem
+
+    def newStatItem(self, _object, _type):
+        """ Create new statistic QTreeWidgetItem
+            @param _object: (object): Tree, treeContainer or treeNode classObject
+            @param _type: (str): 'tree', 'ctnr', 'node' or 'step'
+            @return: (object), (object) : New QTreeWidgetItem, New QWidget """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem._type = _type
+        newItem.link = _object
+        if _type is not 'step':
+            for k, v in _object.__dict__.iteritems():
+                if k == 'nodePath':
+                    setattr(newItem, k, v)
+        newWidget = self.wnd.StatCtnrWidget(self.mainUi, _object, _type, newItem)
+        newItem.widget = newWidget
+        return newItem, newWidget
 
     #========================================== WIDGETS ===========================================#
 

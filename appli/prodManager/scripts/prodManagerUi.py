@@ -1,5 +1,4 @@
-import os
-import sys
+import os, sys
 from appli import prodManager
 from functools import partial
 from PyQt4 import QtGui, QtCore, uic
@@ -25,6 +24,7 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
         self.uiRf_projectTab = pmRefresh.ProjectTab(self)
         self.uiRf_shotInfoTab = pmRefresh.ShotInfoTab(self)
         self.uiRf_linetestTab = pmRefresh.LinetestTab(self)
+        self.uiRf_statisticTab = pmRefresh.StatisticTab(self)
         self.uiCmds_menu = pmUiCmds.MenuCmds(self)
         self.uiCmds_previewImage = pmUiCmds.PreviewImage(self)
         self.uiCmds_mainTree = pmUiCmds.MainTree(self)
@@ -243,8 +243,10 @@ class ProdManagerUi(prodManagerClass, prodManagerUiClass):
             path = '/'.join(nodePath.split('/')[:-1])
             allItems = pQt.getAllItems(twTree)
             for item in allItems:
-                if item.nodePath == path:
-                    return item
+                if hasattr(item, 'nodePath'):
+                    if item.nodePath == path:
+                        return item
+
 
     def getTaskInfo(self, step, selShot):
         """ Get current task for given step

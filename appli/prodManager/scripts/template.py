@@ -1,5 +1,4 @@
-import os
-import time
+import os, time
 from lib.qt.scripts import procQt as pQt
 from lib.system.scripts import procFile as pFile
 from appli.prodManager.scripts import core as pmCore
@@ -439,6 +438,7 @@ class TreeNode(object):
                     return ltFile
         return None
 
+    # noinspection PyStringFormat
     def writeNodeToFile(self):
         """ Write node object to file """
         dataPath, dataFile, nodeName = self.dataInfo

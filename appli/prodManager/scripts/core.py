@@ -1,5 +1,4 @@
-import os
-import time
+import os, time
 from appli import prodManager
 from lib.system.scripts import procFile as pFile
 

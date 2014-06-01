@@ -1,12 +1,9 @@
-import os
-import time
-import shutil
+import os, time, shutil
 from functools import partial
 from appli import prodManager
-from lib.qt.scripts import dialog
 from PyQt4 import QtGui, QtCore, uic
-from lib.qt.scripts import textEditor
 from lib.qt.scripts import procQt as pQt
+from lib.qt.scripts import dialog, textEditor
 from lib.system.scripts import procFile as pFile
 from appli.prodManager.scripts import uiRefresh as pmRefresh
 from appli.prodManager.scripts import template as pmTemplate
@@ -994,3 +991,40 @@ class LtShotWidget(ltShotClass, ltShotUiClass):
             if not preview == '' and not preview == ' ':
                 ima = preview
         return ima
+
+
+statCtnrClass, statCtnrUiClass = uic.loadUiType(prodManager.uiList['statCtnr'])
+class StatCtnrWidget(statCtnrClass, statCtnrUiClass):
+    """ Statistic container widget ui class
+        @param mainUi: (object) : ProdManager QMainWindow
+        @param _object: (object) : TreeNode object
+        @param _type: (str): 'tree', 'ctnr', 'node' or 'step' """
+
+    def __init__(self, mainUi, _object, _type, item):
+        self.mainUi = mainUi
+        self.link = _object
+        self._type = _type
+        self.item = item
+        super(StatCtnrWidget, self).__init__()
+        self._setupUi()
+
+    def _setupUi(self):
+        """ Setup Widget """
+        self.setupUi(self)
+        if self._type == 'tree':
+            self.lName.setText(self.link._treeName.upper())
+        elif self._type == 'ctnr':
+            self.lName.setText(self.link.nodeName.upper())
+        elif self._type == 'node':
+            self.lName.setText(self.link.nodeLabel)
+        elif self._type == 'step':
+            self.lName.setText(self.link)
+
+    def rf_statNode(self):
+        """ Refresh task progression """
+        if self._type == 'node':
+            self.link.ud_paramsFromFile()
+            progDict = {}
+            #ToDo
+            # if 'shotStatus' in self.link.__dict__:
+            #     for task in

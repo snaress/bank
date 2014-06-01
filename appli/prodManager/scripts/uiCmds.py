@@ -434,6 +434,8 @@ class MainTree(object):
         self.mainUi.uiCmds_linetestTab.on_linetest()
         if selTab == 'Linetest':
             self.mainUi.uiRf_linetestTab.rf_stepSwitch()
+        if selTab == 'Statistic':
+            self.mainUi.uiRf_statisticTab.rf_statTree()
 
 
 class ProjectTab(object):
