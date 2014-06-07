@@ -5,7 +5,7 @@ from PyQt4 import QtGui, QtCore, uic
 from lib.system.scripts import procFile as pFile
 
 
-textEditorClass, textEditorUiClass = uic.loadUiType(qt.uiList['textEditorWidget'])
+textEditorClass, textEditorUiClass = uic.loadUiType(qt.uiList['textEditorWidget2'])
 class TextEditorWidget(textEditorClass, textEditorUiClass):
 
     def __init__(self):
