@@ -89,49 +89,56 @@ def dictToList(d):
     txt = []
     if not isinstance(d, dict):
         raise TypeError, "Argument should be of type 'dict', got %s" % type(d)
-    for k, v in d.iteritems():
+    for k, v in sorted(d.iteritems()):
         if isinstance(v, str):
             txt.append("%s = %r" % (k, v))
         else:
             #-- Dict Type --#
             if isinstance(v, dict):
                 txtDict = []
-                for n, attr in enumerate(sorted(v.keys())):
-                    if n == 0:
-                        if isinstance(v[attr], str):
-                            txtDict.append("%s = {%r: %r," % (k, attr, v[attr]))
+                if not len(v.keys()):
+                    txtDict.append("%s = {}" % k)
+                else:
+                    for n, attr in enumerate(sorted(v.keys())):
+                        if n == 0:
+                            if isinstance(v[attr], str):
+                                txtDict.append("%s = {%r: %r," % (k, attr, v[attr]))
+                            else:
+                                txtDict.append("%s = {%r: %s," % (k, attr, v[attr]))
+                        elif n == len(v.keys()) - 1:
+                            if isinstance(v[attr], str):
+                                txtDict.append("%s %r: %r}" % (' ' * (len(k) + 3), attr, v[attr]))
+                            else:
+                                txtDict.append("%s %r: %s}" % (' ' * (len(k) + 3), attr, v[attr]))
                         else:
-                            txtDict.append("%s = {%r: %s," % (k, attr, v[attr]))
-                    elif n == len(v.keys()) - 1:
-                        if isinstance(v[attr], str):
-                            txtDict.append("%s %r: %r}" % (' ' * (len(k) + 3), attr, v[attr]))
-                        else:
-                            txtDict.append("%s %r: %s}" % (' ' * (len(k) + 3), attr, v[attr]))
-                    else:
-                        if isinstance(v[attr], str):
-                            txtDict.append("%s %r: %r," % (' ' * (len(k) + 3), attr, v[attr]))
-                        else:
-                            txtDict.append("%s %r: %s," % (' ' * (len(k) + 3), attr, v[attr]))
+                            if isinstance(v[attr], str):
+                                txtDict.append("%s %r: %r," % (' ' * (len(k) + 3), attr, v[attr]))
+                            else:
+                                txtDict.append("%s %r: %s," % (' ' * (len(k) + 3), attr, v[attr]))
                 txt.extend(txtDict)
             #-- List Type --#
             elif isinstance(v, list):
                 txtDict = []
-                for n, attr in enumerate(sorted(v)):
-                    if n == 0:
-                        if isinstance(v[attr], str):
-                            txtDict.append("%s = [%r," % (k, v[attr]))
+                if not len(v):
+                    txtDict.append("%s = []" % k)
+                else:
+                    for n, attr in enumerate(sorted(v)):
+                        if n == 0:
+                            if isinstance(v[attr], str):
+                                txtDict.append("%s = [%r," % (k, v[attr]))
+                            else:
+                                txtDict.append("%s = [%s," % (k, v[attr]))
+                        elif n == len(v) - 1:
+                            if isinstance(v[attr], str):
+                                txtDict.append("%s %r]" % (len(k) + 3, v[attr]))
+                            else:
+                                txtDict.append("%s %s]" % (len(k) + 3, v[attr]))
                         else:
-                            txtDict.append("%s = [%s," % (k, v[attr]))
-                    elif n == len(v) - 1:
-                        if isinstance(v[attr], str):
-                            txtDict.append("%s %r]" % (len(k) + 3, v[attr]))
-                        else:
-                            txtDict.append("%s %s]" % (len(k) + 3, v[attr]))
-                    else:
-                        if isinstance(v[attr], str):
-                            txtDict.append("%s %r," % (len(k) + 3, v[attr]))
-                        else:
-                            txtDict.append("%s %s," % (len(k) + 3, v[attr]))
+                            if isinstance(v[attr], str):
+                                txtDict.append("%s %r," % (len(k) + 3, v[attr]))
+                            else:
+                                txtDict.append("%s %s," % (len(k) + 3, v[attr]))
+                txt.extend(txtDict)
             #-- Other Type --#
             else:
                 txt.append("%s = %s" % (k, v))
