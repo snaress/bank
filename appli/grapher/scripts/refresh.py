@@ -49,24 +49,6 @@ class SharedWidget(object):
         self.mainUi.rf_zoneVisibility(self.ui.cbTrash, widgets, self.ui.flTrash)
 
 
-class TextEditor(object):
-    """ Class used by the grapherUi for text editing
-        @param textEditor: (object) : QWidget """
-
-    def __init__(self, textEditor):
-        self.textEditor = textEditor
-
-    def widgetVis(self, state=False):
-        """ Refresh widget visibility
-            @param state: (bool) : Visibility state """
-        self.textEditor.bClearText.setEnabled(state)
-        self.textEditor.bLoadFile.setEnabled(not state)
-        self.textEditor.bSaveFile.setEnabled(state)
-        self.textEditor.flEdit.setEnabled(state)
-        self.textEditor.flSyntaxe.setEnabled(state)
-        self.textEditor.teText.setReadOnly(not state)
-
-
 class Style(object):
     """ Class used for grapher style settings """
 

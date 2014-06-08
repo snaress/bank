@@ -15,9 +15,7 @@ class GrapherUi(grapherClass, grapherUiClass):
         self.style = refresh.Style()
         self.rf_mainUi = refresh.MainUi(self)
         self.rf_shared = refresh.SharedWidget(self, self)
-        self.rf_txtEdit = None
         self.cmds_menu = cmds.Menu(self)
-        self.cmds_txtEdit = None
         self.window = window
         super(GrapherUi, self).__init__()
         self._setupUi()
@@ -30,6 +28,8 @@ class GrapherUi(grapherClass, grapherUiClass):
 
     def _setupMenu(self):
         #-- Menu File --#
+        self.miSaveGraph.triggered.connect(self.cmds_menu.on_saveGraph)
+        self.miSaveGraph.setShortcut("Ctrl+S")
         self.miSaveGraphAs.triggered.connect(self.cmds_menu.on_saveGraphAs)
         self.miSaveGraphAs.setShortcut("Ctrl+Shift+S")
         #-- Menu Tool --#
@@ -46,8 +46,6 @@ class GrapherUi(grapherClass, grapherUiClass):
     def _setupMain(self):
         #-- Comment Zone --#
         self.wgComment = self.window.TextEditor(self)
-        self.rf_txtEdit = refresh.TextEditor(self.wgComment)
-        self.cmds_txtEdit = cmds.TextEditor(self, self.wgComment)
         self.vlComment.insertWidget(-1, self.wgComment)
         self.cbComment.clicked.connect(self.rf_shared.rf_commentVis)
         #-- Variables Zone --#
@@ -60,7 +58,6 @@ class GrapherUi(grapherClass, grapherUiClass):
         """ Initialize ui """
         self.rf_shared.rf_commentVis()
         self.rf_shared.rf_commentBgc()
-        self.rf_txtEdit.widgetVis()
         self.rf_shared.rf_variablesVis()
         self.rf_shared.rf_variablesBgc()
         self.rf_mainUi.rf_graphBgc()

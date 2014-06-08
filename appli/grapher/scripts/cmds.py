@@ -13,19 +13,25 @@ class Menu(object):
 
     #===================================== MENU FILE =========================================#
 
+    def on_saveGraph(self):
+        """ Command launched when miSaveGraph is clicked """
+        if self.grapher._path is None or self.grapher._file is None:
+            self.on_saveGraphAs()
+        else:
+            self.grapher.writeToFile()
+
     def on_saveGraphAs(self):
         """ Command launched when miSaveGraphAs is clicked """
         if self.grapher._path is None or self.grapher._file is None:
             rootDir = os.path.join('G:', os.sep)
         else:
             rootDir = self.grapher._path
-        self.fdSaveAs = dialog.fileDialog(fdRoot=rootDir, fdCmd=self.saveGraphAs)
+        self.fdSaveAs = dialog.fileDialog(fdMode='save', fdRoot=rootDir, fdCmd=self.saveGraphAs)
         self.fdSaveAs.setFileMode(QtGui.QFileDialog.AnyFile)
         self.fdSaveAs.show()
 
     def saveGraphAs(self):
-        """ Save grapher as selected fileName
-            @return: (str) : Selected fileName """
+        """ Save grapher as selected fileName """
         selPath = self.fdSaveAs.selectedFiles()
         if selPath:
             fileName = str(selPath[0])
@@ -35,13 +41,11 @@ class Menu(object):
                 self.grapher._file = os.path.basename(fileName)
                 self.grapher._absPath = fileName
                 self.grapher.writeToFile()
-                return fileName
             else:
                 warn = ["!!! Warning: FileName not valide !!!", "Should have path/file.py",
                         "Got %s" % fileName]
                 errorDial = QtGui.QErrorMessage(self.fdSaveAs)
                 errorDial.showMessage('\n'.join(warn))
-                return False
 
     #===================================== MENU TOOL =========================================#
 
@@ -62,11 +66,3 @@ class Menu(object):
     def on_grapherDict(self):
         """ Command launched when miGrapherDict is clicked """
         print self.grapher.__dict__
-
-
-class TextEditor(object):
-    
-    def __init__(self, ui, textEditor):
-        self.ui = ui
-        self.grapher = self.ui.grapher
-        self.textEditor = textEditor

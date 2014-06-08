@@ -13,8 +13,9 @@ class Grapher(object):
         self._lock = False
         self.commentHtml = ""
         self.commentTxt = ""
-        self.variables = []
-        self.graphTree = []
+        self.variables = {'order': []}
+        self.graphTree = {'order': []}
+        self._graphTree = []
 
     def __repr__(self):
         txt = []
@@ -27,8 +28,19 @@ class Grapher(object):
         return '\n'.join(txt)
 
     def __str__(self):
-        txt = ["", "#" * 80, "========== GRAPHER =========="]
-        txt.extend(pFile.dictToList(self.__dict__))
+        txt = ["", "========== GRAPHER =========="]
+        #-- General --#
+        txt.append("\n#-- General --#")
+        for k, v in sorted(self.__dict__.iteritems()):
+            if k.startswith('_'):
+                if isinstance(v, str):
+                    txt.append("%s = %r" % (k, v))
+                else:
+                    txt.append("%s = %s" % (k, v))
+        #-- Comment --#
+        txt.append("#-- Comment --#")
+        txt.append(self.commentTxt)
+        # txt.extend(pFile.dictToList(self.__dict__))
         return '\n'.join(txt)
 
     def ud_commentFromUi(self, mainUi):
