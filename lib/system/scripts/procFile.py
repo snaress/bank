@@ -15,16 +15,22 @@ def readFile(filePath):
     else:
         print "!!! Error: Can't read, file doesn't exists !!!"
 
-def readPyFile(filePath, filterIn=None):
+def readPyFile(filePath, filterIn=None, keepBuiltin=False):
     """ Get text from pyFile
         @param filePath: (str) : Python file absolut path
         @param filterIn: (list) : Keep only key starting with filterIn
+        @param keepBuiltin: (bool) : Keep builtins key
         @return: (dict) : File dict """
     if os.path.exists(filePath):
         params = {}
         execfile(filePath, params)
         if filterIn is None:
-            return params
+            if keepBuiltin:
+                return params
+            else:
+                if '__builtins__' in params.keys():
+                    params.pop('__builtins__')
+                    return params
         else:
             filterParams = {}
             for k, v in params.iteritems():
@@ -35,7 +41,12 @@ def readPyFile(filePath, filterIn=None):
                         break
                 if check:
                     filterParams[k] = v
-            return filterParams
+            if keepBuiltin:
+                return filterParams
+            else:
+                if '__builtins__' in filterParams.keys():
+                    filterParams.pop('__builtins__')
+                    return filterParams
     else:
         print "!!! Error: Can't read, file doesn't exists !!!"
 
