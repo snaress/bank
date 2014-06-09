@@ -4,11 +4,21 @@ class MainUi(object):
 
     def __init__(self, mainUi):
         self.mainUi = mainUi
+        self.grapher = self.mainUi.grapher
         self.style = self.mainUi.style
+
+    def rf_comment(self):
+        """ Refresh Grapher comment """
+        print "\tUpdating grapher comment ..."
+        self.mainUi.wgComment.teText.setHtml(self.grapher.commentHtml)
 
     def rf_graphBgc(self):
         """ Refresh graph background color """
         self.mainUi.twGraph.setStyleSheet(self.style.graphBgc)
+
+    def rf_nodeEditorVis(self):
+        """ Refresh Grapher NodeEditor visibility """
+        self.mainUi.flNodeEditor.setVisible(self.mainUi.miNodeEditor.isChecked())
 
 
 class SharedWidget(object):
@@ -37,11 +47,7 @@ class SharedWidget(object):
 
     def rf_variablesBgc(self):
         """ Refresh variables background color """
-        self.ui.twVariables.setStyleSheet(self.style.variablesBgc)
-
-    def rf_nodeEditorVis(self):
-        """ Refresh Grapher NodeEditor visibility """
-        self.ui.flNodeEditor.setVisible(self.ui.miNodeEditor.isChecked())
+        self.ui.flVariables.setStyleSheet(self.style.variablesBgc)
 
     def rf_trashVis(self):
         """ Refresh Grapher trash visibility """
@@ -61,7 +67,7 @@ class Style(object):
 
     @property
     def variablesBgc(self):
-        return "background-color:AliceBlue;"
+        return "background-color:LightCyan;"
 
     @property
     def graphBgc(self):

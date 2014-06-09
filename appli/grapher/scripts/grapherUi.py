@@ -28,6 +28,8 @@ class GrapherUi(grapherClass, grapherUiClass):
 
     def _setupMenu(self):
         #-- Menu File --#
+        self.miOpenGraph.triggered.connect(self.cmds_menu.on_openGraph)
+        self.miOpenGraph.setShortcut("Ctrl+O")
         self.miSaveGraph.triggered.connect(self.cmds_menu.on_saveGraph)
         self.miSaveGraph.setShortcut("Ctrl+S")
         self.miSaveGraphAs.triggered.connect(self.cmds_menu.on_saveGraphAs)
@@ -61,7 +63,17 @@ class GrapherUi(grapherClass, grapherUiClass):
         self.rf_shared.rf_variablesVis()
         self.rf_shared.rf_variablesBgc()
         self.rf_mainUi.rf_graphBgc()
-        self.rf_shared.rf_nodeEditorVis()
+        self.rf_mainUi.rf_nodeEditorVis()
+
+    def updateUi(self):
+        """ Update ui from graphObject """
+        print "\n#-- Updating GrapherUi --#"
+        self.rf_mainUi.rf_comment()
+
+    def closeEvent(self, event):
+        """ Set QMainWindow closeEvent, called when GrapherUi is closed """
+        QtGui.QMainWindow.closeEvent(self, event)
+        print 'Exit Grapher ...'
 
     @staticmethod
     def rf_zoneVisibility(checkBox, widgets, frameLayout):

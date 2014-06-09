@@ -13,6 +13,29 @@ class Menu(object):
 
     #===================================== MENU FILE =========================================#
 
+    def on_openGraph(self):
+        """ Command launched when miOpenGraph is clicked """
+        if self.grapher._path is None or self.grapher._file is None:
+            rootDir = os.path.join('G:', os.sep)
+        else:
+            rootDir = self.grapher._path
+        self.fdOpen = dialog.fileDialog(fdMode='open', fdFileMode='ExistingFile', fdRoot=rootDir,
+                                        fdFilters=['*.py'], fdCmd=self.openGraph)
+        self.fdOpen.show()
+
+    def openGraph(self):
+        """ Open selected graph """
+        selPath = self.fdOpen.selectedFiles()
+        if selPath:
+            fileName = str(selPath[0])
+            if fileName.endswith('.py'):
+                self.fdOpen.close()
+                self.grapher._lock = True
+                self.grapher.loadGraph(fileName)
+                self.mainUi.updateUi()
+            else:
+                self._fileErrorDialog(fileName, self.fdOpen)
+
     def on_saveGraph(self):
         """ Command launched when miSaveGraph is clicked """
         if self.grapher._path is None or self.grapher._file is None:
@@ -26,8 +49,8 @@ class Menu(object):
             rootDir = os.path.join('G:', os.sep)
         else:
             rootDir = self.grapher._path
-        self.fdSaveAs = dialog.fileDialog(fdMode='save', fdRoot=rootDir, fdCmd=self.saveGraphAs)
-        self.fdSaveAs.setFileMode(QtGui.QFileDialog.AnyFile)
+        self.fdSaveAs = dialog.fileDialog(fdMode='save', fdFileMode='AnyFile', fdRoot=rootDir,
+                                          fdFilters=['*.py'], fdCmd=self.saveGraphAs)
         self.fdSaveAs.show()
 
     def saveGraphAs(self):
@@ -42,16 +65,22 @@ class Menu(object):
                 self.grapher._absPath = fileName
                 self.grapher.writeToFile()
             else:
-                warn = ["!!! Warning: FileName not valide !!!", "Should have path/file.py",
-                        "Got %s" % fileName]
-                errorDial = QtGui.QErrorMessage(self.fdSaveAs)
-                errorDial.showMessage('\n'.join(warn))
+                self._fileErrorDialog(fileName, self.fdSaveAs)
+
+    def _fileErrorDialog(self, fileName, parent):
+        """ Launch error dialog
+            @param fileName: (str) : Grapher absolut path
+            @param parent: (object) : Parent ui """
+        warn = ["!!! Warning: FileName not valide !!!", "Should have path/file.py",
+                "Got %s" % fileName]
+        errorDial = QtGui.QErrorMessage(parent)
+        errorDial.showMessage('\n'.join(warn))
 
     #===================================== MENU TOOL =========================================#
 
     def on_nodeEditor(self):
         """ Command launched when miNodeEditor is clicked """
-        self.mainUi.rf_shared.rf_nodeEditorVis()
+        self.mainUi.rf_mainUi.rf_nodeEditorVis()
 
     #===================================== MENU HELP =========================================#
 

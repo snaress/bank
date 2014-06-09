@@ -43,6 +43,20 @@ class Grapher(object):
         # txt.extend(pFile.dictToList(self.__dict__))
         return '\n'.join(txt)
 
+    def loadGraph(self, fileName):
+        """ Load given grapher file
+            @param fileName: (str) : Grapher absolut path """
+        print "\n#-- Loading Graph: %s --#" % fileName
+        params = pFile.readPyFile(fileName)
+        self._path = os.path.dirname(fileName)
+        self._file = os.path.basename(fileName)
+        self._absPath = fileName
+        for k in sorted(self.__dict__.keys()):
+            if k in params:
+                print "\tUpdating %s ..." % k
+                setattr(self, k, params[k])
+        print "Graph successfully loaded."
+
     def ud_commentFromUi(self, mainUi):
         """ Update comment from mainUi
             @param mainUi: (object) : QMainWindow """
@@ -55,7 +69,7 @@ class Grapher(object):
         """ Write grapher to file """
         if self._absPath is not None:
             if os.path.exists(self._path):
-                print "\n#-- Writing File --#"
+                print "\n#-- Writing Graph --#"
                 try:
                     pFile.writeFile(self._absPath, self.__repr__())
                     print "Result: %s" % self._absPath
