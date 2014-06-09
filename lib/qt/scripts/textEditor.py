@@ -5,7 +5,7 @@ from PyQt4 import QtGui, QtCore, uic
 from lib.system.scripts import procFile as pFile
 
 
-textEditorClass, textEditorUiClass = uic.loadUiType(qt.uiList['textEditorWidget2'])
+textEditorClass, textEditorUiClass = uic.loadUiType(qt.uiList['textEditorWidget'])
 class TextEditorWidget(textEditorClass, textEditorUiClass):
 
     def __init__(self):
@@ -57,6 +57,7 @@ class TextEditorWidget(textEditorClass, textEditorUiClass):
     def _setupToolBarDn(self):
         """ Setup widget toolBar down """
         #-- Font Size --#
+        self.cbFontStyle.currentFontChanged.connect(self.on_fontStyle)
         sizeList = [6,7,8,9,10,11,12,13,14,15,16,18,20,22,24,26,28,32,36,40,44,48,54,60,66,72,80,88,96]
         self.cbFontSize.addItems([str(s) for s in sizeList])
         self.cbFontSize.setCurrentIndex(2)
@@ -165,6 +166,10 @@ class TextEditorWidget(textEditorClass, textEditorUiClass):
     def on_redo(self):
         """ Undo cmd """
         self.teText.redo()
+
+    def on_fontStyle(self):
+        font = QtGui.QFont(self.cbFontStyle.currentFont())
+        self.teText.setCurrentFont(font)
 
     def on_fontSize(self):
         """ Change font size cmd """
