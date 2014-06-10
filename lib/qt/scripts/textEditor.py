@@ -1,6 +1,6 @@
 import sys, os
 from lib import qt
-from lib.qt.scripts import dialog
+from lib.qt.scripts import dialog2
 from PyQt4 import QtGui, QtCore, uic
 from lib.system.scripts import procFile as pFile
 
@@ -106,7 +106,7 @@ class TextEditorWidget(textEditorClass, textEditorUiClass):
 
     def on_loadFile(self):
         """ Launch the load fileDialog """
-        self.fdLoad = dialog.fileDialog(fdMode='open', fdFileMode='AnyFile', fdCmd=self.fd_loadAccept)
+        self.fdLoad = dialog2.fileDialog(fdMode='open', fdFileMode='AnyFile', fdCmd=self.fd_loadAccept)
         self.fdLoad.exec_()
 
     def fd_loadAccept(self):
@@ -122,7 +122,7 @@ class TextEditorWidget(textEditorClass, textEditorUiClass):
 
     def on_saveFile(self):
         """ Launch the save fileDialog """
-        self.fdSave = dialog.fileDialog(fdMode='save', fdFileMode='AnyFile', fdCmd=self.fd_saveAccept)
+        self.fdSave = dialog2.fileDialog(fdMode='save', fdFileMode='AnyFile', fdCmd=self.fd_saveAccept)
         self.fdSave.exec_()
 
     def fd_saveAccept(self):

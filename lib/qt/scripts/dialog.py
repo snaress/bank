@@ -71,11 +71,12 @@ class ClickHandler(object):
 
 confirmDialogClass, confirmDialogUiClass = uic.loadUiType(qt.uiList['confirmDialog'])
 class ConfirmDialog(confirmDialogClass, confirmDialogUiClass):
+    """ Confirm dialog popup
+        @param mess: (str) : Dialog texte
+        @param btns: (list) : Buttons list (4 max)
+        @param cmds: (list) Commands list(4 max) """
 
     def __init__(self, mess, btns=[], cmds=[]):
-        """ @param mess: (str) : Dialog texte
-            @param btns: (list) : Buttons list (4 max)
-            @param cmds: (list) Commands list(4 max) """
         #-- Init --#
         btns.reverse()
         cmds.reverse()
