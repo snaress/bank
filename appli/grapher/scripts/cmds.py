@@ -1,6 +1,7 @@
 import os
 from PyQt4 import QtGui
-from lib.qt.scripts import dialog
+from appli import grapher
+from lib.qt.scripts import dialog2
 
 
 class Menu(object):
@@ -16,10 +17,10 @@ class Menu(object):
     def on_openGraph(self):
         """ Command launched when miOpenGraph is clicked """
         if self.grapher._path is None or self.grapher._file is None:
-            rootDir = os.path.join('G:', os.sep)
+            rootDir = grapher.rootDir
         else:
             rootDir = self.grapher._path
-        self.fdOpen = dialog.fileDialog(fdMode='open', fdFileMode='ExistingFile', fdRoot=rootDir,
+        self.fdOpen = dialog2.fileDialog(fdMode='open', fdFileMode='ExistingFile', fdRoot=rootDir,
                                         fdFilters=['*.py'], fdCmd=self.openGraph)
         self.fdOpen.show()
 
@@ -46,10 +47,10 @@ class Menu(object):
     def on_saveGraphAs(self):
         """ Command launched when miSaveGraphAs is clicked """
         if self.grapher._path is None or self.grapher._file is None:
-            rootDir = os.path.join('G:', os.sep)
+            rootDir = grapher.rootDir
         else:
             rootDir = self.grapher._path
-        self.fdSaveAs = dialog.fileDialog(fdMode='save', fdFileMode='AnyFile', fdRoot=rootDir,
+        self.fdSaveAs = dialog2.fileDialog(fdMode='save', fdFileMode='AnyFile', fdRoot=rootDir,
                                           fdFilters=['*.py'], fdCmd=self.saveGraphAs)
         self.fdSaveAs.show()
 

@@ -1,4 +1,4 @@
-import sys
+import sys, os
 from appli import grapher
 from PyQt4 import QtGui, uic
 from appli.grapher.scripts import grapher as gp
@@ -69,6 +69,16 @@ class GrapherUi(grapherClass, grapherUiClass):
         """ Update ui from graphObject """
         print "\n#-- Updating GrapherUi --#"
         self.rf_mainUi.rf_comment()
+
+    def getLockFile(self):
+        """ Get lock file from GrapherObject
+            @return: (str) : Lock file absolut path """
+        if self.grapher._path is not None and self.grapher._file is not None:
+            lockFile = self.grapher._file.replace('.py', '__lock.py')
+            return os.path.join(self.grapher._path, lockFile)
+
+    def checkLockFile(self):
+        lockFile = self.getLockFile()
 
     def closeEvent(self, event):
         """ Set QMainWindow closeEvent, called when GrapherUi is closed """

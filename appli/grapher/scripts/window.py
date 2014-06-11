@@ -39,7 +39,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.rf_shared.rf_trashVis()
 
 
-class TextEditor(textEditor.TextEditorWidget):
+class TextEditor(textEditor.TextEditor):
     """ Class used by the grapherUi for text editing
         @param parent: (object) : QWidget parent """
 
@@ -61,8 +61,9 @@ class TextEditor(textEditor.TextEditorWidget):
         self.bClearText.setEnabled(state)
         self.bLoadFile.setEnabled(not state)
         self.bSaveFile.setEnabled(state)
-        self.flEdit.setEnabled(state)
-        self.flSyntaxe.setEnabled(state)
+        for grp in [self.editActionGrp, self.textActionGrp, self.fontActionGrp]:
+            for widget in grp:
+                widget.setEnabled(state)
         self.teText.setReadOnly(not state)
 
     def on_clearText(self):
