@@ -1,4 +1,5 @@
-from PyQt4 import QtGui
+from lib import qt
+from PyQt4 import QtGui, uic
 
 
 def fileDialog(fdMode='open', fdFileMode='AnyFile', fdRoot=None, fdRoots=None,
@@ -36,3 +37,45 @@ def fileDialog(fdMode='open', fdFileMode='AnyFile', fdRoot=None, fdRoots=None,
     if fdCmd is not None:
         fd.accepted.connect(fdCmd)
     return fd
+
+
+confirmDialogClass, confirmDialogUiClass = uic.loadUiType(qt.uiList['confirmDialog2'])
+class ConfirmDialog(confirmDialogClass, confirmDialogUiClass):
+    """ Confirm dialog popup
+        @param message: (str) : Dialog texte
+        @param buttons: (list) : Buttons list
+        @param cmds: (list) : Commands list """
+
+    def __init__(self, message, buttons, btnCmds, cancelBtn=True):
+        if not len(buttons) == len(btnCmds):
+            raise KeyError, "!!! Error: Buttons list and cmds lists should have same length !!!"
+        else:
+            self.mess = message
+            buttons.reverse()
+            self.btns = buttons
+            btnCmds.reverse()
+            self.btnCmds = btnCmds
+            self.cancelBtn = cancelBtn
+            super(ConfirmDialog, self).__init__()
+            self.setupUi(self)
+            self.initDialog()
+
+    def initDialog(self):
+        """ Init dialog window """
+        self.lMessage.setText(self.mess)
+        if self.cancelBtn:
+            newButton = self.newButton('Cancel', self.close)
+            self.hlButtons.insertWidget(1, newButton)
+        for n, btn in enumerate(self.btns):
+            newButton = self.newButton(btn, self.btnCmds[n])
+            self.hlButtons.insertWidget(1, newButton)
+
+    def newButton(self, label, btnCmd):
+        """ Create new button
+            @param label: (str) : Button label
+            @param btnCmd: (object) : Button command
+            @return: (object) : New QPushButton """
+        newButton = QtGui.QPushButton()
+        newButton.setText(label)
+        newButton.clicked.connect(btnCmd)
+        return newButton
