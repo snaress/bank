@@ -16,7 +16,7 @@ class FileCmds(object):
                    "time = %r" % time.strftime("%H:%M:%S", time.localtime())]
         try:
             pFile.writeFile(lockFile, '\n'.join(lockTxt))
-            print "\tCreating lockFile ..."
+            print "\tCreating lockFile %s ..." % os.path.basename(lockFile)
             return True
         except:
             raise IOError, "!!! Error: Can't create lockFile: %s" % lockFile
@@ -29,7 +29,7 @@ class FileCmds(object):
         if os.path.exists(lockFile):
             try:
                 os.remove(lockFile)
-                print "\tRemoving lockFile ..."
+                print "\tRemoving lockFile %s ..." % os.path.basename(lockFile)
                 return True
             except:
                 raise IOError, "!!! Error: Can't remove lockFile: %s" % lockFile

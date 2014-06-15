@@ -79,6 +79,17 @@ class Grapher(object):
         else:
             raise ValueError, "Grapher._absPath = %s" % self._absPath
 
+    def reset(self):
+        """ Reset all params """
+        self._path = None
+        self._file = None
+        self._absPath = None
+        self.commentHtml = ""
+        self.commentTxt = ""
+        self.variables = {'order': []}
+        self.graphTree = {'order': []}
+        self._graphTree = []
+
 
 class GraphNode(object):
 

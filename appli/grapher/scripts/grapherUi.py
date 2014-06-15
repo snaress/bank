@@ -36,6 +36,8 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, window.Style):
         self.miSaveGraph.setShortcut("Ctrl+S")
         self.miSaveGraphAs.triggered.connect(self.cmds_menu.on_saveGraphAs)
         self.miSaveGraphAs.setShortcut("Ctrl+Shift+S")
+        self.miQuitGrapher.triggered.connect(self.cmds_menu.on_quitGrapher)
+        self.miQuitGrapher.setShortcut("Ctrl+Shift+W")
         #-- Menu Tool --#
         self.miNodeEditor.triggered.connect(self.cmds_menu.on_nodeEditor)
         self.miNodeEditor.setShortcut("E")
@@ -77,7 +79,7 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, window.Style):
         """ Get lock file from GrapherObject
             @return: (str) : Lock file absolut path """
         if self.grapher._path is not None and self.grapher._file is not None:
-            lockFile = self.grapher._file.replace('.py', '__lock.py')
+            lockFile = self.grapher._file.replace('gp_', 'gpLock_')
             return os.path.join(self.grapher._path, lockFile)
 
     def checkLockFile(self):
@@ -94,17 +96,14 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, window.Style):
                 print "\tLockfile detected ..."
                 lockParams = pFile.readPyFile(lockFile)
                 mess = ["!!! WARNING !!!",
-                        "Graph %s is already open:" % os.path.basename(lockFile).replace('__lock.py', ''),
+                        "Graph %s is already open:" % os.path.basename(lockFile).replace('gpLock_', 'gp_'),
                         "Locked by %s on %s" % (lockParams['user'], lockParams['station']),
                         "Date: %s" % lockParams['date'], "Time: %s" % lockParams['time']]
-                self.lockDialog = dialog2.ConfirmDialog('\n'.join(mess), ["Read Only", "Break Lock"],
-                                  [self.cmds_menu.openReadOnly, self.cmds_menu.breakLock])
+                self.lockDialog = dialog2.ConfirmDialog('\n'.join(mess),
+                                  ["Read Only", "Break Lock", "Cancel"],
+                                  [self.cmds_menu.openReadOnly, self.cmds_menu.breakLock,
+                                   self.cmds_menu.openAbort], cancelBtn=False)
                 self.lockDialog.exec_()
-
-    def closeEvent(self, event):
-        """ Set QMainWindow closeEvent, called when GrapherUi is closed """
-        QtGui.QMainWindow.closeEvent(self, event)
-        print 'Exit Grapher ...'
 
     @staticmethod
     def rf_zoneVisibility(checkBox, widgets, frameLayout):
@@ -132,5 +131,6 @@ def launch(graph=None):
 
 
 if __name__ == '__main__':
-    fileName = "G:/ddd/assets/chars/main/anglaigus/gp_anglaigus.py"
-    launch(graph=fileName)
+    # fileName = "G:/ddd/assets/chars/main/anglaigus/gp_anglaigus.py"
+    # launch(graph=fileName)
+    launch()
