@@ -10,7 +10,6 @@ class Grapher(object):
         self._path = None
         self._file = None
         self._absPath = None
-        self._lock = False
         self.commentHtml = ""
         self.commentTxt = ""
         self.variables = {'order': []}

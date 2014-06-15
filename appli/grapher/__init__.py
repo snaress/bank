@@ -8,7 +8,7 @@ toolPack = __package__
 
 
 #-- Global Var --#
-rootDir = os.path.join('G:', os.sep)
+rootDir = os.path.join('G:', os.sep, 'ddd', 'assets', 'chars', 'main', 'anglaigus')
 user = os.environ.get('username')
 station = os.environ.get('computername')
 

@@ -12,6 +12,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.mainUi = mainUi
         self.grapher = self.mainUi.grapher
         self.rf_shared = refresh.SharedWidget(self.mainUi, self)
+        self.rf_nodeEditor = refresh.NodeEditor(self.mainUi, self)
         super(NodeEditor, self).__init__()
         self._setupUi()
         self.initUi()
@@ -28,7 +29,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         #-- Variables Zone --#
         self.cbVariables.clicked.connect(self.rf_shared.rf_variablesVis)
         #-- Trash Zone --#
-        self.cbTrash.clicked.connect(self.rf_shared.rf_trashVis)
+        self.cbTrash.clicked.connect(self.rf_nodeEditor.rf_trashVis)
 
     def initUi(self):
         """ Initialize ui """
@@ -36,7 +37,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.rf_shared.rf_commentBgc()
         self.rf_shared.rf_variablesVis()
         self.rf_shared.rf_variablesBgc()
-        self.rf_shared.rf_trashVis()
+        self.rf_nodeEditor.rf_trashVis()
 
 
 class TextEditor(textEditor.TextEditor):
@@ -82,5 +83,25 @@ class TextEditor(textEditor.TextEditor):
         """ Switch widget visibility to disable edition and save text """
         self.stored = None
         self.rf_widgetVis()
-        if str(self.parent.objectName()) == 'MainWindow':
+        if str(self.parent.objectName()) == 'grapherUi':
             self.parent.grapher.ud_commentFromUi(self.parent)
+
+
+class Style(object):
+    """ Class used for grapher style settings """
+
+    @property
+    def lockColor(self):
+        return "background-color:Tomato;"
+
+    @property
+    def commentBgc(self):
+        return "background-color:DarkGrey;"
+
+    @property
+    def variablesBgc(self):
+        return "background-color:LightCyan;"
+
+    @property
+    def graphBgc(self):
+        return "background-color:Black;"

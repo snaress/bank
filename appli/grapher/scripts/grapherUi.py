@@ -1,23 +1,25 @@
 import sys, os
 from appli import grapher
 from PyQt4 import QtGui, uic
+from lib.qt.scripts import dialog2
+from lib.system.scripts import procFile as pFile
 from appli.grapher.scripts import grapher as gp
-from appli.grapher.scripts import refresh, cmds, window
+from appli.grapher.scripts import refresh, cmds, window, core
 
 
 grapherClass, grapherUiClass = uic.loadUiType(grapher.uiList['grapher'])
-class GrapherUi(grapherClass, grapherUiClass):
+class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, window.Style):
     """ Class containing all grapher's Ui actions for creation, loading,
         editing and writing datas in or from tool """
 
     def __init__(self):
         self.grapher = gp.Grapher()
-        self.style = refresh.Style()
         self.rf_mainUi = refresh.MainUi(self)
         self.rf_shared = refresh.SharedWidget(self, self)
         self.cmds_menu = cmds.Menu(self)
         self.window = window
         super(GrapherUi, self).__init__()
+        self._lock = False
         self._setupUi()
         self.initUi()
 
@@ -69,6 +71,7 @@ class GrapherUi(grapherClass, grapherUiClass):
         """ Update ui from graphObject """
         print "\n#-- Updating GrapherUi --#"
         self.rf_mainUi.rf_comment()
+        self.rf_mainUi.rf_graphBgc()
 
     def getLockFile(self):
         """ Get lock file from GrapherObject
@@ -78,7 +81,25 @@ class GrapherUi(grapherClass, grapherUiClass):
             return os.path.join(self.grapher._path, lockFile)
 
     def checkLockFile(self):
+        """ Check if lockFile exists """
+        print "\n#-- Check Lock File --#"
         lockFile = self.getLockFile()
+        if lockFile is not None:
+            if not os.path.exists(lockFile):
+                if self.createLockFile(lockFile):
+                    self._lock = False
+                    print "Lockfile successfully created."
+                    self.updateUi()
+            else:
+                print "\tLockfile detected ..."
+                lockParams = pFile.readPyFile(lockFile)
+                mess = ["!!! WARNING !!!",
+                        "Graph %s is already open:" % os.path.basename(lockFile).replace('__lock.py', ''),
+                        "Locked by %s on %s" % (lockParams['user'], lockParams['station']),
+                        "Date: %s" % lockParams['date'], "Time: %s" % lockParams['time']]
+                self.lockDialog = dialog2.ConfirmDialog('\n'.join(mess), ["Read Only", "Break Lock"],
+                                  [self.cmds_menu.openReadOnly, self.cmds_menu.breakLock])
+                self.lockDialog.exec_()
 
     def closeEvent(self, event):
         """ Set QMainWindow closeEvent, called when GrapherUi is closed """
@@ -101,13 +122,15 @@ class GrapherUi(grapherClass, grapherUiClass):
             frameLayout.setMaximumHeight(40)
 
 
-def launch():
+def launch(graph=None):
     """ GrapherUi launcher """
     app = QtGui.QApplication(sys.argv)
     window = GrapherUi()
+    window.cmds_menu.openGraph(graph=graph)
     window.show()
     sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
-    launch()
+    fileName = "G:/ddd/assets/chars/main/anglaigus/gp_anglaigus.py"
+    launch(graph=fileName)

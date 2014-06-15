@@ -5,7 +5,6 @@ class MainUi(object):
     def __init__(self, mainUi):
         self.mainUi = mainUi
         self.grapher = self.mainUi.grapher
-        self.style = self.mainUi.style
 
     def rf_comment(self):
         """ Refresh Grapher comment """
@@ -14,7 +13,10 @@ class MainUi(object):
 
     def rf_graphBgc(self):
         """ Refresh graph background color """
-        self.mainUi.twGraph.setStyleSheet(self.style.graphBgc)
+        if not self.mainUi._lock:
+            self.mainUi.twGraph.setStyleSheet(self.mainUi.graphBgc)
+        else:
+            self.mainUi.twGraph.setStyleSheet(self.mainUi.lockColor)
 
     def rf_nodeEditorVis(self):
         """ Refresh Grapher NodeEditor visibility """
@@ -29,7 +31,6 @@ class SharedWidget(object):
     def __init__(self, mainUi, ui):
         self.mainUi = mainUi
         self.ui = ui
-        self.style = self.mainUi.style
 
     def rf_commentVis(self):
         """ Refresh Grapher comment visibility """
@@ -38,7 +39,7 @@ class SharedWidget(object):
 
     def rf_commentBgc(self):
         """ Refresh comment background color """
-        self.ui.flComment.setStyleSheet(self.style.commentBgc)
+        self.ui.flComment.setStyleSheet(self.mainUi.commentBgc)
 
     def rf_variablesVis(self):
         """ Refresh Grapher variables visibility """
@@ -47,28 +48,19 @@ class SharedWidget(object):
 
     def rf_variablesBgc(self):
         """ Refresh variables background color """
-        self.ui.flVariables.setStyleSheet(self.style.variablesBgc)
+        self.ui.flVariables.setStyleSheet(self.mainUi.variablesBgc)
+
+
+class NodeEditor(object):
+    """ Class used by the nodeEditor to refresh and update widgets
+        @param mainUi: (object) : QMainWindow
+        @param ui: (object) : Widgets parent """
+
+    def __init__(self, mainUi, ui):
+        self.mainUi = mainUi
+        self.ui = ui
 
     def rf_trashVis(self):
         """ Refresh Grapher trash visibility """
         widgets = [self.ui.teTrash]
         self.mainUi.rf_zoneVisibility(self.ui.cbTrash, widgets, self.ui.flTrash)
-
-
-class Style(object):
-    """ Class used for grapher style settings """
-
-    def __init__(self):
-        pass
-
-    @property
-    def commentBgc(self):
-        return "background-color:DarkGrey;"
-
-    @property
-    def variablesBgc(self):
-        return "background-color:LightCyan;"
-
-    @property
-    def graphBgc(self):
-        return "background-color:Black;"
