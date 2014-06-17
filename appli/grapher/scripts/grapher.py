@@ -12,8 +12,8 @@ class Grapher(object):
         self._absPath = None
         self.commentHtml = ""
         self.commentTxt = ""
-        self.variables = {'order': []}
-        self.graphTree = {'order': []}
+        self.variables = {}
+        self.graphTree = {}
         self._graphTree = []
 
     def __repr__(self):
@@ -39,13 +39,16 @@ class Grapher(object):
         #-- Comment --#
         txt.append("#-- Comment --#")
         txt.append(self.commentTxt)
-        # txt.extend(pFile.dictToList(self.__dict__))
+        #-- Variables --#
+        txt.append("#-- Variables--#")
+        for k, v in sorted(self.variables.iteritems()):
+            txt.append("%s = %s" % (k, v))
         return '\n'.join(txt)
 
     def loadGraph(self, fileName):
         """ Load given grapher file
             @param fileName: (str) : Grapher absolut path """
-        print "\n#-- Loading Graph: %s --#" % fileName
+        print "\n[grapher] : #-- Load Graph: %s --#" % os.path.basename(fileName)
         params = pFile.readPyFile(fileName)
         self._path = os.path.dirname(fileName)
         self._file = os.path.basename(fileName)
@@ -54,21 +57,26 @@ class Grapher(object):
             if k in params:
                 print "\tUpdating %s ..." % k
                 setattr(self, k, params[k])
-        print "Graph successfully loaded."
+        print "[grapher] : Graph successfully loaded."
 
     def ud_commentFromUi(self, mainUi):
         """ Update comment from mainUi
             @param mainUi: (object) : QMainWindow """
-        print "\n#-- Update Comment From Ui --#"
+        print "\n[grapher] : #-- Update Comment From Ui --#"
         self.commentHtml = str(mainUi.wgComment.teText.toHtml())
         self.commentTxt = str(mainUi.wgComment.teText.toPlainText())
         print self.commentTxt
+
+    def ud_variablesFromUi(self, mainUi):
+        print "\n[grapher] : #-- Update Variables From Ui --#"
+        self.variables = mainUi.wgVariables.__repr__()
+        print self.variables
 
     def writeToFile(self):
         """ Write grapher to file """
         if self._absPath is not None:
             if os.path.exists(self._path):
-                print "\n#-- Writing Graph --#"
+                print "\n[grapher] : #-- Write Graph --#"
                 try:
                     pFile.writeFile(self._absPath, self.__repr__())
                     print "Result: %s" % self._absPath
@@ -81,14 +89,16 @@ class Grapher(object):
 
     def reset(self):
         """ Reset all params """
+        print "\n[grapher] : #-- Reset All Params --#"
         self._path = None
         self._file = None
         self._absPath = None
         self.commentHtml = ""
         self.commentTxt = ""
-        self.variables = {'order': []}
-        self.graphTree = {'order': []}
+        self.variables = {}
+        self.graphTree = {}
         self._graphTree = []
+        print "[grapher] : Params successfully reseted."
 
 
 class GraphNode(object):

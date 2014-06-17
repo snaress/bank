@@ -4,20 +4,19 @@ from PyQt4 import QtGui, uic
 from lib.qt.scripts import dialog2
 from lib.system.scripts import procFile as pFile
 from appli.grapher.scripts import grapher as gp
-from appli.grapher.scripts import refresh, cmds, window, core
+from appli.grapher.scripts import refresh, cmds, widgets, core
 
 
 grapherClass, grapherUiClass = uic.loadUiType(grapher.uiList['grapher'])
-class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, window.Style):
+class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, widgets.Style):
     """ Class containing all grapher's Ui actions for creation, loading,
         editing and writing datas in or from tool """
 
     def __init__(self):
         self.grapher = gp.Grapher()
-        self.rf_mainUi = refresh.MainUi(self)
         self.rf_shared = refresh.SharedWidget(self, self)
         self.cmds_menu = cmds.Menu(self)
-        self.window = window
+        self.window = widgets
         super(GrapherUi, self).__init__()
         self._lock = False
         self._setupUi()
@@ -30,6 +29,8 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, window.Style):
 
     def _setupMenu(self):
         #-- Menu File --#
+        self.miNewGraph.triggered.connect(self.cmds_menu.on_newGraph)
+        self.miNewGraph.setShortcut("Ctrl+N")
         self.miOpenGraph.triggered.connect(self.cmds_menu.on_openGraph)
         self.miOpenGraph.setShortcut("Ctrl+O")
         self.miSaveGraph.triggered.connect(self.cmds_menu.on_saveGraph)
@@ -55,6 +56,8 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, window.Style):
         self.vlComment.insertWidget(-1, self.wgComment)
         self.cbComment.clicked.connect(self.rf_shared.rf_commentVis)
         #-- Variables Zone --#
+        self.wgVariables = self.window.VarEditor(self)
+        self.vlVariables.insertWidget(-1, self.wgVariables)
         self.cbVariables.clicked.connect(self.rf_shared.rf_variablesVis)
         #-- NodeEditor Zone --#
         self.nodeEditor = self.window.NodeEditor(self)
@@ -63,19 +66,36 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, window.Style):
     def initUi(self):
         """ Initialize ui """
         self.rf_shared.rf_commentVis()
-        self.rf_shared.rf_commentBgc()
         self.rf_shared.rf_variablesVis()
-        self.rf_shared.rf_variablesBgc()
-        self.rf_mainUi.rf_graphBgc()
-        self.rf_mainUi.rf_nodeEditorVis()
+        self.rf_shared.rf_graphBgc()
+        self.rf_shared.rf_nodeEditorVis()
 
     def updateUi(self):
         """ Update ui from graphObject """
-        print "\n#-- Updating GrapherUi --#"
-        self.rf_mainUi.rf_comment()
-        self.rf_mainUi.rf_graphBgc()
+        print "\n[grapherUI] : #-- Update GrapherUi --#"
+        self.setWindowTitle("Grapher - %s" % self.grapher._file)
+        print "\tUpdating grapher comment ..."
+        self.wgComment.rf_comment(self.grapher.commentHtml)
+        print "\tUpdating grapher variables ..."
+        self.wgVariables.rf_variables(**self.grapher.variables)
+        print "\tUpdating grapher treeNode ..."
+        self.rf_shared.rf_graphBgc()
 
-    def getLockFile(self):
+    def resetUi(self):
+        """ Reset Grapher ui """
+        print "\n[grapherUI] : #-- Reset GrapherUi --#"
+        self.setWindowTitle("Grapher")
+        print "\tReseting lock state ..."
+        self._lock = False
+        print "\tReseting grapher comment ..."
+        self.wgComment.resetComment()
+        print "\tReseting grapher variables ..."
+        self.wgVariables.resetVariables()
+        print "\tReseting node editor ..."
+        self.nodeEditor.resetUi()
+
+    @property
+    def lockFile(self):
         """ Get lock file from GrapherObject
             @return: (str) : Lock file absolut path """
         if self.grapher._path is not None and self.grapher._file is not None:
@@ -84,19 +104,19 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, window.Style):
 
     def checkLockFile(self):
         """ Check if lockFile exists """
-        print "\n#-- Check Lock File --#"
-        lockFile = self.getLockFile()
-        if lockFile is not None:
-            if not os.path.exists(lockFile):
-                if self.createLockFile(lockFile):
+        print "\n[grapherUI] : #-- Check Lock File --#"
+        if self.lockFile is not None:
+            if not os.path.exists(self.lockFile):
+                if self.createLockFile(self.lockFile):
                     self._lock = False
-                    print "Lockfile successfully created."
+                    print "[grapherUI] : Lockfile successfully created."
                     self.updateUi()
             else:
                 print "\tLockfile detected ..."
-                lockParams = pFile.readPyFile(lockFile)
+                graph = os.path.basename(self.lockFile).replace('gpLock_', 'gp_')
+                lockParams = pFile.readPyFile(self.lockFile)
                 mess = ["!!! WARNING !!!",
-                        "Graph %s is already open:" % os.path.basename(lockFile).replace('gpLock_', 'gp_'),
+                        "Graph %s is already open:" % graph,
                         "Locked by %s on %s" % (lockParams['user'], lockParams['station']),
                         "Date: %s" % lockParams['date'], "Time: %s" % lockParams['time']]
                 self.lockDialog = dialog2.ConfirmDialog('\n'.join(mess),
@@ -120,6 +140,12 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, window.Style):
             frameLayout.setMinimumHeight(40)
             frameLayout.setMaximumHeight(40)
 
+    def closeEvent(self, event):
+        print "\n[grapherUI] : #-- Close GrapherUi --#"
+        if self.lockFile is not None:
+            if os.path.exists(self.lockFile):
+                self.removeLockFile(self.lockFile)
+
 
 def launch(graph=None):
     """ GrapherUi launcher """
@@ -131,6 +157,6 @@ def launch(graph=None):
 
 
 if __name__ == '__main__':
-    # fileName = "G:/ddd/assets/chars/main/anglaigus/gp_anglaigus.py"
-    # launch(graph=fileName)
-    launch()
+    fileName = "G:/ddd/assets/chars/main/anglaigus/gp_anglaigus.py"
+    launch(graph=fileName)
+    # launch()

@@ -1,7 +1,6 @@
 import os
 from PyQt4 import QtGui
 from appli import grapher
-from functools import partial
 from lib.qt.scripts import dialog2
 from lib.system.scripts import procFile as pFile
 
@@ -16,6 +15,22 @@ class Menu(object):
 
     #===================================== MENU FILE =========================================#
 
+    def on_newGraph(self):
+        """ Command launched when miNewGraph is clicked """
+        mess = "Are you sure you want to close current Graph ?"
+        self.newDialog = dialog2.ConfirmDialog(mess, ["Yes"], [self.newGraph])
+        self.newDialog.exec_()
+
+    def newGraph(self):
+        """ Close current graph and reset all params """
+        print "\n[grapherUI] : #-- New Graph --#"
+        self.newDialog.close()
+        if self.mainUi.lockFile is not None and not self.mainUi._lock:
+            if os.path.exists(self.mainUi.lockFile):
+                self.mainUi.removeLockFile(self.mainUi.lockFile)
+        self.grapher.reset()
+        self.mainUi.resetUi()
+
     def on_openGraph(self):
         """ Command launched when miOpenGraph is clicked """
         if self.grapher._path is None or self.grapher._file is None:
@@ -27,7 +42,9 @@ class Menu(object):
         self.fdOpen.exec_()
 
     def openGraph(self, graph=None):
-        """ Open selected graph """
+        """ Open selected graph
+            @param graph: (str) : Graph absolut path """
+        #-- Get Graph Path --#
         if graph is None:
             try:
                 selPath = self.fdOpen.selectedFiles()
@@ -36,7 +53,9 @@ class Menu(object):
                 selPath = None
         else:
             selPath = [graph]
+        #-- Open Graph --#
         if selPath:
+            print "\n[grapherUI] : #-- Open Graph --#"
             fileName = str(selPath[0])
             if fileName.endswith('.py'):
                 self.grapher.loadGraph(fileName)
@@ -54,19 +73,18 @@ class Menu(object):
         print "\tOpen graph in read only..."
         self.mainUi.lockDialog.close()
         self.mainUi._lock = True
-        lockFile = self.mainUi.getLockFile()
-        if lockFile is not None:
-            lockParams = pFile.readPyFile(lockFile)
+        if self.mainUi.lockFile is not None:
+            lockParams = pFile.readPyFile(self.mainUi.lockFile)
             if grapher.user == lockParams['user']:
-                self.mainUi.removeLockFile(lockFile)
+                self.mainUi.removeLockFile(self.mainUi.lockFile)
         self.mainUi.updateUi()
 
     def breakLock(self):
         """ Break lock and open graph """
         self.mainUi.lockDialog.close()
-        self.mainUi.removeLockFile(self.mainUi.getLockFile())
+        self.mainUi.removeLockFile(self.mainUi.lockFile)
         self.mainUi._lock = False
-        self.mainUi.createLockFile(self.mainUi.getLockFile())
+        self.mainUi.createLockFile(self.mainUi.lockFile)
         self.mainUi.updateUi()
 
     def on_saveGraph(self):
@@ -75,6 +93,8 @@ class Menu(object):
             self.on_saveGraphAs()
         else:
             if not self.mainUi._lock:
+                print "\n[grapherUI] : #-- Save Graph --#"
+                self.grapher.ud_variablesFromUi(self.mainUi)
                 self.grapher.writeToFile()
             else:
                 warn = ["!!! Warning: Destination Graph Locked !!!", "Can't overwrite locked graph"]
@@ -93,57 +113,48 @@ class Menu(object):
 
     def saveGraphAs(self):
         """ Save grapher as selected fileName """
-        print "\n#-- Saving Graph As --#"
+        print "\n[grapherUI] : #-- Save Graph As --#"
         selPath = self.fdSaveAs.selectedFiles()
         if selPath:
             fileName = str(selPath[0])
             if fileName.endswith('.py'):
+                #-- Get LockFiles --#
                 futurLockFile = fileName.replace('gp_', 'gpLock_')
-                currLockFile = self.mainUi.getLockFile()
                 if os.path.exists(futurLockFile):
                     self._fileLockErrorDialog(fileName, futurLockFile, self.fdSaveAs)
                 else:
-                    if fileName == self.grapher._absPath and self.mainUi._lock:
-                        warn = ["!!! Warning: Destination Graph Locked !!!",
-                                "Can't overwrite locked graph"]
-                        errorDial = QtGui.QErrorMessage(self.mainUi)
-                        errorDial.showMessage('\n'.join(warn))
-                    else:
-                        self.fdSaveAs.close()
-                        if not self.mainUi._lock:
-                            if currLockFile is not None:
-                                self.mainUi.removeLockFile(currLockFile)
-                        self.grapher._path = os.path.dirname(fileName)
-                        self.grapher._file = os.path.basename(fileName)
-                        self.grapher._absPath = fileName
-                        self.grapher.writeToFile()
-                        self.mainUi.createLockFile(self.mainUi.getLockFile())
-                        self.mainUi._lock = False
-                        self.mainUi.rf_mainUi.rf_graphBgc()
+                    self.fdSaveAs.close()
+                    #-- Remove Current LockFile --#
+                    if not self.mainUi._lock:
+                        if self.mainUi.lockFile is not None:
+                            self.mainUi.removeLockFile(self.mainUi.lockFile)
+                    #-- Save Graph --#
+                    self.grapher._path = os.path.dirname(fileName)
+                    self.grapher._file = os.path.basename(fileName)
+                    self.grapher._absPath = fileName
+                    self.grapher.ud_variablesFromUi(self.mainUi)
+                    self.grapher.writeToFile()
+                    self.mainUi.setWindowTitle("Grapher - %s" % self.grapher._file)
+                    self.mainUi.createLockFile(self.mainUi.lockFile)
+                    self.mainUi._lock = False
+                    self.mainUi.rf_shared.rf_graphBgc()
             else:
                 self._fileErrorDialog(fileName, self.fdSaveAs)
 
     def on_quitGrapher(self):
         """ Command launched when miQuitGraph is clicked """
-        mess = "Save before closing ?"
-        self.quitDialog = dialog2.ConfirmDialog(mess, ["Save", "Save As", "Don't Save"],
-                          [partial(self.quitGrapher, option="Save"),
-                           partial(self.quitGrapher, option="Save As"), self.quitGrapher])
+        mess = "Are you sure you want to close Grapher ?"
+        self.quitDialog = dialog2.ConfirmDialog(mess, ["Close"], [self.quitGrapher])
         self.quitDialog.exec_()
 
-    def quitGrapher(self, option="Don't Save"):
-        """ Ask to save before closing
-            @param option: (str) : "Save", "Save As" or "Don't Save" """
-        if option == "Save":
-            self.on_saveGraph()
-        elif option == "Save As":
-            self.on_saveGraphAs()
-        # lockFile = self.mainUi.getLockFile()
-        # if not self.mainUi._lock and lockFile is not None:
-        #     if os.path.exists(lockFile):
-        #         self.mainUi.removeLockFile(lockFile)
-        # self.quitDialog.close()
-        # self.mainUi.close()
+    def quitGrapher(self):
+        """ Ask confirmaton before closing """
+        print "\n[grapherUI] : #-- Exit Grapher --#"
+        if not self.mainUi._lock and self.mainUi.lockFile is not None:
+            if os.path.exists(self.mainUi.lockFile):
+                self.mainUi.removeLockFile(self.mainUi.lockFile)
+        self.quitDialog.close()
+        self.mainUi.close()
 
     def _fileErrorDialog(self, fileName, parent):
         """ Launch fileDialog error message
@@ -171,7 +182,7 @@ class Menu(object):
 
     def on_nodeEditor(self):
         """ Command launched when miNodeEditor is clicked """
-        self.mainUi.rf_mainUi.rf_nodeEditorVis()
+        self.mainUi.rf_shared.rf_nodeEditorVis()
 
     #===================================== MENU HELP =========================================#
 
@@ -186,3 +197,4 @@ class Menu(object):
     def on_grapherDict(self):
         """ Command launched when miGrapherDict is clicked """
         print self.grapher.__dict__
+
