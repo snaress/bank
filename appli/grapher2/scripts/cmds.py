@@ -1,8 +1,29 @@
 import os
 from PyQt4 import QtGui
-from appli import grapher
-from lib.qt.scripts import dialog2
+from appli import grapher2
+from lib.qt.scripts import procQt as pQt
 from lib.system.scripts import procFile as pFile
+
+
+class SharedWidget(object):
+    """ Class used by the grapherUi to refresh and update shared widgets
+        @param mainUi: (object) : QMainWindow
+        @param ui: (object) : Widgets parent """
+
+    def __init__(self, mainUi, ui):
+        self.ui = ui
+        self.mainUi = mainUi
+        self.grapher = self.mainUi.grapher
+
+    def rf_commentVis(self):
+        """ Refresh Grapher comment visibility """
+        widgets = [self.ui.wgComment]
+        self.mainUi.rf_zoneVisibility(self.ui.cbComment, widgets, self.ui.flComment)
+
+    def rf_variablesVis(self):
+        """ Refresh Grapher variables visibility """
+        widgets = [self.ui.wgVariables.flVarBtns, self.ui.wgVariables.twVariables]
+        self.mainUi.rf_zoneVisibility(self.ui.cbVariables, widgets, self.ui.flVariables)
 
 
 class Menu(object):
@@ -18,7 +39,7 @@ class Menu(object):
     def on_newGraph(self):
         """ Command launched when miNewGraph is clicked """
         mess = "Are you sure you want to close current Graph ?"
-        self.newDialog = dialog2.ConfirmDialog(mess, ["Yes"], [self.newGraph])
+        self.newDialog = pQt.ConfirmDialog(mess, ["Yes"], [self.newGraph])
         self.newDialog.exec_()
 
     def newGraph(self):
@@ -34,10 +55,10 @@ class Menu(object):
     def on_openGraph(self):
         """ Command launched when miOpenGraph is clicked """
         if self.grapher._path is None or self.grapher._file is None:
-            rootDir = grapher.rootDir
+            rootDir = grapher2.rootDir
         else:
             rootDir = self.grapher._path
-        self.fdOpen = dialog2.fileDialog(fdMode='open', fdFileMode='ExistingFile', fdRoot=rootDir,
+        self.fdOpen = pQt.fileDialog(fdMode='open', fdFileMode='ExistingFile', fdRoot=rootDir,
                                         fdFilters=['gp_*.py'], fdCmd=self.openGraph)
         self.fdOpen.exec_()
 
@@ -75,7 +96,7 @@ class Menu(object):
         self.mainUi._lock = True
         if self.mainUi.lockFile is not None:
             lockParams = pFile.readPyFile(self.mainUi.lockFile)
-            if grapher.user == lockParams['user']:
+            if grapher2.user == lockParams['user']:
                 self.mainUi.removeLockFile(self.mainUi.lockFile)
         self.mainUi.updateUi()
 
@@ -95,6 +116,7 @@ class Menu(object):
             if not self.mainUi._lock:
                 print "\n[grapherUI] : #-- Save Graph --#"
                 self.grapher.ud_variablesFromUi(self.mainUi)
+                self.grapher.ud_graphTreeFromUi(self.mainUi)
                 self.grapher.writeToFile()
             else:
                 warn = ["!!! Warning: Destination Graph Locked !!!", "Can't overwrite locked graph"]
@@ -104,15 +126,15 @@ class Menu(object):
     def on_saveGraphAs(self):
         """ Command launched when miSaveGraphAs is clicked """
         if self.grapher._path is None or self.grapher._file is None:
-            rootDir = grapher.rootDir
+            rootDir = grapher2.rootDir
         else:
             rootDir = self.grapher._path
-        self.fdSaveAs = dialog2.fileDialog(fdMode='save', fdFileMode='AnyFile', fdRoot=rootDir,
-                                           fdFilters=['gp_*.py'], fdCmd=self.saveGraphAs)
+        self.fdSaveAs = pQt.fileDialog(fdMode='save', fdFileMode='AnyFile', fdRoot=rootDir,
+                                       fdFilters=['gp_*.py'], fdCmd=self.saveGraphAs)
         self.fdSaveAs.exec_()
 
     def saveGraphAs(self):
-        """ Save grapher as selected fileName """
+        """ Save grapher2 as selected fileName """
         print "\n[grapherUI] : #-- Save Graph As --#"
         selPath = self.fdSaveAs.selectedFiles()
         if selPath:
@@ -133,18 +155,19 @@ class Menu(object):
                     self.grapher._file = os.path.basename(fileName)
                     self.grapher._absPath = fileName
                     self.grapher.ud_variablesFromUi(self.mainUi)
+                    self.grapher.ud_graphTreeFromUi(self.mainUi)
                     self.grapher.writeToFile()
                     self.mainUi.setWindowTitle("Grapher - %s" % self.grapher._file)
                     self.mainUi.createLockFile(self.mainUi.lockFile)
                     self.mainUi._lock = False
-                    self.mainUi.rf_shared.rf_graphBgc()
+                    self.mainUi.wgGraph.rf_graphBgc()
             else:
                 self._fileErrorDialog(fileName, self.fdSaveAs)
 
     def on_quitGrapher(self):
         """ Command launched when miQuitGraph is clicked """
         mess = "Are you sure you want to close Grapher ?"
-        self.quitDialog = dialog2.ConfirmDialog(mess, ["Close"], [self.quitGrapher])
+        self.quitDialog = pQt.ConfirmDialog(mess, ["Close"], [self.quitGrapher])
         self.quitDialog.exec_()
 
     def quitGrapher(self):
@@ -178,11 +201,11 @@ class Menu(object):
         errorDial = QtGui.QErrorMessage(parent)
         errorDial.showMessage('\n'.join(warn))
 
-    #===================================== MENU TOOL =========================================#
+    #===================================== MENU GRAPH ========================================#
 
     def on_nodeEditor(self):
         """ Command launched when miNodeEditor is clicked """
-        self.mainUi.rf_shared.rf_nodeEditorVis()
+        self.mainUi.nodeEditor.rf_nodeEditorVis()
 
     #===================================== MENU HELP =========================================#
 
@@ -198,3 +221,6 @@ class Menu(object):
         """ Command launched when miGrapherDict is clicked """
         print self.grapher.__dict__
 
+    def on_grapherUiStr(self):
+        """ Command launched when miGrapherUiStr is clicked """
+        print self.mainUi.__str__()

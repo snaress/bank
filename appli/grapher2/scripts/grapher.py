@@ -3,7 +3,7 @@ from lib.system.scripts import procFile as pFile
 
 
 class Grapher(object):
-    """ Class containing all grapher's commands for creation, loading,
+    """ Class containing all grapher2's commands for creation, loading,
         editing and writing datas in or from tool """
 
     def __init__(self):
@@ -14,7 +14,6 @@ class Grapher(object):
         self.commentTxt = ""
         self.variables = {}
         self.graphTree = {}
-        self._graphTree = []
 
     def __repr__(self):
         txt = []
@@ -43,12 +42,17 @@ class Grapher(object):
         txt.append("#-- Variables--#")
         for k, v in sorted(self.variables.iteritems()):
             txt.append("%s = %s" % (k, v))
+        #-- Graph Tree --#
+        txt.append("#-- Graph Tree--#")
+        for k, v in sorted(self.graphTree.iteritems()):
+            if not k.startswith('_'):
+                txt.append("%s = %s" % (k, v))
         return '\n'.join(txt)
 
     def loadGraph(self, fileName):
-        """ Load given grapher file
+        """ Load given grapher2 file
             @param fileName: (str) : Grapher absolut path """
-        print "\n[grapher] : #-- Load Graph: %s --#" % os.path.basename(fileName)
+        print "\n[grapher2] : #-- Load Graph: %s --#" % os.path.basename(fileName)
         params = pFile.readPyFile(fileName)
         self._path = os.path.dirname(fileName)
         self._file = os.path.basename(fileName)
@@ -57,26 +61,30 @@ class Grapher(object):
             if k in params:
                 print "\tUpdating %s ..." % k
                 setattr(self, k, params[k])
-        print "[grapher] : Graph successfully loaded."
+        print "[grapher2] : Graph successfully loaded."
 
     def ud_commentFromUi(self, mainUi):
         """ Update comment from mainUi
             @param mainUi: (object) : QMainWindow """
-        print "\n[grapher] : #-- Update Comment From Ui --#"
+        print "\n[grapher2] : #-- Update Comment From Ui --#"
         self.commentHtml = str(mainUi.wgComment.teText.toHtml())
         self.commentTxt = str(mainUi.wgComment.teText.toPlainText())
-        print self.commentTxt
 
     def ud_variablesFromUi(self, mainUi):
-        print "\n[grapher] : #-- Update Variables From Ui --#"
+        """ Update variables from mainUi
+            @param mainUi: (object) : QMainWindow """
+        print "\n[grapher2] : #-- Update Variables From Ui --#"
         self.variables = mainUi.wgVariables.__repr__()
-        print self.variables
+
+    def ud_graphTreeFromUi(self, mainUi):
+        print "\n[grapher2] : #-- Update Graph Tree From Ui --#"
+        self.graphTree = mainUi.wgGraph.__repr__()
 
     def writeToFile(self):
-        """ Write grapher to file """
+        """ Write grapher2 to file """
         if self._absPath is not None:
             if os.path.exists(self._path):
-                print "\n[grapher] : #-- Write Graph --#"
+                print "\n[grapher2] : #-- Write Graph --#"
                 try:
                     pFile.writeFile(self._absPath, self.__repr__())
                     print "Result: %s" % self._absPath
@@ -89,7 +97,7 @@ class Grapher(object):
 
     def reset(self):
         """ Reset all params """
-        print "\n[grapher] : #-- Reset All Params --#"
+        print "\n[grapher2] : #-- Reset All Params --#"
         self._path = None
         self._file = None
         self._absPath = None
@@ -97,16 +105,4 @@ class Grapher(object):
         self.commentTxt = ""
         self.variables = {}
         self.graphTree = {}
-        self._graphTree = []
-        print "[grapher] : Params successfully reseted."
-
-
-class GraphNode(object):
-
-    def __init__(self, nodeName, nodeType, parent=None):
-        self.parent = parent
-        self.children = []
-        self.nodeName = nodeName
-        self.nodeType = nodeType
-        self.nodeComment = ""
-        self.nodeVariables = []
+        print "[grapher2] : Params successfully reseted."

@@ -1,26 +1,33 @@
 import sys, os
-from appli import grapher
+from appli import grapher2
 from PyQt4 import QtGui, uic
-from lib.qt.scripts import dialog2
+from lib.qt.scripts import procQt as pQt
 from lib.system.scripts import procFile as pFile
-from appli.grapher.scripts import grapher as gp
-from appli.grapher.scripts import refresh, cmds, widgets, core
+from appli.grapher2.scripts import grapher as gp
+from appli.grapher2.scripts import cmds, widgets, core
 
 
-grapherClass, grapherUiClass = uic.loadUiType(grapher.uiList['grapher'])
+grapherClass, grapherUiClass = uic.loadUiType(grapher2.uiList['grapher'])
 class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, widgets.Style):
-    """ Class containing all grapher's Ui actions for creation, loading,
+    """ Class containing all grapher2's Ui actions for creation, loading,
         editing and writing datas in or from tool """
 
     def __init__(self):
         self.grapher = gp.Grapher()
-        self.rf_shared = refresh.SharedWidget(self, self)
+        self.rf_shared = cmds.SharedWidget(self, self)
         self.cmds_menu = cmds.Menu(self)
         self.window = widgets
         super(GrapherUi, self).__init__()
         self._lock = False
         self._setupUi()
         self.initUi()
+
+    def __str__(self):
+        txt = ["\n", "========== GRAPHER UI ==========\n"]
+        txt.append(self.wgVariables.__str__())
+        txt.append("\n")
+        txt.append(self.wgGraph.__str__())
+        return ''.join(txt)
 
     def _setupUi(self):
         self.setupUi(self)
@@ -49,6 +56,8 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, widgets.Style):
         self.miGrapherStr.setShortcut("Shift+G")
         self.miGrapherDict.triggered.connect(self.cmds_menu.on_grapherDict)
         self.miGrapherDict.setShortcut("Alt+G")
+        self.miGrapherUiStr.triggered.connect(self.cmds_menu.on_grapherUiStr)
+        self.miGrapherUiStr.setShortcut("Ctrl+Shift+G")
 
     def _setupMain(self):
         #-- Comment Zone --#
@@ -59,27 +68,32 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, widgets.Style):
         self.wgVariables = self.window.VarEditor(self)
         self.vlVariables.insertWidget(-1, self.wgVariables)
         self.cbVariables.clicked.connect(self.rf_shared.rf_variablesVis)
+        #-- Graph Zone --#
+        self.wgGraph = self.window.GraphZone(self)
+        self.vlGraph.insertWidget(-1, self.wgGraph)
         #-- NodeEditor Zone --#
-        self.nodeEditor = self.window.NodeEditor(self)
+        self.nodeEditor = NodeEditor(self)
         self.vlNodeEditor.addWidget(self.nodeEditor)
 
     def initUi(self):
         """ Initialize ui """
         self.rf_shared.rf_commentVis()
         self.rf_shared.rf_variablesVis()
-        self.rf_shared.rf_graphBgc()
-        self.rf_shared.rf_nodeEditorVis()
+        self.wgGraph.rf_graphBgc()
+        self.nodeEditor.rf_nodeEditorVis()
 
     def updateUi(self):
         """ Update ui from graphObject """
         print "\n[grapherUI] : #-- Update GrapherUi --#"
         self.setWindowTitle("Grapher - %s" % self.grapher._file)
-        print "\tUpdating grapher comment ..."
+        print "\tUpdating grapher2 comment ..."
         self.wgComment.rf_comment(self.grapher.commentHtml)
-        print "\tUpdating grapher variables ..."
+        print "\tUpdating grapher2 variables ..."
         self.wgVariables.rf_variables(**self.grapher.variables)
-        print "\tUpdating grapher treeNode ..."
-        self.rf_shared.rf_graphBgc()
+        print "\tUpdating grapher2 tree ..."
+        self.wgGraph.rf_graphBgc()
+        self.wgGraph.rf_graph()
+        print "[grapherUI] : Graph successfully loaded."
 
     def resetUi(self):
         """ Reset Grapher ui """
@@ -87,10 +101,12 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, widgets.Style):
         self.setWindowTitle("Grapher")
         print "\tReseting lock state ..."
         self._lock = False
-        print "\tReseting grapher comment ..."
+        print "\tReseting grapher2 comment ..."
         self.wgComment.resetComment()
-        print "\tReseting grapher variables ..."
+        print "\tReseting grapher2 variables ..."
         self.wgVariables.resetVariables()
+        print "\tReseting grapher2 tree ..."
+        self.wgGraph.resetGraph()
         print "\tReseting node editor ..."
         self.nodeEditor.resetUi()
 
@@ -119,7 +135,7 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, widgets.Style):
                         "Graph %s is already open:" % graph,
                         "Locked by %s on %s" % (lockParams['user'], lockParams['station']),
                         "Date: %s" % lockParams['date'], "Time: %s" % lockParams['time']]
-                self.lockDialog = dialog2.ConfirmDialog('\n'.join(mess),
+                self.lockDialog = pQt.ConfirmDialog('\n'.join(mess),
                                   ["Read Only", "Break Lock", "Cancel"],
                                   [self.cmds_menu.openReadOnly, self.cmds_menu.breakLock,
                                    self.cmds_menu.openAbort], cancelBtn=False)
@@ -145,6 +161,57 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, widgets.Style):
         if self.lockFile is not None:
             if os.path.exists(self.lockFile):
                 self.removeLockFile(self.lockFile)
+
+
+nodeEditorClass, nodeEditorUiClass = uic.loadUiType(grapher2.uiList['nodeEditor'])
+class NodeEditor(nodeEditorClass, nodeEditorUiClass):
+    """ Class used for graph nodes edition
+        @param mainUi: (object) : QMainWindow """
+
+    def __init__(self, mainUi):
+        self.mainUi = mainUi
+        self.grapher = self.mainUi.grapher
+        self.rf_shared = cmds.SharedWidget(self.mainUi, self)
+        self.window = widgets
+        super(NodeEditor, self).__init__()
+        self._setupUi()
+        self.initUi()
+
+    def _setupUi(self):
+        self.setupUi(self)
+        self._setupMain()
+
+    def _setupMain(self):
+        #-- Comment Zone --#
+        self.wgComment = self.window.TextEditor(self)
+        self.vlComment.insertWidget(-1, self.wgComment)
+        self.cbComment.clicked.connect(self.rf_shared.rf_commentVis)
+        #-- Variables Zone --#
+        self.wgVariables = self.window.VarEditor(self)
+        self.vlVariables.insertWidget(-1, self.wgVariables)
+        self.cbVariables.clicked.connect(self.rf_shared.rf_variablesVis)
+        #-- Trash Zone --#
+        self.cbTrash.clicked.connect(self.rf_trashVis)
+
+    def initUi(self):
+        """ Initialize ui """
+        self.rf_shared.rf_commentVis()
+        self.rf_shared.rf_variablesVis()
+        self.rf_trashVis()
+
+    def rf_nodeEditorVis(self):
+        """ Refresh Grapher NodeEditor visibility """
+        self.mainUi.flNodeEditor.setVisible(self.mainUi.miNodeEditor.isChecked())
+
+    def rf_trashVis(self):
+        """ Refresh nodeEditor trash visibility """
+        widgets = [self.teTrash]
+        self.mainUi.rf_zoneVisibility(self.cbTrash, widgets, self.flTrash)
+
+    def resetUi(self):
+        """ Reset NodeEditor ui """
+        self.wgComment.resetComment()
+        self.wgVariables.resetVariables()
 
 
 def launch(graph=None):

@@ -1,5 +1,5 @@
 import os, time
-from appli import grapher
+from appli import grapher2
 from lib.system.scripts import procFile as pFile
 
 
@@ -10,8 +10,8 @@ class FileCmds(object):
         """ Create lockFile
             @param lockFile: (str) : LockFile absolut path
             @return: (bool) : True if success, False if failed """
-        lockTxt = ["user = %r" % grapher.user,
-                   "station = %r" % grapher.station,
+        lockTxt = ["user = %r" % grapher2.user,
+                   "station = %r" % grapher2.station,
                    "date = %r" % time.strftime("%Y/%m/%d", time.localtime()),
                    "time = %r" % time.strftime("%H:%M:%S", time.localtime())]
         try:
