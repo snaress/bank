@@ -8,7 +8,7 @@ sys.path.insert(0, bankPath)
 
 
 #-- Launch Tool --#
-from appli.grapher2.scripts import grapherUi
+from appli.grapher.scripts import grapherUi
 if __name__ == '__main__':
     grapherUi.launch()
 
