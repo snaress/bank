@@ -86,7 +86,7 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, core.Style):
         print "\tUpdating grapher comment ..."
         self.wgComment.rf_comment(self.grapher.commentHtml)
         print "\tUpdating grapher variables ..."
-        # self.wgVariables.rf_variables(**self.grapher.variables)
+        self.wgVariables.rf_variables(**self.grapher.variables)
         print "\tUpdating grapher tree ..."
         self.wgGraph.rf_graphBgc()
         # self.wgGraph.rf_graph()

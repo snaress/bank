@@ -45,7 +45,7 @@ class VarEditor(varEditorClass, varEditorUiClass):
     def rf_variables(self, **kwargs):
         """ Refresh variables values
             @param kwargs: (dict) : Variables dict """
-        self.resetVariables()
+        self.resetTree()
         for var in sorted(kwargs.keys()):
             newItem = self.on_addVar()
             self.setItem(newItem, **kwargs[var])
@@ -147,6 +147,10 @@ class VarEditor(varEditorClass, varEditorUiClass):
         item.wdgType.setCurrentIndex(item.wdgType.findText(kwargs['type']))
         item.wdgValue.setText(kwargs['value'])
         item.wdgComment.setText(kwargs['comment'])
+
+    def resetTree(self):
+        """ Reset variable tree """
+        self.twVariables.clear()
 
 
 class VarTree(QtGui.QTreeWidget):

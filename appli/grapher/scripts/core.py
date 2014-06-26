@@ -73,12 +73,6 @@ class FileCmds(object):
         errorDial = QtGui.QErrorMessage(parent)
         errorDial.showMessage('\n'.join(warn))
 
-    @staticmethod
-    def _pushVarBufferError(parent):
-        """ Launch pushVarDialog error message
-            @param parent: (object) : Parent ui """
-        warn = "!!! ERROR: Can not store variable buffer !!!"
-
 
 class Style(object):
     """ Class used by grapher for style settings """
