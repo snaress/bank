@@ -44,9 +44,9 @@ class GraphTree(QtGui.QTreeWidget):
         self.setItemsExpandable(True)
         self.setIndentation(0)
         #-- Drag & Drop --#
-        self.setAcceptDrops(True)
-        self.setDragEnabled(True)
-        self.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
+        self.setAcceptDrops(False)
+        self.setDragEnabled(False)
+        self.setDragDropMode(QtGui.QAbstractItemView.NoDragDrop)
         self.setDefaultDropAction(QtCore.Qt.LinkAction)
 
     def _setupMainUi(self):
@@ -92,39 +92,6 @@ class GraphTree(QtGui.QTreeWidget):
                 self.setItemWidget(newItem, ind, newWidget)
                 newItem._widgetInd = ind
         self.rf_graphColumns()
-
-    def dropEvent(self, QDropEvent):
-        """ Overrides QTreeWidget dorp event
-            @param QDropEvent: (object) : QtGui.QDropEvent """
-        srcItems = self.selectedItems()
-        dstItem = self.itemAt(QDropEvent.pos())
-        dstIndex = self.indexAt(QDropEvent.pos())
-        kbMod = QDropEvent.keyboardModifiers()
-        if kbMod == QtCore.Qt.ControlModifier:
-            print 'copy'
-            newItems, newWidgets = self._droppedNewItems(srcItems, dstItem)
-            for n, newItem in enumerate(newItems):
-                print n
-        elif kbMod == QtCore.Qt.ShiftModifier:
-            print 'move'
-            newItems, newWidgets = self._droppedNewItems(srcItems, dstItem)
-            for n, newItem in enumerate(newItems):
-                print n
-        elif kbMod == QtCore.Qt.AltModifier:
-            print 'instance'
-            newItems, newWidgets = self._droppedNewItems(srcItems, dstItem)
-            for n, newItem in enumerate(newItems):
-                print n
-
-    def _droppedNewItems(self, items, dstItem):
-        newItems = []
-        newWidgets = []
-        for n, srcItem in enumerate(items):
-            itemDict = srcItem._widget.__repr__()
-            newItem, newWidget = self.new_graphItem(_parent=dstItem)
-            newItems.append(newItem)
-            newWidgets.append(newWidget)
-        return newItems, newWidgets
 
     def on_popUpMenu(self, point):
         """ Show popup menu
@@ -175,8 +142,6 @@ class GraphTree(QtGui.QTreeWidget):
                     names.append(nodeName)
             names.sort()
             return 'NewNode_%s' % (int(names[-1].split('_')[-1]) + 1)
-
-    # def setItem
 
     def getItemFromNodeName(self, nodeName):
         """ Get QTreeWidgetItem from given nodeName
