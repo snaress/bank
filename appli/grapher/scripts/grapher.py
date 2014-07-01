@@ -28,7 +28,7 @@ class Grapher(object):
     def __str__(self):
         txt = ["", "========== GRAPHER =========="]
         #-- General --#
-        txt.append("\n#-- General --#")
+        txt.append("#-- General --#")
         for k, v in sorted(self.__dict__.iteritems()):
             if k.startswith('_'):
                 if isinstance(v, str):
@@ -40,8 +40,14 @@ class Grapher(object):
         txt.append(self.commentTxt)
         #-- Variables --#
         txt.append("#-- Variables--#")
+        for k, v in sorted(self.variables.iteritems()):
+            txt.append("%s = %s" % (k, v))
         #-- Graph Tree --#
         txt.append("#-- Graph Tree--#")
+        for node in self.graphTree['_order']:
+            txt.append("%s :" % node)
+            for k, v in self.graphTree[node].iteritems():
+                txt.append("\t\t%s = %s" % (k, v))
         return '\n'.join(txt)
 
     def loadGraph(self, fileName):
@@ -71,6 +77,12 @@ class Grapher(object):
             @param mainUi: (object) : QMainWindow """
         print "\n[grapher] : #-- Update Variables From Ui --#"
         self.variables = mainUi.wgVariables.__repr__()
+
+    def ud_graphTreeFromUi(self, mainUi):
+        """ Update graph tree from mainUi
+            @param mainUi: (object) : QMainWindow """
+        print "\n[grapher] : #-- Update Graph Tree From Ui --#"
+        self.graphTree = mainUi.wgGraph.__repr__()
 
     def writeToFile(self):
         """ Write grapher2 to file """

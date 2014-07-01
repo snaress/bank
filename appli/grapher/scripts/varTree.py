@@ -181,7 +181,7 @@ class VarTree(QtGui.QTreeWidget):
 
     def dropEvent(self, QDropEvent):
         """ Overrides QTreeWidget dorp event
-        @param QDropEvent: (object) : QtGui.QDropEvent """
+            @param QDropEvent: (object) : QtGui.QDropEvent """
         srcItems = self.selectedItems()
         dstInd = (self.indexAt(QDropEvent.pos()).row() + 1)
         kbMod = QDropEvent.keyboardModifiers()

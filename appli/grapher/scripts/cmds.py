@@ -96,6 +96,7 @@ class Menu(object):
                 print "\n[grapherUI] : #-- Save Graph --#"
                 self.grapher.ud_commentFromUi(self.mainUi)
                 self.grapher.ud_variablesFromUi(self.mainUi)
+                self.grapher.ud_graphTreeFromUi(self.mainUi)
                 self.grapher.writeToFile()
             else:
                 warn = ["!!! Warning: Destination Graph Locked !!!", "Can't overwrite locked graph"]
@@ -135,6 +136,7 @@ class Menu(object):
                     self.grapher._absPath = fileName
                     self.grapher.ud_commentFromUi(self.mainUi)
                     self.grapher.ud_variablesFromUi(self.mainUi)
+                    self.grapher.ud_graphTreeFromUi(self.mainUi)
                     self.grapher.writeToFile()
                     self.mainUi.setWindowTitle("Grapher - %s" % self.grapher._file)
                     self.mainUi.createLockFile(self.mainUi.lockFile)

@@ -197,7 +197,7 @@
     </widget>
     <addaction name="menuDev"/>
    </widget>
-   <widget class="QMenu" name="menuEdit">
+   <widget class="QMenu" name="menuGraph">
     <property name="title">
      <string>Graph</string>
     </property>
@@ -206,7 +206,7 @@
     <addaction name="miNewGraphNode"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
+   <addaction name="menuGraph"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>

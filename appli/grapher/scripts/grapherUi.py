@@ -45,7 +45,7 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, core.Style):
         self.miSaveGraphAs.setShortcut("Ctrl+Shift+S")
         self.miQuitGrapher.triggered.connect(self.cmds_menu.on_quitGrapher)
         self.miQuitGrapher.setShortcut("Ctrl+Shift+W")
-        #-- Menu Tool --#
+        #-- Menu Graph --#
         self.miNodeEditor.triggered.connect(self.cmds_menu.on_nodeEditor)
         self.miNodeEditor.setShortcut("E")
         #-- Menu Help --#
@@ -89,7 +89,7 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, core.Style):
         self.wgVariables.rf_variables(**self.grapher.variables)
         print "\tUpdating grapher tree ..."
         self.wgGraph.rf_graphBgc()
-        # self.wgGraph.rf_graph()
+        self.wgGraph.rf_graph()
         print "[grapherUI] : Graph successfully loaded."
 
     def resetUi(self):
@@ -100,6 +100,8 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, core.Style):
         self._lock = False
         print "\tReseting grapher comment ..."
         self.wgComment.resetComment()
+        print "\tReseting grapher variables ..."
+        self.wgVariables.resetTree()
         print "\tReseting grapher tree ..."
         self.wgGraph.resetGraph()
         print "\tReseting node editor ..."
