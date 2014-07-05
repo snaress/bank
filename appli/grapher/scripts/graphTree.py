@@ -1,4 +1,5 @@
 from appli import grapher
+from functools import partial
 from PyQt4 import QtGui, QtCore, uic
 from lib.qt.scripts import procQt as pQt
 from appli.grapher.scripts import core
@@ -12,6 +13,7 @@ class GraphTree(QtGui.QTreeWidget):
         self.mainUi = mainUi
         self.grapher = self.mainUi.grapher
         self.columns = 10
+        self.cpBuffer = None
         super(GraphTree, self).__init__()
         self._setupUi()
         self._setupMainUi()
@@ -21,7 +23,7 @@ class GraphTree(QtGui.QTreeWidget):
         treeDict = {'_order': []}
         allItems = pQt.getAllItems(self)
         for item in allItems:
-            nodeDict = item._widget.__repr__()
+            nodeDict = item.__repr__()
             treeDict['_order'].append(nodeDict['nodeName'])
             treeDict[nodeDict['nodeName']] = nodeDict
         return treeDict
@@ -50,8 +52,14 @@ class GraphTree(QtGui.QTreeWidget):
         self.setDefaultDropAction(QtCore.Qt.LinkAction)
 
     def _setupMainUi(self):
-        self.mainUi.miNewGraphNode.triggered.connect(self.on_newGraphNode)
-        self.mainUi.miNewGraphNode.setShortcut("N")
+        self.mainUi.miNewGraphNode.triggered.connect(self.on_newNode)
+        self.mainUi.miNewGraphNode.setShortcut("Alt+N")
+        self.mainUi.miDelGraphNode.triggered.connect(self.on_delNode)
+        self.mainUi.miDelGraphNode.setShortcut("Del")
+        self.mainUi.miCopyNodes.triggered.connect(self.on_copyNode)
+        self.mainUi.miCopyNodes.setShortcut("Ctrl+C")
+        self.mainUi.miPasteNodes.triggered.connect(self.on_pasteNode)
+        self.mainUi.miPasteNodes.setShortcut("Ctrl+V")
 
     def _popUpMenu(self):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -59,9 +67,58 @@ class GraphTree(QtGui.QTreeWidget):
                      self.on_popUpMenu)
         self.tbGraph = QtGui.QToolBar()
         self.pMenu = QtGui.QMenu(self.mainUi)
-        self.miNewGraphNode = self.tbGraph.addAction("New Node", self.on_newGraphNode)
-        self.miNewGraphNode.setShortcut("N")
+        #-- New Graph Node --#
+        self.miNewGraphNode = self.tbGraph.addAction("New Node", self.on_newNode)
+        self.miNewGraphNode.setShortcut("Alt+N")
         self.pMenu.addAction(self.miNewGraphNode)
+        #-- Delete Graph Node --#
+        self.miDelGraphNode = self.tbGraph.addAction("Delete", self.on_delNode)
+        self.miDelGraphNode.setShortcut("Del")
+        self.pMenu.addAction(self.miDelGraphNode)
+        self.pMenu.addSeparator()
+        #-- Cut Nodes --#
+        self.miCutNodes = self.tbGraph.addAction("Cut")
+        self.miCutNodes.setShortcut("Ctrl+X")
+        self.pMenu.addAction(self.miCutNodes)
+        #-- Copy Nodes --#
+        self.miCopyNodes = self.tbGraph.addAction("Copy", self.on_copyNode)
+        self.miCopyNodes.setShortcut("Ctrl+C")
+        self.pMenu.addAction(self.miCopyNodes)
+        #-- Paste Nodes --#
+        self.miPasteNodes = self.tbGraph.addAction("Paste", self.on_pasteNode)
+        self.miPasteNodes.setShortcut("Ctrl+V")
+        self.pMenu.addAction(self.miPasteNodes)
+        #-- Instanciate Nodes --#
+        self.miInstanceNodes = self.tbGraph.addAction("Instanciate")
+        self.miInstanceNodes.setShortcut("Shift+C")
+        self.pMenu.addAction(self.miInstanceNodes)
+        self.pMenu.addSeparator()
+        #-- Push Nodes --#
+        self.miPushNodes = self.tbGraph.addAction("Push")
+        self.miPushNodes.setShortcut("Ctrl+P")
+        self.pMenu.addAction(self.miPushNodes)
+        #-- Pull Nodes --#
+        self.miPullNodes = self.tbGraph.addAction("Pull")
+        self.miPullNodes.setShortcut("Shift+P")
+        self.pMenu.addAction(self.miPullNodes)
+
+    def addTopLevelItem(self, QTreeWidgetItem):
+        super(GraphTree, self).addTopLevelItem(QTreeWidgetItem)
+        self.setItemWidget(QTreeWidgetItem, 0, QTreeWidgetItem._widget)
+
+    def addTopLevelItems(self, list_of_QTreeWidgetItem):
+        super(GraphTree, self).addTopLevelItems(list_of_QTreeWidgetItem)
+        for item in list_of_QTreeWidgetItem:
+            self.setItemWidget(item, 0, item._widget)
+
+    def insertTopLevelItem(self, p_int, QTreeWidgetItem):
+        super(GraphTree, self).insertTopLevelItem(p_int, QTreeWidgetItem)
+        self.setItemWidget(QTreeWidgetItem, 0, QTreeWidgetItem._widget)
+
+    def insertTopLevelItems(self, p_int, list_of_QTreeWidgetItem):
+        super(GraphTree, self).insertTopLevelItems(p_int, list_of_QTreeWidgetItem)
+        for item in list_of_QTreeWidgetItem:
+            self.setItemWidget(item, 0, item._widget)
 
     def rf_graphBgc(self):
         """ Refresh graph background color """
@@ -81,16 +138,7 @@ class GraphTree(QtGui.QTreeWidget):
         for node in self.grapher.graphTree['_order']:
             nodeDict = self.grapher.graphTree[node]
             _parent = self.getItemFromNodeName(nodeDict['nodeParent'])
-            newItem, newWidget = self.new_graphItem(_parent=_parent)
-            if _parent is None:
-                self.addTopLevelItem(newItem)
-                self.setItemWidget(newItem, 0, newWidget)
-                newItem._widgetInd = 0
-            else:
-                _parent.addChild(newItem)
-                ind = (_parent._widgetInd + 1)
-                self.setItemWidget(newItem, ind, newWidget)
-                newItem._widgetInd = ind
+            self.addGraphNode(nodeDict['nodeName'], nodeDict['nodeEnabled'], _parent)
         self.rf_graphColumns()
 
     def on_popUpMenu(self, point):
@@ -98,50 +146,118 @@ class GraphTree(QtGui.QTreeWidget):
             @param point: (object) : QPoint """
         self.pMenu.exec_(self.mapToGlobal(point))
 
-    def on_newGraphNode(self):
-        """ Create new graphNode item """
+    def on_newNode(self):
+        """ Command launch when menuItem 'New Node' is clicked
+            @return: (object) : QTreeWidgetItem """
         selItems = self.selectedItems()
-        #-- Add Top Item --#
-        if not selItems:
-            newItem, newWidget = self.new_graphItem()
-            self.addTopLevelItem(newItem)
-            self.setItemWidget(newItem, 0, newWidget)
-            newItem._widgetInd = 0
-        #-- Add Child Item --#
-        else:
-            if len(selItems) > 1:
-                self.mainUi._defaultErrorDialog("!!! Warning: Select only one node !!!", self.mainUi)
+        if not len(selItems) > 1:
+            if selItems:
+                newItem = self.addGraphNode('NewNode', nodeParent=selItems[0])
             else:
-                newItem, newWidget = self.new_graphItem(_parent=selItems[0])
-                selItems[0].addChild(newItem)
-                ind = (selItems[0]._widgetInd + 1)
-                self.setItemWidget(newItem, ind, newWidget)
-                newItem._widgetInd = ind
+                newItem = self.addGraphNode('NewNode', nodeParent=None)
+            return newItem
+        else:
+            self.mainUi._defaultErrorDialog("!!! Warning: Select only one node !!!", self.mainUi)
+
+    def on_delNode(self):
+        """ Command launch when menuItem 'Delete Node' is clicked """
+        selItems = self.selectedItems()
+        if selItems:
+            self.confUi = pQt.ConfirmDialog('Delete Selected Nodes ?', ['Delete'],
+                                            [partial(self.delGraphNodes, selItems)])
+            self.confUi.exec_()
+
+    def on_cutNode(self):
+        """ Store selected items dict and remove selection """
+        self.on_copyNode()
+        selItems = self.selectedItems()
+
+    def on_copyNode(self):
+        """ Store selected items dict """
+        selItems = self.selectedItems()
+        if selItems:
+            self.cpBuffer = []
+            for item in selItems:
+                self.cpBuffer.append(item.__repr__())
+
+    def on_pasteNode(self):
+        """ Paste stored items dict """
+        selItems = self.selectedItems()
+        if not len(selItems) > 1:
+            if self.cpBuffer is not None:
+                for nodeDict in self.cpBuffer:
+                    if selItems:
+                        parentItem = selItems[0]
+                    else:
+                        parentItem = None
+                    valideName = self._checkNodeName(nodeDict['nodeName'])
+                    self.addGraphNode(valideName, nodeEnable=nodeDict['nodeEnabled'],
+                                      nodeParent=parentItem)
+        else:
+            self.mainUi._defaultErrorDialog("!!! Warning: Select only one node !!!", self.mainUi)
+
+    def addGraphNode(self, nodeName, nodeEnable=True, nodeParent=None):
+        """ Add new QTreeWidgetItem
+            @param nodeName: (str) : New node name
+            @param nodeEnable: (bool) : New node state
+            @param nodeParent: (object) : Parent QTreeWidgetItem
+            @return: (object) : QTreeWidgetItem """
+        valideName = self._checkNodeName(nodeName)
+        newItem = GraphItem(self, nodeParent)
+        if nodeParent is None:
+            self.addTopLevelItem(newItem)
+        else:
+            nodeParent.addChild(newItem)
+        newItem._widget.setGraphNodeName(valideName)
+        newItem._widget.setGraphNodeEnabled(nodeEnable)
         self.rf_graphColumns()
+        return newItem
 
-    def new_graphItem(self, _parent=None):
-        """ New graphNode item
-            @return: (object), (object) : QTreeWidgetItem, QWidget """
-        newItem = QtGui.QTreeWidgetItem()
-        newWidget = GraphNode(self, newItem, _parent)
-        newWidget.pbNode.setText(self.newNodeName())
-        newItem._widget = newWidget
-        return newItem, newWidget
+    def delGraphNodes(self, QTreeWidgetItems):
+        """ Delete given QTreeWidgetItems
+            @param QTreeWidgetItems: (list) : List of QTreeWidgetItem to remove"""
+        for item in QTreeWidgetItems:
+            if item.parent() is None:
+                self.takeTopLevelItem(self.indexOfTopLevelItem(item))
+            else:
+                item.parent().removeChild(item)
+        try:
+            self.confUi.close()
+        except:
+            pass
 
-    def newNodeName(self):
-        """ Get new default node name
-            @return: (str) : default node name """
+    def _checkNodeName(self, nodeName):
+        """ Check if new name is valide
+            @param nodeName: (str) : Node name
+            @return: (str) : Valide node name """
+        #-- Check Suffixe --#
+        if len(nodeName.split('_')) < 2:
+            tmpName = '%s_1' % nodeName
+            tmpBaseName = nodeName
+        else:
+            if not nodeName.split('_')[-1].isdigit():
+                tmpName = '%s_1' % nodeName
+                tmpBaseName = nodeName
+            else:
+                tmpName = nodeName
+                tmpBaseName = '_'.join(nodeName.split('_')[:-1])
+        #-- Get Valide Name --#
         allItems = pQt.getAllItems(self)
         if not allItems:
-            return 'NewNode_1'
+            return tmpName
         else:
-            names = []
+            indexes = []
+            nodeExists = False
             for item in allItems:
-                nodeName = item._widget.__repr__()['nodeName']
-                if nodeName.startswith('NewNode_'):
-                    names.append(nodeName)
-            names.sort()
-            return 'NewNode_%s' % (int(names[-1].split('_')[-1]) + 1)
+                treeNodeName = item._widget.__repr__()['nodeName']
+                if treeNodeName == tmpName:
+                    nodeExists = True
+                if treeNodeName.startswith('%s_' % tmpBaseName):
+                    indexes.append(int(treeNodeName.split('_')[-1]))
+            if not nodeExists:
+                return nodeName
+            else:
+                return '%s_%s' % (tmpBaseName, (max(indexes) + 1))
 
     def getItemFromNodeName(self, nodeName):
         """ Get QTreeWidgetItem from given nodeName
@@ -160,22 +276,57 @@ class GraphTree(QtGui.QTreeWidget):
         self.clear()
 
 
+class GraphItem(QtGui.QTreeWidgetItem):
+
+    def __init__(self, tree, parent):
+        self._tree = tree
+        self._parent = parent
+        self._widget = GraphNode(self._tree, self)
+        if self._parent is None:
+            self._widgetIndex = 0
+        else:
+            self._widgetIndex = (self._parent._widgetIndex + 1)
+        super(GraphItem, self).__init__()
+
+    def __repr__(self):
+        itemDict = self._widget.__repr__()
+        if self.parent() is None:
+            itemDict['nodeParent'] = None
+        else:
+            parentName = self.parent()._widget.__repr__()['nodeName']
+            itemDict['nodeParent'] = parentName
+        return itemDict
+
+    def addChild(self, QTreeWidgetItem):
+        super(GraphItem, self).addChild(QTreeWidgetItem)
+        self._tree.setItemWidget(QTreeWidgetItem, (self._widgetIndex + 1), QTreeWidgetItem._widget)
+
+    def addChildren(self, list_of_QTreeWidgetItem):
+        super(GraphItem, self).addChildren(list_of_QTreeWidgetItem)
+        for item in list_of_QTreeWidgetItem:
+            self._tree.setItemWidget(item, (self._widgetIndex + 1), item._widget)
+
+    def insertChild(self, p_int, QTreeWidgetItem):
+        super(GraphItem, self).insertChild(p_int, QTreeWidgetItem)
+        self._tree.setItemWidget(QTreeWidgetItem, (self._widgetIndex + 1), QTreeWidgetItem._widget)
+
+    def insertChildren(self, p_int, list_of_QTreeWidgetItem):
+        super(GraphItem, self).insertChildren(p_int, list_of_QTreeWidgetItem)
+        for item in list_of_QTreeWidgetItem:
+            self._tree.setItemWidget(item, (self._widgetIndex + 1), item._widget)
+
+
 graphNodeClass, graphNodeUiClass = uic.loadUiType(grapher.uiList['graphNode'])
 class GraphNode(graphNodeClass, graphNodeUiClass, core.Style):
 
-    def __init__(self, tree, item, _parent):
-        self.tree = tree
-        self.item = item
-        self._parent = _parent
+    def __init__(self, tree, item):
+        self._tree = tree
+        self._item = item
         super(GraphNode, self).__init__()
         self._setupUi()
 
     def __repr__(self):
-        if self._parent is None:
-            _parentItem = None
-        else:
-            _parentItem = self._parent._widget.__repr__()['nodeName']
-        return {'nodeName': str(self.pbNode.text()), 'nodeParent': _parentItem,
+        return {'nodeName': str(self.pbNode.text()),
                 'nodeEnabled': self.cbNode.isChecked()}
 
     def _setupUi(self):
@@ -187,13 +338,23 @@ class GraphNode(graphNodeClass, graphNodeUiClass, core.Style):
     def on_expandNode(self):
         """ Expand or collapse item """
         if str(self.pbExpand.text()) == '+':
-            self.item.setExpanded(True)
+            self._item.setExpanded(True)
             self.pbExpand.setText('-')
-            self.tree.rf_graphColumns()
+            self._tree.rf_graphColumns()
         else:
-            self.item.setExpanded(False)
+            self._item.setExpanded(False)
             self.pbExpand.setText('+')
 
     def on_enableNode(self):
         """ Enable or disable graphNode """
         self.pbNode.setEnabled(self.cbNode.isChecked())
+
+    def setGraphNodeName(self, nodeName):
+        """ Edit graphNode button name
+            @param nodeName: (str) : Node name"""
+        self.pbNode.setText(nodeName)
+
+    def setGraphNodeEnabled(self, nodeEnable):
+        """ Edit graphNode checkBox state
+            @param nodeEnable: (bool) : Node state """
+        self.cbNode.setChecked(nodeEnable)

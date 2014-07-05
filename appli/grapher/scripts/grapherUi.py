@@ -26,6 +26,8 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, core.Style):
         txt.append(self.wgComment.__str__())
         txt.append("\n")
         txt.append(self.wgVariables.__str__())
+        txt.append("\n")
+        txt.append(self.wgGraph.__str__())
         return ''.join(txt)
 
     def _setupUi(self):

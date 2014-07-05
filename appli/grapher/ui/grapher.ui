@@ -204,6 +204,15 @@
     <addaction name="miNodeEditor"/>
     <addaction name="separator"/>
     <addaction name="miNewGraphNode"/>
+    <addaction name="miDelGraphNode"/>
+    <addaction name="separator"/>
+    <addaction name="miCutNodes"/>
+    <addaction name="miCopyNodes"/>
+    <addaction name="miPasteNodes"/>
+    <addaction name="miInstanceNodes"/>
+    <addaction name="separator"/>
+    <addaction name="miPushNodes"/>
+    <addaction name="miPullNodes"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuGraph"/>
@@ -271,6 +280,41 @@
   <action name="miGrapherUiStr">
    <property name="text">
     <string>GrapherUi__str__</string>
+   </property>
+  </action>
+  <action name="miCutNodes">
+   <property name="text">
+    <string>Cut</string>
+   </property>
+  </action>
+  <action name="miCopyNodes">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="miPasteNodes">
+   <property name="text">
+    <string>Paste</string>
+   </property>
+  </action>
+  <action name="miInstanceNodes">
+   <property name="text">
+    <string>Instanciate</string>
+   </property>
+  </action>
+  <action name="miPushNodes">
+   <property name="text">
+    <string>Push</string>
+   </property>
+  </action>
+  <action name="miPullNodes">
+   <property name="text">
+    <string>Pull</string>
+   </property>
+  </action>
+  <action name="miDelGraphNode">
+   <property name="text">
+    <string>Delete Node</string>
    </property>
   </action>
  </widget>
