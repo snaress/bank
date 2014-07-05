@@ -67,7 +67,8 @@ class ConfirmDialog(confirmDialogClass, confirmDialogUiClass):
     """ Confirm dialog popup
         @param message: (str) : Dialog texte
         @param buttons: (list) : Buttons list
-        @param cmds: (list) : Commands list """
+        @param btnCmds: (list) : Commands list
+        @param cancelBtn: (bool) : Add cacnel button """
 
     def __init__(self, message, buttons, btnCmds, cancelBtn=True):
         if not len(buttons) == len(btnCmds):
@@ -102,3 +103,45 @@ class ConfirmDialog(confirmDialogClass, confirmDialogUiClass):
         newButton.setText(label)
         newButton.clicked.connect(btnCmd)
         return newButton
+
+
+promptDialogClass, promptDialogUiClass = uic.loadUiType(qt.uiList['promptDialog2'])
+class PromptDialog(promptDialogClass, promptDialogUiClass):
+    """ Prompt dialog popup
+        @param message: (str) : Dialog texte
+        @param acceptCmd: (object) : Accept command
+        @param cancelCmd: (object) : Cancel command
+        @param Nlines: (int) : Prompt line count """
+
+    def __init__(self, message, acceptCmd, cancelCmd=None, Nlines=1):
+        self.message = message
+        self.acceptCmd = acceptCmd
+        self.cancelCmd = cancelCmd
+        self.Nlines = Nlines
+        super(PromptDialog, self).__init__()
+        self.setupUi(self)
+        self.initDialog()
+
+    def initDialog(self):
+        """ Init dialog window """
+        self.lMessage.setText(self.message)
+        for n in range(self.Nlines):
+            newWidget = QtGui.QLineEdit()
+            newItem = QtGui.QTreeWidgetItem()
+            newItem._widget = newWidget
+            self.twPrompt.addTopLevelItem(newItem)
+            self.twPrompt.setItemWidget(newItem, 0, newWidget)
+        self.bAccept.clicked.connect(self.acceptCmd)
+        if self.cancelCmd is None:
+            self.bCancel.clicked.connect(self.close)
+        else:
+            self.bCancel.clicked.connect(self.cancelCmd)
+
+    def result(self):
+        """ Get QLineEdit value
+            @return: (dict) : Prompt result """
+        results = {}
+        allItems = getTopItems(self.twPrompt)
+        for n, item in enumerate(allItems):
+            results['result_%s' % (n+1)] = str(item._widget.text())
+        return results
