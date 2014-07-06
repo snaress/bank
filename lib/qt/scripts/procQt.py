@@ -2,12 +2,14 @@ from lib import qt
 from PyQt4 import QtGui, uic
 
 
-def getAllItems(twTree):
+#========================================== QTreeWidget ==========================================#
+
+def getAllItems(QTreeWidget):
     """ Get all QTreeWidgetItem of given QTreeWidget
-        @param twTree: (object) : QTreeWidget object
+        @param QTreeWidget: (object) : QTreeWidget object
         @return: (list) : All QTreeWidgetItem list """
     items = []
-    allItems = QtGui.QTreeWidgetItemIterator(twTree, QtGui.QTreeWidgetItemIterator.All) or None
+    allItems = QtGui.QTreeWidgetItemIterator(QTreeWidget, QtGui.QTreeWidgetItemIterator.All) or None
     if allItems is not None:
         while allItems.value():
             item = allItems.value()
@@ -15,15 +17,33 @@ def getAllItems(twTree):
             allItems += 1
     return items
 
-def getTopItems(twTree):
+def getTopItems(QTreeWidget):
     """ Get all topLevelItems of given QTreeWidget
-        @param twTree: (object) : QTreeWidget object
+        @param QTreeWidget: (object) : QTreeWidget object
         @return: (list) : All topLevelItem list """
     items = []
-    nTop = twTree.topLevelItemCount()
+    nTop = QTreeWidget.topLevelItemCount()
     for n in range(nTop):
-        items.append(twTree.topLevelItem(n))
+        items.append(QTreeWidget.topLevelItem(n))
     return items
+
+def getAllChildren(QTreeWidgetItem, depth=-1):
+    """ Get all children of given QTreeWidgetItem
+        @param QTreeWidgetItem: (object) : Recusion start QTreeWidgetItem
+        @param depth: (int) : Number of recursion (-1 = infinite)
+        @return: (list) : QTreeWigdetItem list """
+    items = []
+
+    def recurse(currentItem, depth):
+        items.append(currentItem)
+        if depth != 0:
+            for n in range(currentItem.childCount()):
+                recurse(currentItem.child(n), depth-1)
+
+    recurse(QTreeWidgetItem, depth)
+    return items
+
+#============================================ QDialog ============================================#
 
 def fileDialog(fdMode='open', fdFileMode='AnyFile', fdRoot=None, fdRoots=None,
                fdFilters=None, fdCmd=None):
