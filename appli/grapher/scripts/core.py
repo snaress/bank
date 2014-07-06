@@ -39,6 +39,11 @@ class FileCmds(object):
             raise IOError, "!!! Error: LockFile not found: %s" % lockFile
 
     @staticmethod
+    def xtermLauncher():
+        """ Default xterm launcher """
+        return "cmd.exe"
+
+    @staticmethod
     def _defaultErrorDialog(message, parent):
         """ Launch default error dialog
             @param message: (str or list): Message to print

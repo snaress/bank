@@ -52,12 +52,19 @@ class GraphTree(QtGui.QTreeWidget):
         self.setDefaultDropAction(QtCore.Qt.LinkAction)
 
     def _setupMainUi(self):
+        #-- Menu Create --#
         self.mainUi.miNewGraphNode.triggered.connect(self.on_newNode)
         self.mainUi.miNewGraphNode.setShortcut("Alt+N")
         self.mainUi.miRenameGraphNode.triggered.connect(self.on_renameNode)
         self.mainUi.miRenameGraphNode.setShortcut("F2")
         self.mainUi.miDelGraphNode.triggered.connect(self.on_delNode)
         self.mainUi.miDelGraphNode.setShortcut("Del")
+        #-- Menu Move --#
+        self.mainUi.miMoveNodesUp.triggered.connect(partial(self.on_moveNodes, 'up'))
+        self.mainUi.miMoveNodesUp.setShortcut("Ctrl+Up")
+        self.mainUi.miMoveNodesDn.triggered.connect(partial(self.on_moveNodes, 'down'))
+        self.mainUi.miMoveNodesDn.setShortcut("Ctrl+Down")
+        #-- Menu Edit --#
         self.mainUi.miCutNodes.triggered.connect(partial(self.on_cutSelection, 'node'))
         self.mainUi.miCutNodes.setShortcut("Ctrl+X")
         self.mainUi.miCutBranch.triggered.connect(partial(self.on_cutSelection, 'branch'))
@@ -75,6 +82,12 @@ class GraphTree(QtGui.QTreeWidget):
                      self.on_popUpMenu)
         self.tbGraph = QtGui.QToolBar()
         self.pMenu = QtGui.QMenu(self.mainUi)
+        self._menuCreate()
+        self._menuMove()
+        self._menuEdit()
+        self._menuStorage()
+
+    def _menuCreate(self):
         #-- New Graph Node --#
         self.miNewGraphNode = self.tbGraph.addAction("New Node", self.on_newNode)
         self.miNewGraphNode.setShortcut("Alt+N")
@@ -88,6 +101,19 @@ class GraphTree(QtGui.QTreeWidget):
         self.miDelGraphNode.setShortcut("Del")
         self.pMenu.addAction(self.miDelGraphNode)
         self.pMenu.addSeparator()
+
+    def _menuMove(self):
+        #-- Move Nodes Up --#
+        self.miMoveNodesUp = self.tbGraph.addAction("Move Up", partial(self.on_moveNodes, 'up'))
+        self.miMoveNodesUp.setShortcut("Ctrl+Up")
+        self.pMenu.addAction(self.miMoveNodesUp)
+        #-- Move Nodes Down --#
+        self.miMoveNodesDn = self.tbGraph.addAction("Move Down", partial(self.on_moveNodes, 'down'))
+        self.miMoveNodesDn.setShortcut("Ctrl+Down")
+        self.pMenu.addAction(self.miMoveNodesDn)
+        self.pMenu.addSeparator()
+
+    def _menuEdit(self):
         #-- Cut Nodes --#
         self.miCutNodes = self.tbGraph.addAction("Cut Nodes", partial(self.on_cutSelection, 'node'))
         self.miCutNodes.setShortcut("Ctrl+X")
@@ -108,11 +134,8 @@ class GraphTree(QtGui.QTreeWidget):
         self.miPasteNodes = self.tbGraph.addAction("Paste", self.on_pasteNode)
         self.miPasteNodes.setShortcut("Ctrl+V")
         self.pMenu.addAction(self.miPasteNodes)
-        #-- Instanciate Nodes --#
-        self.miInstanceNodes = self.tbGraph.addAction("Instanciate")
-        self.miInstanceNodes.setShortcut("Shift+C")
-        self.pMenu.addAction(self.miInstanceNodes)
-        self.pMenu.addSeparator()
+
+    def _menuStorage(self):
         #-- Push Nodes --#
         self.miPushNodes = self.tbGraph.addAction("Push")
         self.miPushNodes.setShortcut("Ctrl+P")
@@ -195,6 +218,37 @@ class GraphTree(QtGui.QTreeWidget):
                                             [partial(self.delGraphNodes, selItems)])
             self.confUi.exec_()
 
+    def on_moveNodes(self, side):
+        """ Command launch when miMoveNodes up or down is clicked
+            @param side: (str) : 'up' or 'down' """
+        selItems = self.selectedItems()
+        if len(selItems) == 1:
+            #-- Store Info --#
+            _parent = selItems[0].parent()
+            nodeDict = selItems[0].__repr__()
+            children = pQt.getAllChildren(selItems[0])
+            childDict = []
+            for item in children:
+                childDict.append(item.__repr__())
+            #-- Move Node --#
+            if _parent is None:
+                reparentChild = self._moveTopItem(selItems, side, **nodeDict)
+            else:
+                reparentChild = self._moveChildItem(selItems, _parent, side, **nodeDict)
+            #-- Reparent Children --#
+            if reparentChild:
+                for node in childDict:
+                    if not node['nodeName'] == nodeDict['nodeName']:
+                        node['nodeParent'] = self.getItemFromNodeName(node['nodeParent'])
+                        self.addGraphNode(**node)
+            #-- Reselect Node --#
+            nodesList = []
+            for selItem in selItems:
+                nodesList.append(selItem.__repr__()['nodeName'])
+            self._reselectNodes(nodesList)
+        else:
+            self.mainUi._defaultErrorDialog("!!! Warning: Select only one node !!!", self.mainUi)
+
     def on_cutSelection(self, mode):
         """ Store selected items dict and remove selection
             @param mode: (str) : 'node' or 'branch' """
@@ -243,8 +297,9 @@ class GraphTree(QtGui.QTreeWidget):
         else:
             self.mainUi._defaultErrorDialog("!!! Warning: Select only one node !!!", self.mainUi)
 
-    def addGraphNode(self, **kwargs):
+    def addGraphNode(self, index=None, **kwargs):
         """ Add new QTreeWidgetItem
+            @param index: (int) : Index of insertion
             @param kwargs: (dict) : Node params
                 @keyword nodeName: (str) : New node name
                 @keyword nodeParent: (object) : Parent QTreeWidgetItem
@@ -255,9 +310,15 @@ class GraphTree(QtGui.QTreeWidget):
         kwargs['nodeName'] = self._checkNodeName(kwargs['nodeName'])
         newItem = GraphItem(self, kwargs['nodeParent'])
         if kwargs['nodeParent'] is None:
-            self.addTopLevelItem(newItem)
+            if index is None:
+                self.addTopLevelItem(newItem)
+            else:
+                self.insertTopLevelItem(index, newItem)
         else:
-            kwargs['nodeParent'].addChild(newItem)
+            if index is None:
+                kwargs['nodeParent'].addChild(newItem)
+            else:
+                kwargs['nodeParent'].insertChild(index, newItem)
         #-- Edit New QTreeWidgetItem --#
         nodeParams = self._checkNodeDict(**kwargs)
         newItem.setParams(**nodeParams)
@@ -349,6 +410,59 @@ class GraphTree(QtGui.QTreeWidget):
             kwargs['nodeExpanded'] = False
         return kwargs
 
+    def _moveTopItem(self, selItems, side, **nodeDict):
+        """ Move top level items
+            @param selItems: (list) : List of QTreeWidgetItem
+            @param side: (str) : 'up' or 'down'
+            @param nodeDict: (dict) : Node params
+            @return: (bool) : True if success, False if failed """
+        currentIndex = self.indexOfTopLevelItem(selItems[0])
+        topItemCount = self.topLevelItemCount()
+        if side == 'up':
+            if currentIndex > 0:
+                self.takeTopLevelItem(currentIndex)
+                self.addGraphNode(index=(currentIndex - 1), **nodeDict)
+            else:
+                return False
+        elif side == 'down':
+            newIndex = (currentIndex + 1)
+            if newIndex < topItemCount:
+                self.takeTopLevelItem(currentIndex)
+                self.addGraphNode(index=newIndex, **nodeDict)
+            else:
+                return False
+        return True
+
+    def _moveChildItem(self, selItems, _parent, side, **nodeDict):
+        """ Move child items
+            @param selItems: (list) : List of QTreeWidgetItem
+            @param _parent: (object) : QTreeWidgetItem
+            @param side: (str) : 'up' or 'down'
+            @param nodeDict: (dict) : Node params
+            @return: (bool) : True if success, False if failed """
+        currentIndex = None
+        childCount = _parent.childCount()
+        nodeDict['nodeParent'] = _parent
+        for n in range(childCount):
+            childItem = _parent.child(n)
+            if childItem.__repr__()['nodeName'] == selItems[0].__repr__()['nodeName']:
+                currentIndex = n
+                break
+        if side == 'up':
+            if currentIndex > 0:
+                _parent.removeChild(selItems[0])
+                self.addGraphNode(index=(currentIndex - 1), **nodeDict)
+            else:
+                return False
+        elif side == 'down':
+            newIndex = (currentIndex + 1)
+            if newIndex < childCount:
+                _parent.removeChild(selItems[0])
+                self.addGraphNode(index=newIndex, **nodeDict)
+            else:
+                return False
+        return True
+
     def _pastNode(self, selItems):
         """ Paste stored items with mode 'node'
             @param selItems: (list) : List of QTreeWidgetItem """
@@ -376,6 +490,15 @@ class GraphTree(QtGui.QTreeWidget):
                 nodeDict['nodeParent'] = _parent
                 newNode = self.addGraphNode(**nodeDict)
                 convertedDict[nodeDict['nodeName']] = newNode.__repr__()
+
+    def _reselectNodes(self, nodes):
+        """ Reselect given nodes
+            @param nodes: (list) : List of node names """
+        for item in pQt.getAllItems(self):
+            if item.__repr__()['nodeName'] in nodes:
+                self.setItemSelected(item, True)
+            else:
+                self.setItemSelected(item, False)
 
 
 class GraphItem(QtGui.QTreeWidgetItem):

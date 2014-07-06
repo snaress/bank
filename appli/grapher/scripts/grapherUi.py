@@ -47,9 +47,13 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, core.Style):
         self.miSaveGraphAs.setShortcut("Ctrl+Shift+S")
         self.miQuitGrapher.triggered.connect(self.cmds_menu.on_quitGrapher)
         self.miQuitGrapher.setShortcut("Ctrl+Shift+W")
-        #-- Menu Graph --#
+        #-- Menu Window --#
         self.miNodeEditor.triggered.connect(self.cmds_menu.on_nodeEditor)
         self.miNodeEditor.setShortcut("E")
+        self.miXterm.triggered.connect(self.cmds_menu.on_xTerm)
+        self.miXterm.setShortcut("Alt+O")
+        self.miXplorer.triggered.connect(self.cmds_menu.on_xPlorer)
+        self.miXplorer.setShortcut("Shift+O")
         #-- Menu Help --#
         self.miGrapherRepr.triggered.connect(self.cmds_menu.on_grapherRepr)
         self.miGrapherRepr.setShortcut("Ctrl+G")

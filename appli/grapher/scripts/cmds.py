@@ -160,13 +160,28 @@ class Menu(object):
         self.quitDialog.close()
         self.mainUi.close()
 
-    #===================================== MENU GRAPH ========================================#
+    #===================================== MENU WINDOW ========================================#
 
     def on_nodeEditor(self):
         """ Command launched when miNodeEditor is clicked """
         self.mainUi.nodeEditor.rf_nodeEditorVis()
 
-    #===================================== MENU HELP =========================================#
+    def on_xTerm(self):
+        """ Command launched when miXterm is clicked """
+        if self.grapher._path is None:
+            os.system('start %s' % self.mainUi.xtermLauncher())
+        else:
+            os.system('start %s /K "cd /d %s"' % (self.mainUi.xtermLauncher(),
+                                                  os.path.normpath(self.grapher._path)))
+
+    def on_xPlorer(self):
+        """ Command launched when miXplorer is clicked """
+        if self.grapher._path is None:
+            os.system('start %s' % os.path.normpath(grapher.rootDir))
+        else:
+            os.system('start %s' % os.path.normpath(self.grapher._path))
+
+    #====================================== MENU HELP =========================================#
 
     def on_grapherRepr(self):
         """ Command launched when miGrapherRepr is clicked """

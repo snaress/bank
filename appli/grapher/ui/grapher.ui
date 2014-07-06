@@ -201,24 +201,34 @@
     <property name="title">
      <string>Graph</string>
     </property>
-    <addaction name="miNodeEditor"/>
-    <addaction name="separator"/>
     <addaction name="miNewGraphNode"/>
     <addaction name="miRenameGraphNode"/>
     <addaction name="miDelGraphNode"/>
+    <addaction name="separator"/>
+    <addaction name="miMoveNodesUp"/>
+    <addaction name="miMoveNodesDn"/>
     <addaction name="separator"/>
     <addaction name="miCutNodes"/>
     <addaction name="miCutBranch"/>
     <addaction name="miCopyNodes"/>
     <addaction name="miCopyBranch"/>
     <addaction name="miPasteNodes"/>
-    <addaction name="miInstanceNodes"/>
     <addaction name="separator"/>
     <addaction name="miPushNodes"/>
     <addaction name="miPullNodes"/>
    </widget>
+   <widget class="QMenu" name="menuWindow">
+    <property name="title">
+     <string>Window</string>
+    </property>
+    <addaction name="miNodeEditor"/>
+    <addaction name="separator"/>
+    <addaction name="miXterm"/>
+    <addaction name="miXplorer"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuGraph"/>
+   <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -333,6 +343,36 @@
   <action name="miCutBranch">
    <property name="text">
     <string>Cut Branch</string>
+   </property>
+  </action>
+  <action name="miXterm">
+   <property name="text">
+    <string>Xterm</string>
+   </property>
+  </action>
+  <action name="miXplorer">
+   <property name="text">
+    <string>Xplorer</string>
+   </property>
+  </action>
+  <action name="miMoveNodesUp">
+   <property name="text">
+    <string>Move Up</string>
+   </property>
+  </action>
+  <action name="miMoveNodesDn">
+   <property name="text">
+    <string>Move Down</string>
+   </property>
+  </action>
+  <action name="miParentNodesUp">
+   <property name="text">
+    <string>Parent Up</string>
+   </property>
+  </action>
+  <action name="miParentNodesDn">
+   <property name="text">
+    <string>Parent Down</string>
    </property>
   </action>
  </widget>
