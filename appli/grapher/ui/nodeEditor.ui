@@ -20,102 +20,6 @@
    <property name="spacing">
     <number>2</number>
    </property>
-   <item row="0" column="0">
-    <layout class="QHBoxLayout" name="hlNodeName">
-     <property name="spacing">
-      <number>4</number>
-     </property>
-     <item>
-      <widget class="QLabel" name="lName">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>40</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Name: </string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="leName">
-       <property name="minimumSize">
-        <size>
-         <width>150</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="lType">
-       <property name="minimumSize">
-        <size>
-         <width>40</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>40</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Type:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="cbType">
-       <property name="minimumSize">
-        <size>
-         <width>70</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>40</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <item>
-        <property name="text">
-         <string>Modul</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Loop</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>SysData</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>CmdData</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>PurData</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-    </layout>
-   </item>
    <item row="1" column="0">
     <layout class="QHBoxLayout" name="hlNodeVersion">
      <property name="spacing">
@@ -141,7 +45,20 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="leVTitle"/>
+      <widget class="QLineEdit" name="leVTitle">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>18</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>18</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="lVersion">
@@ -167,13 +84,13 @@
        <property name="minimumSize">
         <size>
          <width>60</width>
-         <height>0</height>
+         <height>18</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
          <width>60</width>
-         <height>16777215</height>
+         <height>18</height>
         </size>
        </property>
        <property name="sizeIncrement">
@@ -182,21 +99,31 @@
          <height>0</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>7</pointsize>
+        </font>
+       </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="bNewV">
        <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>35</width>
+         <height>18</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>35</width>
+         <height>18</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>7</pointsize>
+        </font>
        </property>
        <property name="text">
         <string>New</string>
@@ -207,15 +134,20 @@
       <widget class="QPushButton" name="bDelV">
        <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>35</width>
+         <height>18</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>35</width>
+         <height>18</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>7</pointsize>
+        </font>
        </property>
        <property name="text">
         <string>Del</string>
@@ -230,6 +162,59 @@
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="Line" name="line_5">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <layout class="QHBoxLayout" name="hlNodeBtns">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="bSave">
+       <property name="maximumSize">
+        <size>
+         <width>60</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Save</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="bClose">
+       <property name="maximumSize">
+        <size>
+         <width>60</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Close</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item row="3" column="0">
     <widget class="QSplitter" name="splitter">
@@ -372,55 +357,106 @@
      </layout>
     </widget>
    </item>
-   <item row="6" column="0">
-    <widget class="Line" name="line_5">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="0">
-    <layout class="QHBoxLayout" name="hlNodeBtns">
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="hlNodeName">
      <property name="spacing">
-      <number>1</number>
+      <number>4</number>
      </property>
      <item>
-      <spacer name="horizontalSpacer_4">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
+      <widget class="QLabel" name="lName">
+       <property name="minimumSize">
         <size>
          <width>40</width>
-         <height>20</height>
+         <height>0</height>
         </size>
        </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="bSave">
        <property name="maximumSize">
         <size>
-         <width>60</width>
-         <height>20</height>
+         <width>40</width>
+         <height>16777215</height>
         </size>
        </property>
        <property name="text">
-        <string>Save</string>
+        <string>Name: </string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="bClose">
+      <widget class="QLineEdit" name="leName">
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lType">
+       <property name="minimumSize">
+        <size>
+         <width>40</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
-         <width>60</width>
-         <height>20</height>
+         <width>40</width>
+         <height>16777215</height>
         </size>
        </property>
        <property name="text">
-        <string>Close</string>
+        <string>Type:</string>
        </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="cbType">
+       <property name="minimumSize">
+        <size>
+         <width>70</width>
+         <height>18</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>40</width>
+         <height>18</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+       <item>
+        <property name="text">
+         <string>Modul</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Loop</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>SysData</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>CmdData</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>PurData</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>

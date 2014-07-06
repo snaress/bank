@@ -204,10 +204,13 @@
     <addaction name="miNodeEditor"/>
     <addaction name="separator"/>
     <addaction name="miNewGraphNode"/>
+    <addaction name="miRenameGraphNode"/>
     <addaction name="miDelGraphNode"/>
     <addaction name="separator"/>
     <addaction name="miCutNodes"/>
+    <addaction name="miCutBranch"/>
     <addaction name="miCopyNodes"/>
+    <addaction name="miCopyBranch"/>
     <addaction name="miPasteNodes"/>
     <addaction name="miInstanceNodes"/>
     <addaction name="separator"/>
@@ -284,12 +287,12 @@
   </action>
   <action name="miCutNodes">
    <property name="text">
-    <string>Cut</string>
+    <string>Cut Nodes</string>
    </property>
   </action>
   <action name="miCopyNodes">
    <property name="text">
-    <string>Copy</string>
+    <string>Copy Nodes</string>
    </property>
   </action>
   <action name="miPasteNodes">
@@ -314,7 +317,22 @@
   </action>
   <action name="miDelGraphNode">
    <property name="text">
-    <string>Delete Node</string>
+    <string>Delete Nodes</string>
+   </property>
+  </action>
+  <action name="miRenameGraphNode">
+   <property name="text">
+    <string>Rename Node</string>
+   </property>
+  </action>
+  <action name="miCopyBranch">
+   <property name="text">
+    <string>Copy Branch</string>
+   </property>
+  </action>
+  <action name="miCutBranch">
+   <property name="text">
+    <string>Cut Branch</string>
    </property>
   </action>
  </widget>

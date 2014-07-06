@@ -212,6 +212,12 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         """ Refresh Grapher NodeEditor visibility """
         self.mainUi.flNodeEditor.setVisible(self.mainUi.miNodeEditor.isChecked())
 
+    def connectToGraphNode(self, graphNode):
+        """ Update nodeEditor with given graphNode
+            @param graphNode: (object) : QTreeWidgetItem """
+        print 'Connecting to %s' % graphNode.__repr__()['nodeName']
+        self.leName.setText(graphNode.__repr__()['nodeName'])
+
 
 def launch(graph=None):
     """ GrapherUi launcher """
