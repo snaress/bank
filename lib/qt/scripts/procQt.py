@@ -43,6 +43,22 @@ def getAllChildren(QTreeWidgetItem, depth=-1):
     recurse(QTreeWidgetItem, depth)
     return items
 
+def getAllParent(QTreeWidgetItem, depth=-1):
+    """ Get all parent of given QTreeWidgetItem
+        @param QTreeWidgetItem: (object) : Recusion start QTreeWidgetItem
+        @param depth: (int) : Number of recursion (-1 = infinite)
+        @return: (list) : QTreeWigdetItem list """
+    items = []
+
+    def recurse(currentItem, depth):
+        items.append(currentItem)
+        if depth != 0:
+            if currentItem.parent() is not None:
+                recurse(currentItem.parent(), depth-1)
+
+    recurse(QTreeWidgetItem, depth)
+    return items
+
 #============================================ QDialog ============================================#
 
 def fileDialog(fdMode='open', fdFileMode='AnyFile', fdRoot=None, fdRoots=None,
