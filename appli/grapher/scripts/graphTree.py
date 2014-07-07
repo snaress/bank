@@ -1,8 +1,10 @@
+import os
 from appli import grapher
 from functools import partial
 from PyQt4 import QtGui, QtCore, uic
-from lib.qt.scripts import procQt as pQt
 from appli.grapher.scripts import core
+from lib.qt.scripts import procQt as pQt
+from lib.system.scripts import procFile as pFile
 
 
 class GraphTree(QtGui.QTreeWidget):
@@ -75,6 +77,13 @@ class GraphTree(QtGui.QTreeWidget):
         self.mainUi.miCopyBranch.setShortcut("Shift+C")
         self.mainUi.miPasteNodes.triggered.connect(self.on_pasteNode)
         self.mainUi.miPasteNodes.setShortcut("Ctrl+V")
+        #-- Menu Storage --#
+        self.mainUi.miPushNodes.triggered.connect(partial(self.on_pushSelection, 'node'))
+        self.mainUi.miPushNodes.setShortcut("Ctrl+P")
+        self.mainUi.miPushBranch.triggered.connect(partial(self.on_pushSelection, 'branch'))
+        self.mainUi.miPushBranch.setShortcut("Shift+P")
+        self.mainUi.miPullNodes.triggered.connect(self.on_pullNodes)
+        self.mainUi.miPullNodes.setShortcut("Alt+P")
 
     def _popUpMenu(self):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -134,15 +143,20 @@ class GraphTree(QtGui.QTreeWidget):
         self.miPasteNodes = self.tbGraph.addAction("Paste", self.on_pasteNode)
         self.miPasteNodes.setShortcut("Ctrl+V")
         self.pMenu.addAction(self.miPasteNodes)
+        self.pMenu.addSeparator()
 
     def _menuStorage(self):
         #-- Push Nodes --#
-        self.miPushNodes = self.tbGraph.addAction("Push")
+        self.miPushNodes = self.tbGraph.addAction("Push Nodes", partial(self.on_pushSelection, 'node'))
         self.miPushNodes.setShortcut("Ctrl+P")
         self.pMenu.addAction(self.miPushNodes)
+        #-- Push Branch --#
+        self.miPushBranch = self.tbGraph.addAction("Push Branch", partial(self.on_pushSelection, 'branch'))
+        self.miPushBranch.setShortcut("Shift+P")
+        self.pMenu.addAction(self.miPushBranch)
         #-- Pull Nodes --#
-        self.miPullNodes = self.tbGraph.addAction("Pull")
-        self.miPullNodes.setShortcut("Shift+P")
+        self.miPullNodes = self.tbGraph.addAction("Pull", self.on_pullNodes)
+        self.miPullNodes.setShortcut("Alt+P")
         self.pMenu.addAction(self.miPullNodes)
 
     def addTopLevelItem(self, QTreeWidgetItem):
@@ -226,7 +240,7 @@ class GraphTree(QtGui.QTreeWidget):
             #-- Store Info --#
             _parent = selItems[0].parent()
             nodeDict = selItems[0].__repr__()
-            children = pQt.getAllChildren(selItems[0])
+            children = selItems[0].getChildren()
             childDict = []
             for item in children:
                 childDict.append(item.__repr__())
@@ -268,7 +282,7 @@ class GraphTree(QtGui.QTreeWidget):
             elif mode == 'branch':
                 if len(selItems) == 1:
                     self.cpBuffer = {'mode': mode, 'nodeList': []}
-                    children = pQt.getAllChildren(selItems[0])
+                    children = selItems[0].getChildren()
                     for child in children:
                         self.cpBuffer['nodeList'].append(child.__repr__())
                     self.delGraphNodes(selItems)
@@ -282,8 +296,17 @@ class GraphTree(QtGui.QTreeWidget):
         selItems = self.selectedItems()
         if selItems:
             self.cpBuffer = {'mode': mode, 'nodeList': []}
-            for item in selItems:
-                self.cpBuffer['nodeList'].append(item.__repr__())
+            if mode == 'node':
+                for item in selItems:
+                    self.cpBuffer['nodeList'].append(item.__repr__())
+            elif mode == 'branch':
+                if len(selItems) == 1:
+                    children = selItems[0].getChildren()
+                    for child in children:
+                        self.cpBuffer['nodeList'].append(child.__repr__())
+                else:
+                    message = "!!! Warning: Select only one node !!!"
+                    self.mainUi._defaultErrorDialog(message, self.mainUi)
 
     def on_pasteNode(self):
         """ Paste stored items dict """
@@ -294,6 +317,53 @@ class GraphTree(QtGui.QTreeWidget):
                     self._pastNode(selItems)
                 elif self.cpBuffer['mode'] == 'branch':
                     self._pasteBranch(selItems)
+        else:
+            self.mainUi._defaultErrorDialog("!!! Warning: Select only one node !!!", self.mainUi)
+
+    def on_pushSelection(self, mode):
+        """ Push selected nodes into buffer
+            @param mode: (str) : 'node' or 'branch' """
+        if not os.path.exists(grapher.binPath):
+            mess = "!!! ERROR: rndBin path not found, check user pref !!!"
+            self.mainUi._defaultErrorDialog(mess, self.mainUi)
+        else:
+            tmpPath = os.path.join(grapher.binPath, 'user', grapher.user)
+            tmpFile = os.path.join(tmpPath, 'nodeBuffer.py')
+            selItems = self.selectedItems()
+            txt = ["pushMode = %r" % mode]
+            if mode == 'node':
+                for n, item in enumerate(selItems):
+                    txt.append("selNode_%s = %s" % ((n + 1), item.__repr__()))
+            elif mode == 'branch':
+                if len(selItems) == 1:
+                    children = selItems[0].getChildren()
+                    for n, child in enumerate(children):
+                        txt.append("selNode_%s = %s" % ((n + 1), child.__repr__()))
+                else:
+                    message = "!!! Warning: Select only one node !!!"
+                    self.mainUi._defaultErrorDialog(message, self.mainUi)
+            try:
+                pFile.writeFile(tmpFile, '\n'.join(txt))
+                print "[grapherUI] : Nodes successfully pushed in user buffer with mode %r." % mode
+            except:
+                mess = "!!! ERROR: Can not store nodes in buffer !!!"
+                self.mainUi._defaultErrorDialog(mess, self.mainUi)
+
+    def on_pullNodes(self):
+        """ Pull nodes from buffer """
+        selItems = self.selectedItems()
+        if not len(selItems) > 1:
+            if not os.path.exists(grapher.binPath):
+                mess = "!!! ERROR: rndBin path not found, check user pref !!!"
+                self.mainUi._defaultErrorDialog(mess, self.mainUi)
+            else:
+                tmpPath = os.path.join(grapher.binPath, 'user', grapher.user)
+                tmpFile = os.path.join(tmpPath, 'nodeBuffer.py')
+                nodesDict = pFile.readPyFile(tmpFile)
+                if nodesDict['pushMode'] == 'node':
+                    self._pullNodes(nodesDict, selItems)
+                elif nodesDict['pushMode'] == 'branch':
+                    self._pullBranch(nodesDict, selItems)
         else:
             self.mainUi._defaultErrorDialog("!!! Warning: Select only one node !!!", self.mainUi)
 
@@ -491,6 +561,40 @@ class GraphTree(QtGui.QTreeWidget):
                 newNode = self.addGraphNode(**nodeDict)
                 convertedDict[nodeDict['nodeName']] = newNode.__repr__()
 
+    def _pullNodes(self, nodesDict, selItems):
+        """ Pull nodes from buffer with mode 'node'
+            @param nodesDict: (list) : List of dict to pull
+            @param selItems: (list) : Parent item """
+        for node in sorted(nodesDict.keys()):
+            if node.startswith('selNode_'):
+                nodeDict = nodesDict[node]
+                if selItems:
+                    nodeDict['nodeParent'] = selItems[0]
+                else:
+                    nodeDict['nodeParent'] = None
+                self.addGraphNode(**nodeDict)
+
+    def _pullBranch(self, nodesDict, selItems):
+        """ Pull nodes from buffer with mode 'branch'
+            @param nodesDict: (list) : List of dict to pull
+            @param selItems: (list) : Parent item """
+        convertedDict = {}
+        nodesDict.pop('pushMode')
+        for n, node in enumerate(sorted(nodesDict.keys())):
+            nodeDict = nodesDict[node]
+            if n == 0:
+                if selItems:
+                    nodeDict['nodeParent'] = selItems[0]
+                else:
+                    nodeDict['nodeParent'] = None
+                newNode = self.addGraphNode(**nodeDict)
+                convertedDict[nodeDict['nodeName']] = newNode.__repr__()
+            else:
+                _parent = self.getItemFromNodeName(convertedDict[nodeDict['nodeParent']]['nodeName'])
+                nodeDict['nodeParent'] = _parent
+                newNode = self.addGraphNode(**nodeDict)
+                convertedDict[nodeDict['nodeName']] = newNode.__repr__()
+
     def _reselectNodes(self, nodes):
         """ Reselect given nodes
             @param nodes: (list) : List of node names """
@@ -545,6 +649,18 @@ class GraphItem(QtGui.QTreeWidgetItem):
         super(GraphItem, self).insertChildren(p_int, list_of_QTreeWidgetItem)
         for item in list_of_QTreeWidgetItem:
             self._tree.setItemWidget(item, (self._widgetIndex + 1), item._widget)
+
+    def getChildren(self, depth=-1):
+        """ Get all children items with given recursion
+            @param depth: (int) : Number of recursion (-1 = infinite)
+            @return: (list) : QTreeWigdetItem list """
+        return pQt.getAllChildren(self, depth=depth)
+
+    def getParents(self, depth=-1):
+        """ Get all parent items with given recursion
+            @param depth: (int) : Number of recursion (-1 = infinite)
+            @return: (list) : QTreeWigdetItem list """
+        return pQt.getAllParent(self, depth=depth)
 
     def setParams(self, **kwargs):
         """ Edit widget params

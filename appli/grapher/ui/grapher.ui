@@ -215,6 +215,7 @@
     <addaction name="miPasteNodes"/>
     <addaction name="separator"/>
     <addaction name="miPushNodes"/>
+    <addaction name="miPushBranch"/>
     <addaction name="miPullNodes"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
@@ -317,7 +318,7 @@
   </action>
   <action name="miPushNodes">
    <property name="text">
-    <string>Push</string>
+    <string>Push Nodes</string>
    </property>
   </action>
   <action name="miPullNodes">
@@ -373,6 +374,11 @@
   <action name="miParentNodesDn">
    <property name="text">
     <string>Parent Down</string>
+   </property>
+  </action>
+  <action name="miPushBranch">
+   <property name="text">
+    <string>Push Branch</string>
    </property>
   </action>
  </widget>

@@ -97,7 +97,7 @@ class VarEditor(varEditorClass, varEditorUiClass):
                 self.mainUi._defaultErrorDialog(mess, self.mainUi)
 
     def on_pullVar(self):
-        """ Pull selected items from buffer """
+        """ Pull items from buffer """
         if not os.path.exists(grapher.binPath):
             mess = "!!! ERROR: rndBin path not found, check user pref !!!"
             self.mainUi._defaultErrorDialog(mess, self.mainUi)
