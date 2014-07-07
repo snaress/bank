@@ -314,7 +314,7 @@ class GraphTree(QtGui.QTreeWidget):
         if not len(selItems) > 1:
             if self.cpBuffer is not None:
                 if self.cpBuffer['mode'] == 'node':
-                    self._pastNode(selItems)
+                    self._pasteNode(selItems)
                 elif self.cpBuffer['mode'] == 'branch':
                     self._pasteBranch(selItems)
         else:
@@ -533,7 +533,7 @@ class GraphTree(QtGui.QTreeWidget):
                 return False
         return True
 
-    def _pastNode(self, selItems):
+    def _pasteNode(self, selItems):
         """ Paste stored items with mode 'node'
             @param selItems: (list) : List of QTreeWidgetItem """
         for nodeDict in self.cpBuffer['nodeList']:
