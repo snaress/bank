@@ -45,7 +45,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="leVTitle">
+      <widget class="QLineEdit" name="leVersionTitle">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -80,7 +80,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="cbVersion">
+      <widget class="QComboBox" name="cbNodeVersion">
        <property name="minimumSize">
         <size>
          <width>60</width>
@@ -101,13 +101,13 @@
        </property>
        <property name="font">
         <font>
-         <pointsize>7</pointsize>
+         <pointsize>8</pointsize>
         </font>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="bNewV">
+      <widget class="QPushButton" name="bNewVersion">
        <property name="minimumSize">
         <size>
          <width>35</width>
@@ -131,7 +131,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="bDelV">
+      <widget class="QPushButton" name="bDelVersion">
        <property name="minimumSize">
         <size>
          <width>35</width>
@@ -382,7 +382,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="leName">
+      <widget class="QLineEdit" name="leNodeName">
        <property name="minimumSize">
         <size>
          <width>150</width>
@@ -414,7 +414,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="cbType">
+      <widget class="QComboBox" name="cbNodeType">
        <property name="minimumSize">
         <size>
          <width>70</width>
@@ -434,27 +434,27 @@
        </property>
        <item>
         <property name="text">
-         <string>Modul</string>
+         <string>modul</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Loop</string>
+         <string>loop</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>SysData</string>
+         <string>sysData</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>CmdData</string>
+         <string>cmdData</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>PurData</string>
+         <string>purData</string>
         </property>
        </item>
       </widget>

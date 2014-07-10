@@ -4,6 +4,7 @@ from functools import partial
 from PyQt4 import QtGui, QtCore, uic
 from appli.grapher.scripts import core
 from lib.qt.scripts import procQt as pQt
+from appli.grapher.scripts import grapher as gp
 from lib.system.scripts import procFile as pFile
 
 
@@ -35,7 +36,7 @@ class GraphTree(QtGui.QTreeWidget):
         text = ["#-- Graph Tree --#"]
         for node in treeDict['_order']:
             text.append("%s:" % node)
-            for k, v in treeDict[node].iteritems():
+            for k, v in sorted(treeDict[node].iteritems()):
                 text.append("%s %s = %s" % (' '*len(node), k, v))
         return '\n'.join(text)
 
@@ -177,6 +178,9 @@ class GraphTree(QtGui.QTreeWidget):
         for item in list_of_QTreeWidgetItem:
             self.setItemWidget(item, 0, item._widget)
 
+    def mouseDoubleClickEvent(self, *args, **kwargs):
+        pass
+
     def rf_graphBgc(self):
         """ Refresh graph background color """
         if not self.mainUi._lock:
@@ -188,6 +192,8 @@ class GraphTree(QtGui.QTreeWidget):
         """ Refresh graph columns size """
         for column in range(self.columns):
             self.resizeColumnToContents(column)
+        for item in pQt.getAllItems(self):
+            item._widget.rf_childIndicator()
 
     def rf_graph(self):
         """ Refresh graph tree """
@@ -207,11 +213,15 @@ class GraphTree(QtGui.QTreeWidget):
         """ Command launch when menuItem 'New Node' is clicked
             @return: (object) : QTreeWidgetItem """
         selItems = self.selectedItems()
+        attrs = {'nodeName': 'NewNode', 'nodeType': 'modul', 'currentVersion': '001',
+                 'versionTitle': {'001': 'New Version'}}
         if not len(selItems) > 1:
             if selItems:
-                newItem = self.addGraphNode(nodeName='NewNode', nodeParent=selItems[0])
+                attrs['nodeParent'] = selItems[0]
+                newItem = self.addGraphNode(**attrs)
             else:
-                newItem = self.addGraphNode(nodeName='NewNode', nodeParent=None)
+                attrs['nodeParent'] = None
+                newItem = self.addGraphNode(**attrs)
             return newItem
         else:
             self.mainUi._defaultErrorDialog("!!! Warning: Select only one node !!!", self.mainUi)
@@ -260,6 +270,7 @@ class GraphTree(QtGui.QTreeWidget):
             for selItem in selItems:
                 nodesList.append(selItem.__repr__()['nodeName'])
             self._reselectNodes(nodesList)
+            self.rf_graphColumns()
         else:
             self.mainUi._defaultErrorDialog("!!! Warning: Select only one node !!!", self.mainUi)
 
@@ -276,6 +287,7 @@ class GraphTree(QtGui.QTreeWidget):
                 if checkChildren:
                     self.on_copySelection(mode)
                     self.delGraphNodes(selItems)
+                    self.rf_graphColumns()
                 else:
                     mess = "!!! Warning: Node with children can not be cut !!!"
                     self.mainUi._defaultErrorDialog(mess, self.mainUi)
@@ -286,9 +298,12 @@ class GraphTree(QtGui.QTreeWidget):
                     for child in children:
                         self.cpBuffer['nodeList'].append(child.__repr__())
                     self.delGraphNodes(selItems)
+                    self.rf_graphColumns()
                 else:
                     mess = "!!! Warning: Select only one node !!!"
                     self.mainUi._defaultErrorDialog(mess, self.mainUi)
+        else:
+            self.mainUi._defaultErrorDialog("!!! Warning: Select at least one node !!!", self.mainUi)
 
     def on_copySelection(self, mode):
         """ Store selected items dict
@@ -317,6 +332,7 @@ class GraphTree(QtGui.QTreeWidget):
                     self._pasteNode(selItems)
                 elif self.cpBuffer['mode'] == 'branch':
                     self._pasteBranch(selItems)
+                self.rf_graphColumns()
         else:
             self.mainUi._defaultErrorDialog("!!! Warning: Select only one node !!!", self.mainUi)
 
@@ -364,6 +380,7 @@ class GraphTree(QtGui.QTreeWidget):
                     self._pullNodes(nodesDict, selItems)
                 elif nodesDict['pushMode'] == 'branch':
                     self._pullBranch(nodesDict, selItems)
+                self.rf_graphColumns()
         else:
             self.mainUi._defaultErrorDialog("!!! Warning: Select only one node !!!", self.mainUi)
 
@@ -392,6 +409,7 @@ class GraphTree(QtGui.QTreeWidget):
         #-- Edit New QTreeWidgetItem --#
         nodeParams = self._checkNodeDict(**kwargs)
         newItem.setParams(**nodeParams)
+        newItem.setDatas(**nodeParams)
         self.rf_graphColumns()
         return newItem
 
@@ -405,6 +423,7 @@ class GraphTree(QtGui.QTreeWidget):
                 item.parent().removeChild(item)
         try:
             self.confUi.close()
+            self.rf_graphColumns()
         except:
             pass
 
@@ -474,10 +493,17 @@ class GraphTree(QtGui.QTreeWidget):
         """ Check and fill node params with default value
             @param kwargs: (dict) : Node params
             @return: (dict) : Node params """
-        if not 'nodeEnabled' in kwargs.keys():
+        keyList = kwargs.keys()
+        if not 'nodeEnabled' in keyList:
             kwargs['nodeEnabled'] = True
-        if not 'nodeExpanded' in kwargs.keys():
+        if not 'nodeExpanded' in keyList:
             kwargs['nodeExpanded'] = False
+        if not 'nodeType' in keyList:
+            kwargs['nodeType'] = 'modul'
+        if not 'currentVersion' in keyList:
+            kwargs['currentVersion'] = '001'
+        if not 'versionTitle' in keyList:
+            kwargs['versionTitle'] = {'001': 'New Version'}
         return kwargs
 
     def _moveTopItem(self, selItems, side, **nodeDict):
@@ -606,6 +632,9 @@ class GraphTree(QtGui.QTreeWidget):
 
 
 class GraphItem(QtGui.QTreeWidgetItem):
+    """ Class used by GraphTree(), overriding QTreeWidgetItem
+        @param tree: (object) : Parent QTreeWidget
+        @param parent: (object) : Parent QTreeWidgetItem """
 
     def __init__(self, tree, parent):
         self._tree = tree
@@ -672,21 +701,38 @@ class GraphItem(QtGui.QTreeWidgetItem):
         self._widget.setGraphNodeEnabled(kwargs['nodeEnabled'])
         self._widget.setGraphNodeExpanded(kwargs['nodeExpanded'])
 
+    def setDatas(self, **kwargs):
+        """ Edit widget params
+            @param kwargs: (dict) : Node datas
+                @keyword nodeType: (str) : 'modul', 'loop', 'sysData', 'cmdData', 'purData'
+                @keyword currentVersion: (str) : Current node version
+                @keyword versionTitle: (dict) : Version titles"""
+        for k, v in kwargs.iteritems():
+            if hasattr(self._widget._data, k):
+                setattr(self._widget._data, k, v)
+
 
 graphNodeClass, graphNodeUiClass = uic.loadUiType(grapher.uiList['graphNode'])
 class GraphNode(graphNodeClass, graphNodeUiClass, core.Style):
+    """ Class used by GraphItem(), adding widgets to QTreeWidgetItem
+        @param tree: (object) : Parent QTreeWidget
+        @param item: (object) : Parent QTreeWidgetItem """
 
     def __init__(self, tree, item):
         self._tree = tree
         self._item = item
+        self._data = gp.GraphNodeData()
         self.mainUi = self._tree.mainUi
         super(GraphNode, self).__init__()
         self._setupUi()
 
     def __repr__(self):
-        return {'nodeName': str(self.pbNode.text()),
-                'nodeEnabled': self.cbNode.isChecked(),
-                'nodeExpanded': self._item.isExpanded()}
+        nodeDict = {'nodeName': str(self.pbNode.text()),
+                    'nodeEnabled': self.cbNode.isChecked(),
+                    'nodeExpanded': self._item.isExpanded()}
+        for k, v in self._data.__repr__().iteritems():
+            nodeDict[k] = v
+        return nodeDict
 
     def __str__(self):
         txt = []
@@ -700,6 +746,13 @@ class GraphNode(graphNodeClass, graphNodeUiClass, core.Style):
         self.pbExpand.clicked.connect(self.on_expandNode)
         self.cbNode.clicked.connect(self.on_enableNode)
         self.pbNode.clicked.connect(self.on_node)
+
+    def rf_childIndicator(self):
+        """ Refresh children indicator """
+        if self._item.childCount() > 0:
+            self.lChildIndicator.setText("F")
+        else:
+            self.lChildIndicator.setText("")
 
     def on_expandNode(self):
         """ Expand or collapse item """

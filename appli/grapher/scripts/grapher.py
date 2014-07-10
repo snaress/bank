@@ -110,3 +110,23 @@ class Grapher(object):
         self.variables = {}
         self.graphTree = {}
         print "[grapher] : Params successfully reseted."
+
+
+class GraphNodeData(object):
+
+    def __init__(self):
+        self.nodeType = None
+        self.currentVersion = None
+        self.versionTitle = {}
+
+    def __repr__(self):
+        return self.__dict__
+
+    def __str__(self):
+        txt = []
+        for k, v in self.__repr__().iteritems():
+            if isinstance(v, str):
+                txt.append("%s = %r" % (k, v))
+            else:
+                txt.append("%s = %s" % (k, v))
+        return '\n'.join(txt)
