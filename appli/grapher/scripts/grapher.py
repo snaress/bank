@@ -118,6 +118,7 @@ class GraphNodeData(object):
         self.nodeType = None
         self.currentVersion = None
         self.versionTitle = {}
+        self.nodeComment = {}
 
     def __repr__(self):
         return self.__dict__

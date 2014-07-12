@@ -2,6 +2,42 @@ from lib import qt
 from PyQt4 import QtGui, QtCore, uic
 
 
+#============================================ Action =============================================#
+
+class ClickHandler(object):
+    """ Single and double click options
+        @param dcTimer: (int) : Double click timer (in mili seconds)
+        @param singleClickCmd: (object) : Single click command
+        @param doubleClickCmd: (object) : Double click command """
+
+    # noinspection PyUnresolvedReferences
+    def __init__(self, dcTimer=200, singleClickCmd=None, doubleClickCmd=None):
+        """ Activate double click for QPushButton
+            @param dcTimer: (int) : Time in milliSec
+            @param singleClickCmd: (object) : Command launch when single click is detected
+            @param doubleClickCmd: (object) : Command launch when double click is detected """
+        self.singleCmd = singleClickCmd
+        self.doubleCmd = doubleClickCmd
+        self.timer = QtCore.QTimer()
+        self.timer.setInterval(dcTimer)
+        self.timer.setSingleShot(True)
+        self.timer.timeout.connect(self.timeout)
+        self.click_count = 0
+
+    def timeout(self):
+        if self.click_count == 1:
+            if self.singleCmd is not None:
+                self.singleCmd()
+        elif self.click_count > 1:
+            if self.doubleCmd is not None:
+                self.doubleCmd()
+        self.click_count = 0
+
+    def __call__(self):
+        self.click_count += 1
+        if not self.timer.isActive():
+            self.timer.start()
+
 #========================================== QTreeWidget ==========================================#
 
 def getAllItems(QTreeWidget):
@@ -192,38 +228,3 @@ class PromptDialog(promptDialogClass, promptDialogUiClass):
         for n, item in enumerate(allItems):
             results['result_%s' % (n+1)] = str(item._widget.text())
         return results
-
-
-class ClickHandler(object):
-    """ Single and double click options
-        @param time: (int) : Double click timer (in mili seconds)
-        @param singleClickCmd: (object) : Single click command
-        @param doubleClickCmd: (object) : Double click command """
-
-    # noinspection PyUnresolvedReferences
-    def __init__(self, dcTimer=200, singleClickCmd=None, doubleClickCmd=None):
-        """ Activate double click for QPushButton
-            @param dcTimer: (int) : Time in milliSec
-            @param singleClickCmd: (object) : Command launch when single click is detected
-            @param doubleClickCmd: (object) : Command launch when double click is detected """
-        self.singleCmd = singleClickCmd
-        self.doubleCmd = doubleClickCmd
-        self.timer = QtCore.QTimer()
-        self.timer.setInterval(dcTimer)
-        self.timer.setSingleShot(True)
-        self.timer.timeout.connect(self.timeout)
-        self.click_count = 0
-
-    def timeout(self):
-        if self.click_count == 1:
-            if self.singleCmd is not None:
-                self.singleCmd()
-        elif self.click_count > 1:
-            if self.doubleCmd is not None:
-                self.doubleCmd()
-        self.click_count = 0
-
-    def __call__(self):
-        self.click_count += 1
-        if not self.timer.isActive():
-            self.timer.start()

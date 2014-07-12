@@ -2,10 +2,10 @@ import os
 from appli import grapher
 from functools import partial
 from PyQt4 import QtGui, QtCore, uic
-from appli.grapher.scripts import core
 from lib.qt.scripts import procQt as pQt
 from appli.grapher.scripts import grapher as gp
 from lib.system.scripts import procFile as pFile
+from appli.grapher.scripts import nodeEditor, core
 
 
 class GraphTree(QtGui.QTreeWidget):
@@ -40,6 +40,7 @@ class GraphTree(QtGui.QTreeWidget):
                 text.append("%s %s = %s" % (' '*len(node), k, v))
         return '\n'.join(text)
 
+    # noinspection PyUnresolvedReferences
     def _setupUi(self):
         #-- Columns --#
         self.setHeaderHidden(True)
@@ -48,6 +49,7 @@ class GraphTree(QtGui.QTreeWidget):
         self.setSelectionMode(QtGui.QTreeWidget.ExtendedSelection)
         self.setItemsExpandable(True)
         self.setIndentation(0)
+        self.itemClicked.connect(self.mainUi.nodeEditor.resetUi)
         #-- Drag & Drop --#
         self.setAcceptDrops(False)
         self.setDragEnabled(False)
@@ -504,6 +506,8 @@ class GraphTree(QtGui.QTreeWidget):
             kwargs['currentVersion'] = '001'
         if not 'versionTitle' in keyList:
             kwargs['versionTitle'] = {'001': 'New Version'}
+        if not 'nodeComment' in keyList:
+            kwargs['nodeComment'] = {'001': {'txt': "Add Comment", 'html': ""}}
         return kwargs
 
     def _moveTopItem(self, selItems, side, **nodeDict):
@@ -742,10 +746,12 @@ class GraphNode(graphNodeClass, graphNodeUiClass, core.Style):
 
     def _setupUi(self):
         self.setupUi(self)
-        self.setStyleSheet(self.graphNodeBgc)
+        self.setStyleSheet(self.graphNodeBgc('modul'))
         self.pbExpand.clicked.connect(self.on_expandNode)
         self.cbNode.clicked.connect(self.on_enableNode)
-        self.pbNode.clicked.connect(self.on_node)
+        click_handler = pQt.ClickHandler(singleClickCmd=self._singleClick,
+                                         doubleClickCmd=self._doubleClick)
+        self.pbNode.clicked.connect(click_handler)
 
     def rf_childIndicator(self):
         """ Refresh children indicator """
@@ -762,10 +768,16 @@ class GraphNode(graphNodeClass, graphNodeUiClass, core.Style):
         """ Enable or disable graphNode """
         self.setGraphNodeEnabled(self.cbNode.isChecked())
 
-    def on_node(self):
-        """ Connect node to editor """
+    def _singleClick(self):
+        """ Connect graphNode to nodeEditor """
         if self.mainUi.miNodeEditor.isChecked():
-            self.mainUi.nodeEditor.connectToGraphNode(self)
+            self.mainUi.nodeEditor.connectGraphNode(self)
+
+    def _doubleClick(self):
+        """ Connect graphNode in an external nodeEditor """
+        self.nodeEditor = nodeEditor.NodeEditor(self.mainUi)
+        self.nodeEditor.show()
+        self.nodeEditor.connectGraphNode(self)
 
     def setGraphNodeName(self, nodeName):
         """ Edit graphNode button name

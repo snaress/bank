@@ -90,6 +90,10 @@ class Style(object):
     def graphBgc(self):
         return "background-color:Black;"
 
-    @property
-    def graphNodeBgc(self):
-        return "background-color:LightGrey;"
+    @staticmethod
+    def graphNodeBgc(nodeType):
+        """ Graph node background color
+            @param nodeType: (str) : 'modul', 'loop', 'sysData', 'cmdData', 'purData'
+            @return: (str) : Background color """
+        if nodeType == 'modul':
+            return "background-color:LightGrey;"

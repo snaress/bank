@@ -5,7 +5,7 @@ from functools import partial
 from lib.qt.scripts import procQt as pQt
 from appli.grapher.scripts import grapher as gp
 from lib.system.scripts import procFile as pFile
-from appli.grapher.scripts import widgets, varTree, graphTree, cmds, core
+from appli.grapher.scripts import widgets, graphTree, nodeEditor, cmds, core
 
 
 grapherClass, grapherUiClass = uic.loadUiType(grapher.uiList['grapher'])
@@ -68,15 +68,15 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, core.Style):
         self.vlComment.insertWidget(-1, self.wgComment)
         self.cbComment.clicked.connect(partial(self.rf_commentVis, self))
         #-- Variables --#
-        self.wgVariables = varTree.VarEditor(self, self)
+        self.wgVariables = widgets.VarEditor(self, self)
         self.vlVariables.insertWidget(-1, self.wgVariables)
         self.cbVariables.clicked.connect(partial(self.rf_variablesVis, self))
+        #-- NodeEditor --#
+        self.nodeEditor = nodeEditor.NodeEditor(self)
+        self.vlNodeEditor.addWidget(self.nodeEditor)
         #-- Graph Tree --#
         self.wgGraph = graphTree.GraphTree(self)
         self.vlGraph.insertWidget(-1, self.wgGraph)
-        #-- NodeEditor --#
-        self.nodeEditor = NodeEditor(self)
-        self.vlNodeEditor.addWidget(self.nodeEditor)
 
     def initUi(self):
         """ Initialize ui """
@@ -175,103 +175,6 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, core.Style):
         if self.lockFile is not None:
             if os.path.exists(self.lockFile):
                 self.removeLockFile(self.lockFile)
-
-
-nodeEditorClass, nodeEditorUiClass = uic.loadUiType(grapher.uiList['nodeEditor'])
-class NodeEditor(nodeEditorClass, nodeEditorUiClass):
-    """ Class used for graph nodes edition
-        @param mainUi: (object) : QMainWindow """
-
-    def __init__(self, mainUi):
-        self.mainUi = mainUi
-        self.grapher = self.mainUi.grapher
-        self.graphNode = None
-        super(NodeEditor, self).__init__()
-        self._setupUi()
-        self.initUi()
-
-    def _setupUi(self):
-        self.setupUi(self)
-        self._setupMain()
-
-    def _setupMain(self):
-        #-- Node Version --#
-        self.leVersionTitle.returnPressed.connect(self.on_versionTitle)
-        self.cbNodeVersion.currentIndexChanged.connect(self.on_version)
-        self.bNewVersion.clicked.connect(self.on_newVersion)
-        #-- Comment --#
-        self.wgComment = widgets.Comment(self)
-        self.vlComment.insertWidget(-1, self.wgComment)
-        self.cbComment.clicked.connect(partial(self.mainUi.rf_commentVis, self))
-        #-- Variables --#
-        self.wgVariables = varTree.VarEditor(self.mainUi, self)
-        self.vlVariables.insertWidget(-1, self.wgVariables)
-        self.cbVariables.clicked.connect(partial(self.mainUi.rf_variablesVis, self))
-
-    def initUi(self):
-        """ Initialize ui """
-        self.mainUi.rf_commentVis(self)
-        self.mainUi.rf_variablesVis(self)
-
-    def resetUi(self):
-        """ Reset NodeEditor ui """
-        self.wgComment.resetComment()
-        self.wgVariables.resetTree()
-
-    def rf_nodeEditorVis(self):
-        """ Refresh Grapher NodeEditor visibility """
-        self.mainUi.flNodeEditor.setVisible(self.mainUi.miNodeEditor.isChecked())
-
-    def rf_versionTitle(self):
-        """ Refresh node version title """
-        title = self.graphNode._data.versionTitle[self.currentVersion]
-        self.leVersionTitle.setText(title)
-
-    def rf_versionList(self, versions):
-        """ Refresh node version list
-            @param versions: (list) : Version list """
-        self.cbNodeVersion.clear()
-        self.cbNodeVersion.addItems(versions)
-
-    def connectToGraphNode(self, graphNode):
-        """ Update nodeEditor with given graphNode
-            @param graphNode: (object) : QTreeWidgetItem """
-        self.graphNode = graphNode
-        nodeDict = self.graphNode.__repr__()
-        print "\n[grapherUI] : Connecting node editor to %s" % nodeDict['nodeName']
-        self.leNodeName.setText(nodeDict['nodeName'])
-        self.cbNodeType.setCurrentIndex(self.cbNodeType.findText(nodeDict['nodeType']))
-        self.leVersionTitle.setText(nodeDict['versionTitle'][nodeDict['currentVersion']])
-        self.rf_versionList(sorted(nodeDict['versionTitle'].keys()))
-        self.cbNodeVersion.setCurrentIndex(self.cbNodeVersion.findText(nodeDict['currentVersion']))
-
-    def on_versionTitle(self):
-        """ Command launch when leVersionTitle has changed """
-        self.graphNode._data.versionTitle[self.currentVersion] = str(self.leVersionTitle.text())
-
-    def on_version(self):
-        """ Command launch when cbNodeVersion has changed """
-        self.graphNode._data.currentVersion = self.currentVersion
-        self.rf_versionTitle()
-
-    def on_newVersion(self):
-        """ Command launch when bAddVersion is clicked """
-        if self.graphNode is None:
-            mess = "!!! Warning: Node editor is not connected !!!"
-            self.mainUi._defaultErrorDialog(mess, self.mainUi)
-        else:
-            items = pQt.getComboBoxItems(self.cbNodeVersion)
-            newVersion = str(int(max(items)) + 1).zfill(3)
-            self.graphNode._data.versionTitle[newVersion] = "New Version"
-            self.graphNode._data.currentVersion = newVersion
-            self.cbNodeVersion.addItem(newVersion)
-            self.cbNodeVersion.setCurrentIndex(self.cbNodeVersion.findText(newVersion))
-
-    @property
-    def currentVersion(self):
-        """ Get current version from ui
-            @return: (str) : Current version """
-        return str(self.cbNodeVersion.itemText(self.cbNodeVersion.currentIndex()))
 
 
 def launch(graph=None):
