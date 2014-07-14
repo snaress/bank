@@ -15,7 +15,7 @@ class Grapher(object):
         self.variables = {}
         self.graphTree = {}
 
-    def __repr__(self):
+    def __repr2__(self):
         txt = []
         for k, v in sorted(self.__dict__.iteritems()):
             if not k.startswith('_'):
@@ -68,7 +68,7 @@ class Grapher(object):
         """ Update comment from mainUi
             @param mainUi: (object) : QMainWindow """
         print "\n[grapher] : #-- Update Comment From Ui --#"
-        txtDict = mainUi.wgComment.__repr__()
+        txtDict = mainUi.wgComment.__repr2__()
         self.commentHtml = txtDict['commentHtml']
         self.commentTxt = txtDict['commentTxt']
 
@@ -76,13 +76,13 @@ class Grapher(object):
         """ Update variables from mainUi
             @param mainUi: (object) : QMainWindow """
         print "\n[grapher] : #-- Update Variables From Ui --#"
-        self.variables = mainUi.wgVariables.__repr__()
+        self.variables = mainUi.wgVariables.__repr2__()
 
     def ud_graphTreeFromUi(self, mainUi):
         """ Update graph tree from mainUi
             @param mainUi: (object) : QMainWindow """
         print "\n[grapher] : #-- Update Graph Tree From Ui --#"
-        self.graphTree = mainUi.wgGraph.__repr__()
+        self.graphTree = mainUi.wgGraph.__repr2__()
 
     def writeToFile(self):
         """ Write grapher2 to file """
@@ -90,7 +90,7 @@ class Grapher(object):
             if os.path.exists(self._path):
                 print "\n[grapher] : #-- Write Graph --#"
                 try:
-                    pFile.writeFile(self._absPath, self.__repr__())
+                    pFile.writeFile(self._absPath, self.__repr2__())
                     print "Result: %s" % self._absPath
                 except:
                     raise IOError, "Result: Failed to write file %s" % self._absPath
@@ -119,13 +119,17 @@ class GraphNodeData(object):
         self.currentVersion = None
         self.versionTitle = {}
         self.nodeComment = {}
+        self.nodeVariables = {}
+        self.nodeLoop = {}
+        self.nodeScript = {}
+        self.nodeTrash = {}
 
-    def __repr__(self):
+    def __repr2__(self):
         return self.__dict__
 
     def __str__(self):
         txt = []
-        for k, v in self.__repr__().iteritems():
+        for k, v in self.__repr2__().iteritems():
             if isinstance(v, str):
                 txt.append("%s = %r" % (k, v))
             else:

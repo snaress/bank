@@ -97,3 +97,11 @@ class Style(object):
             @return: (str) : Background color """
         if nodeType == 'modul':
             return "background-color:LightGrey;"
+        elif nodeType == 'loop':
+            return "background-color:ForestGreen;"
+        elif nodeType == 'sysData':
+            return "background-color:PaleTurquoise;"
+        elif nodeType == 'cmdData':
+            return "background-color:CornFlowerBlue;"
+        elif nodeType == 'purData':
+            return "background-color:GreenYellow;"

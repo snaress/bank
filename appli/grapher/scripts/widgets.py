@@ -18,12 +18,12 @@ class Comment(textEditor.TextEditor):
         self._setupWidget()
         self.rf_widgetVis()
 
-    def __repr__(self):
+    def __repr2__(self):
         return {'commentHtml': str(self.teText.toHtml()),
                 'commentTxt': str(self.teText.toPlainText())}
 
     def __str__(self):
-        return self.__repr__()['commentTxt']
+        return self.__repr2__()['commentTxt']
 
     def _setupWidget(self):
         self.bClearText.setToolTip("Cancel Edition")
@@ -65,7 +65,7 @@ class Comment(textEditor.TextEditor):
         if str(self.parent.objectName()) == 'grapherUi':
             self.parent.grapher.ud_commentFromUi(self.parent)
         elif str(self.parent.objectName()) == 'nodeEditor':
-            self.parent.ud_nodeComment()
+            self.rf_widgetVis(state=False)
 
     def resetComment(self):
         """ Reset Grapher comment """
@@ -84,7 +84,7 @@ class VarEditor(varEditorClass, varEditorUiClass):
         super(VarEditor, self).__init__()
         self._setupUi()
 
-    def __repr__(self):
+    def __repr2__(self):
         items = pQt.getTopItems(self.twVariables)
         varDict = {}
         for n, item in enumerate(items):
@@ -93,8 +93,8 @@ class VarEditor(varEditorClass, varEditorUiClass):
 
     def __str__(self):
         text = ["#-- Variables --#"]
-        for var in sorted(self.__repr__().keys()):
-            text.append("%s = %s" % (var, self.__repr__()[var]))
+        for var in sorted(self.__repr2__().keys()):
+            text.append("%s = %s" % (var, self.__repr2__()[var]))
         return '\n'.join(text)
 
     def _setupUi(self):
