@@ -512,9 +512,9 @@ class GraphTree(QtGui.QTreeWidget):
         if not 'nodeVariables' in keyList:
             kwargs['nodeVariables'] = {'001': {}}
         if not 'nodeLoop' in keyList:
-            kwargs['nodeLoop'] = {'001': {'type': 'range', 'iter': 'i', 'checkFile': 'tmpCheck',
+            kwargs['nodeLoop'] = {'type': 'range', 'iter': 'i', 'checkFile': 'tmpCheck',
                                           'start': '1', 'stop': '10', 'step': '1',
-                                          'list': '2,3,4', 'single': '1'}}
+                                          'list': '2,3,4', 'single': '1'}
         if not 'nodeScript' in keyList:
             kwargs['nodeScript'] = {'001': ""}
         if not 'nodeTrash' in keyList:
@@ -783,12 +783,14 @@ class GraphNode(graphNodeClass, graphNodeUiClass, core.Style):
         """ Connect graphNode to nodeEditor """
         if self.mainUi.miNodeEditor.isChecked():
             self.mainUi.nodeEditor.connectGraphNode(self)
+            self.mainUi.nodeEditor.bClose.setVisible(False)
 
     def _doubleClick(self):
         """ Connect graphNode in an external nodeEditor """
         self.nodeEditor = nodeEditor.NodeEditor(self.mainUi)
         self.nodeEditor.show()
         self.nodeEditor.connectGraphNode(self)
+        self.nodeEditor.bClose.setVisible(True)
 
     def setGraphNodeBgc(self):
         """ Edit graphNode color """
