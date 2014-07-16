@@ -47,7 +47,7 @@
     </widget>
    </item>
    <item row="3" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="hlButtons">
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -60,34 +60,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="bButton1">
-       <property name="text">
-        <string>button1</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="bButton2">
-       <property name="text">
-        <string>button2</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="bButton3">
-       <property name="text">
-        <string>button3</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="bButton4">
-       <property name="text">
-        <string>button4</string>
-       </property>
-      </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer_2">

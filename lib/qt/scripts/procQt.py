@@ -145,7 +145,7 @@ def fileDialog(fdMode='open', fdFileMode='AnyFile', fdRoot=None, fdRoots=None,
     return fd
 
 
-confirmDialogClass, confirmDialogUiClass = uic.loadUiType(qt.uiList['confirmDialog2'])
+confirmDialogClass, confirmDialogUiClass = uic.loadUiType(qt.uiList['confirmDialog'])
 class ConfirmDialog(confirmDialogClass, confirmDialogUiClass):
     """ Confirm dialog popup
         @param message: (str) : Dialog texte
@@ -188,7 +188,7 @@ class ConfirmDialog(confirmDialogClass, confirmDialogUiClass):
         return newButton
 
 
-promptDialogClass, promptDialogUiClass = uic.loadUiType(qt.uiList['promptDialog2'])
+promptDialogClass, promptDialogUiClass = uic.loadUiType(qt.uiList['promptDialog'])
 class PromptDialog(promptDialogClass, promptDialogUiClass):
     """ Prompt dialog popup
         @param message: (str) : Dialog texte
