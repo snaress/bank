@@ -11,8 +11,11 @@ class ScriptEditor(scriptEditorClass, scriptEditorUiClass):
 
     def _setupUi(self):
         self.setupUi(self)
-        self.wgScript = ScriptZone()
-        self.glScriptEditor.addWidget(self.wgScript, 1, 1, 1, 1)
+        self._widget = ScriptZone()
+        self.glScriptEditor.addWidget(self._widget, 1, 1, 1, 1)
+
+    def resetScript(self):
+        self._widget.clear()
 
 
 class ScriptZone(QtGui.QTextEdit):
@@ -65,7 +68,7 @@ class PythonHighlighter(QtGui.QSyntaxHighlighter):
                  "except", "exec", "finally", "for", "from", "global", "if", "import", "in", "is",
                  "lambda", "not", "or", "pass", "print", "return", "try", "while", "yield")
     keyWords2 = ("basestring", "delattr", "dict", "execFile", "float", "getattr", "int",
-                 "isinstance", "list", "map", "object","setattr", "str", "super")
+                 "isinstance", "list", "map", "None", "object","setattr", "str", "super")
 
     def __init__(self, document, base_format):
         super(PythonHighlighter, self).__init__(document)

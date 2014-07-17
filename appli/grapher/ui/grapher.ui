@@ -226,6 +226,8 @@
     <addaction name="separator"/>
     <addaction name="miXterm"/>
     <addaction name="miXplorer"/>
+    <addaction name="separator"/>
+    <addaction name="miExecGraph"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuGraph"/>
@@ -379,6 +381,11 @@
   <action name="miPushBranch">
    <property name="text">
     <string>Push Branch</string>
+   </property>
+  </action>
+  <action name="miExecGraph">
+   <property name="text">
+    <string>Exec Graph</string>
    </property>
   </action>
  </widget>

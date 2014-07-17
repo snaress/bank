@@ -1,4 +1,5 @@
 import os
+from lib.maya.scripts import mayaEnv
 
 
 #-- Packager Var --#
@@ -10,9 +11,9 @@ toolPack = __package__
 #-- Global Var --#
 rootDir = os.path.join('G:', os.sep)
 binPath = os.path.join('G:', os.sep, 'rndBin', toolName)
+envFile = os.path.join(os.path.dirname(mayaEnv.__file__), 'mayaEnv.py').replace('\\', '/')
 user = os.environ.get('username')
 station = os.environ.get('computername')
-
 
 #-- UI Files --#
 uiL = os.listdir(os.path.join(toolPath, 'ui')) or []

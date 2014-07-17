@@ -7,6 +7,9 @@ from lib.system.scripts import procFile as pFile
 class FileCmds(object):
     """ File commands class used by grapher """
 
+    def __init__(self):
+        pass
+
     @staticmethod
     def createLockFile(lockFile):
         """ Create lockFile
@@ -42,6 +45,29 @@ class FileCmds(object):
     def xtermLauncher():
         """ Default xterm launcher """
         return "cmd.exe"
+
+    @staticmethod
+    def initTmpPath(graphPath, graphFile):
+        """ Initialize grapher tmp path
+            @param graphPath: (str) : Current graph path
+            @param graphFile: (str) : Current graph file name
+            @return: (str) : Tmp graph path """
+        if not os.path.exists(graphPath):
+            print "!!! ERROR: Graph path not found %s !!!" % graphPath
+        else:
+            tmpPath = os.path.join(graphPath, 'tmp')
+            if not os.path.exists(tmpPath):
+                print "\t\t\tCreate folder 'tmp'"
+                os.mkdir(tmpPath)
+            tmpGraphPath = os.path.join(tmpPath, graphFile.replace('.py', ''))
+            if not os.path.exists(tmpGraphPath):
+                print "\t\t\tCreate folder '%s'" % graphFile.replace('.py', '')
+                os.mkdir(tmpGraphPath)
+            tmpUserPath = os.path.join(tmpGraphPath, grapher.user)
+            if not os.path.exists(tmpUserPath):
+                print "\t\t\tCreate folder '%s'" % tmpUserPath
+                os.mkdir(tmpUserPath)
+            return tmpUserPath
 
     @staticmethod
     def _defaultErrorDialog(message, parent):
@@ -82,12 +108,19 @@ class FileCmds(object):
 class Style(object):
     """ Class used by grapher for style settings """
 
+    def __init__(self):
+        pass
+
     @property
     def lockColor(self):
+        """ Lock background color
+            @return: (str) : Red color """
         return "background-color:Tomato;"
 
     @property
     def graphBgc(self):
+        """ GraphTree background color
+            @return: (str) : Black color """
         return "background-color:Black;"
 
     @staticmethod
@@ -105,3 +138,26 @@ class Style(object):
             return "background-color:CornFlowerBlue;"
         elif nodeType == 'purData':
             return "background-color:GreenYellow;"
+
+    @property
+    def nodeEditorScriptFont(self):
+        """ Node editor script font params
+            @return: (object) : Qfont """
+        scriptFont = QtGui.QFont()
+        scriptFont.setFamily('Courier')
+        scriptFont.setStyleHint(QtGui.QFont.Monospace)
+        scriptFont.setFixedPitch(True)
+        scriptFont.setPointSize(10)
+        return scriptFont
+
+    @property
+    def nodeEditorScriptMetrics(self):
+        """ Node editor script font metric
+            @return: (object) : QFontMetrics """
+        return QtGui.QFontMetrics(self.nodeEditorScriptFont)
+
+    @property
+    def nodeEditorNotesBgc(self):
+        """ Node editor notes background color
+            @return: (str) : Grey color """
+        return "background-color:LightGrey;"

@@ -517,8 +517,8 @@ class GraphTree(QtGui.QTreeWidget):
                                           'list': '2,3,4', 'single': '1'}
         if not 'nodeScript' in keyList:
             kwargs['nodeScript'] = {'001': ""}
-        if not 'nodeTrash' in keyList:
-            kwargs['nodeTrash'] = {'001': ""}
+        if not 'nodeNotes' in keyList:
+            kwargs['nodeNotes'] = {'001': ""}
         return kwargs
 
     def _moveTopItem(self, selItems, side, **nodeDict):

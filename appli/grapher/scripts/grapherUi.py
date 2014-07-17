@@ -54,6 +54,8 @@ class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, core.Style):
         self.miXterm.setShortcut("Alt+O")
         self.miXplorer.triggered.connect(self.cmds_menu.on_xPlorer)
         self.miXplorer.setShortcut("Shift+O")
+        self.miExecGraph.triggered.connect(self.cmds_menu.on_execGraph)
+        self.miExecGraph.setShortcut("Alt+E")
         #-- Menu Help --#
         self.miGrapherRepr.triggered.connect(self.cmds_menu.on_grapherRepr)
         self.miGrapherRepr.setShortcut("Ctrl+G")

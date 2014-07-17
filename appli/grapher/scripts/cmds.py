@@ -181,6 +181,16 @@ class Menu(object):
         else:
             os.system('start %s' % os.path.normpath(self.grapher._path))
 
+    def on_execGraph(self):
+        """ Command launched when miExecGraph is clicked """
+        print "\n[grapherUI] : #-- Execute Graph --#"
+        self.grapher.ud_commentFromUi(self.mainUi)
+        self.grapher.ud_variablesFromUi(self.mainUi)
+        self.grapher.ud_graphTreeFromUi(self.mainUi)
+        tmpPath = self.mainUi.initTmpPath(self.grapher._path, self.grapher._file)
+        if os.path.exists(tmpPath):
+            self.grapher.execGraph()
+
     #====================================== MENU HELP =========================================#
 
     def on_grapherRepr(self):

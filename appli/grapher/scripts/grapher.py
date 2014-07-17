@@ -1,4 +1,5 @@
 import os
+from appli import grapher
 from lib.system.scripts import procFile as pFile
 
 
@@ -67,7 +68,7 @@ class Grapher(object):
     def ud_commentFromUi(self, mainUi):
         """ Update comment from mainUi
             @param mainUi: (object) : QMainWindow """
-        print "\n[grapher] : #-- Update Comment From Ui --#"
+        print "[grapher] : #-- Update Comment From Ui --#"
         txtDict = mainUi.wgComment.__repr2__()
         self.commentHtml = txtDict['commentHtml']
         self.commentTxt = txtDict['commentTxt']
@@ -75,14 +76,30 @@ class Grapher(object):
     def ud_variablesFromUi(self, mainUi):
         """ Update variables from mainUi
             @param mainUi: (object) : QMainWindow """
-        print "\n[grapher] : #-- Update Variables From Ui --#"
+        print "[grapher] : #-- Update Variables From Ui --#"
         self.variables = mainUi.wgVariables.__repr2__()
 
     def ud_graphTreeFromUi(self, mainUi):
         """ Update graph tree from mainUi
             @param mainUi: (object) : QMainWindow """
-        print "\n[grapher] : #-- Update Graph Tree From Ui --#"
+        print "[grapher] : #-- Update Graph Tree From Ui --#"
         self.graphTree = mainUi.wgGraph.__repr2__()
+
+    def execGraph(self):
+        """ Execute graph """
+        print "[grapher] : #-- Init Graph File --#"
+        gpFolder = self._file.replace('.py', '')
+        exeFile = os.path.join(self._path, 'tmp', gpFolder, grapher.user, 'test.py')
+        script = ['print "######################"',
+                  'print "##### EXEC GRAPH #####"',
+                  'print "######################"',
+                  'print "Graph Path: %s"' % self._path,
+                  'print "Graph File: %s"' % self._file,
+                  'execfile("%s")' % grapher.envFile,
+                  'print ""', 'print "#-- Import Global Var --#"']
+        script.extend(self._varDictToStr())
+        pFile.writeFile(exeFile, '\n'.join(script))
+        os.system('start python -i %s' % exeFile)
 
     def writeToFile(self):
         """ Write grapher2 to file """
@@ -111,8 +128,28 @@ class Grapher(object):
         self.graphTree = {}
         print "[grapher] : Params successfully reseted."
 
+    def _varDictToStr(self):
+        script = []
+        for var in sorted(self.variables.keys()):
+            if self.variables[var]['type'] == 'num':
+                print 'num'
+                if '.' in self.variables[var]['value']:
+                    varLine = '%s = %s' % (self.variables[var]['label'],
+                                           float(self.variables[var]['value']))
+                else:
+                    varLine = '%s = %s' % (self.variables[var]['label'],
+                                           int(self.variables[var]['value']))
+            else:
+                varLine = '%s = %s' % (self.variables[var]['label'],
+                                       self.variables[var]['value'])
+            script.append('print %r' % varLine)
+            script.append(varLine)
+        if script:
+            return script
+
 
 class GraphNodeData(object):
+    """ Class used by Grapher for graphNode data storage """
 
     def __init__(self):
         self.nodeType = None
@@ -122,7 +159,7 @@ class GraphNodeData(object):
         self.nodeVariables = {}
         self.nodeLoop = {}
         self.nodeScript = {}
-        self.nodeTrash = {}
+        self.nodeNotes = {}
 
     def __repr2__(self):
         return self.__dict__

@@ -23,17 +23,6 @@
     </property>
    </layout>
   </widget>
-  <widget class="QToolBar" name="toolBarUp">
-   <property name="windowTitle">
-    <string>toolBarUp</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
   <action name="miAddTab">
    <property name="text">
     <string>Add Tabulation</string>

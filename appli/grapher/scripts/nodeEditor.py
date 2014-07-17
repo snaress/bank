@@ -1,8 +1,9 @@
-from appli import grapher
 from PyQt4 import uic
+from appli import grapher
 from functools import partial
 from lib.qt.scripts import procQt as pQt
 from appli.grapher.scripts import widgets
+from lib.qt.scripts import scriptEditor
 
 
 #F:\rnd\server\_archive\_old\apps\grapher\ui
@@ -43,8 +44,14 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.rbLoopRange.clicked.connect(self.on_loopType)
         self.rbLoopList.clicked.connect(self.on_loopType)
         self.rbLoopSingle.clicked.connect(self.on_loopType)
-        #-- Trash --#
-        self.cbTrash.clicked.connect(self.rf_trashVis)
+        #-- Script --#
+        self.wgScript = scriptEditor.ScriptEditor()
+        self.vlScript.insertWidget(-1, self.wgScript)
+        #-- Notes --#
+        self.cbNotes.clicked.connect(self.rf_notesVis)
+        self.teNotes.setStyleSheet(self.mainUi.nodeEditorNotesBgc)
+        self.teNotes.setFont(self.mainUi.nodeEditorScriptFont)
+        self.teNotes.setTabStopWidth(4 * self.mainUi.nodeEditorScriptMetrics.width(' '))
         #-- Edit --#
         self.bClose.clicked.connect(self.close)
         self.bSave.clicked.connect(self.on_save)
@@ -55,7 +62,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.mainUi.rf_commentVis(self)
         self.mainUi.rf_variablesVis(self)
         self.rf_scriptVis()
-        self.rf_trashVis()
+        self.rf_notesVis()
 
     def resetUi(self):
         """ Reset NodeEditor ui """
@@ -66,8 +73,8 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.cbNodeVersion.clear()
         self.wgComment.resetComment()
         self.wgVariables.resetTree()
-        self.teScript.clear()
-        self.teTrash.clear()
+        self.wgScript.resetScript()
+        self.teNotes.clear()
         self.setVisible(False)
 
     #========================================== REFRESH ==========================================#
@@ -148,19 +155,19 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
 
     def rf_script(self):
         """ Refresh node script """
-        self.teScript.clear()
+        self.wgScript.resetScript()
         if self.currentVersion in self.graphNode._data.nodeScript:
-            self.teScript.setText(self.graphNode._data.nodeScript[self.currentVersion])
+            self.wgScript._widget.setText(self.graphNode._data.nodeScript[self.currentVersion])
 
-    def rf_trashVis(self):
-        """ Refresh node trash visibility """
-        self.mainUi.rf_zoneVisibility(self.cbTrash, [self.teTrash], self.flTrash)
+    def rf_notesVis(self):
+        """ Refresh node notes visibility """
+        self.mainUi.rf_zoneVisibility(self.cbNotes, [self.teNotes], self.flNotes)
 
-    def rf_trash(self):
-        """ Refresh node trash text """
-        self.teTrash.clear()
-        if self.currentVersion in self.graphNode._data.nodeTrash:
-            self.teTrash.setText(self.graphNode._data.nodeTrash[self.currentVersion])
+    def rf_notes(self):
+        """ Refresh node notes text """
+        self.teNotes.clear()
+        if self.currentVersion in self.graphNode._data.nodeNotes:
+            self.teNotes.setText(self.graphNode._data.nodeNotes[self.currentVersion])
 
     def rf_editor(self):
         """ Refresh node editor """
@@ -170,7 +177,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.rf_variables()
         self.rf_loop()
         self.rf_script()
-        self.rf_trash()
+        self.rf_notes()
 
     #========================================== UPDATES ==========================================#
 
@@ -210,12 +217,12 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
     def ud_script(self):
         """ Update graphNode script """
         data = self.graphNode._data
-        data.nodeScript[self.currentVersion] = str(self.teScript.toPlainText())
+        data.nodeScript[self.currentVersion] = str(self.wgScript._widget.toPlainText())
 
-    def ud_trash(self):
-        """ Update graphNode trash """
+    def ud_notes(self):
+        """ Update graphNode notes """
         data = self.graphNode._data
-        data.nodeTrash[self.currentVersion] = str(self.teTrash.toPlainText())
+        data.nodeNotes[self.currentVersion] = str(self.teNotes.toPlainText())
 
     #========================================== ACTIONS ==========================================#
 
@@ -272,7 +279,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.graphNode._data.nodeComment.pop(version)
         self.graphNode._data.nodeVariables.pop(version)
         self.graphNode._data.nodeScript.pop(version)
-        self.graphNode._data.nodeTrash.pop(version)
+        self.graphNode._data.nodeNotes.pop(version)
 
     def on_loopType(self):
         """ Command launch when bgLoopType is clicked """
@@ -299,7 +306,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.ud_variables()
         self.ud_loop()
         self.ud_script()
-        self.ud_trash()
+        self.ud_notes()
 
     def on_cancel(self):
         """ Command launch when bCancel is clicked """
