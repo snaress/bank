@@ -67,8 +67,9 @@ class PythonHighlighter(QtGui.QSyntaxHighlighter):
     keyWords1 = ("and", "assert", "break", "class", "continue", "def", "del", "elif", "else",
                  "except", "exec", "finally", "for", "from", "global", "if", "import", "in", "is",
                  "lambda", "not", "or", "pass", "print", "return", "try", "while", "yield")
-    keyWords2 = ("basestring", "delattr", "dict", "execFile", "float", "getattr", "int",
-                 "isinstance", "list", "map", "None", "object","setattr", "str", "super")
+    keyWords2 = ("basestring", "delattr", "dict", "execfile", "float", "getattr", "int",
+                 "isinstance", "list", "map", "max", "min", "None", "object","setattr", "str",
+                 "super")
 
     def __init__(self, document, base_format):
         super(PythonHighlighter, self).__init__(document)
