@@ -1,42 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>toolManagerUi</class>
+ <widget class="QMainWindow" name="toolManagerUi">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>532</width>
-    <height>264</height>
+    <width>494</width>
+    <height>280</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>ToolManager</string>
+   <string>MainWindow</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QTreeWidget" name="twTools">
-     <property name="indentation">
-      <number>0</number>
-     </property>
-     <attribute name="headerVisible">
-      <bool>false</bool>
-     </attribute>
-     <column>
-      <property name="text">
-       <string notr="true">1</string>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QTreeWidget" name="twTools">
+      <property name="indentation">
+       <number>0</number>
       </property>
-     </column>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QPushButton" name="bLaunchTool">
-     <property name="text">
-      <string>Launch Selected Tool</string>
-     </property>
-    </widget>
-   </item>
-  </layout>
+      <attribute name="headerVisible">
+       <bool>false</bool>
+      </attribute>
+      <column>
+       <property name="text">
+        <string notr="true">1</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QPushButton" name="bLaunchTool">
+      <property name="text">
+       <string>Launch Selected Tool</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>494</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>

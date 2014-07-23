@@ -18,5 +18,4 @@ toolComment = "Tool showing the listing of all maya tools."
 
 
 #-- Launch Tool Ui --#
-window = toolManagerUi.ToolManagerUi()
-window.show()
+toolManagerUi.launch()

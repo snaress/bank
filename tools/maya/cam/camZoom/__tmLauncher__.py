@@ -16,5 +16,5 @@ toolComment = "Camera view helper."
 
 
 #-- Launch Tool Ui --#
-window = camZoomUi.CamZoomUi()
-window.show()
+camZoomUi.launch()
+

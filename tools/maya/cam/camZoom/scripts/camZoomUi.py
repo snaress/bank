@@ -1,16 +1,21 @@
-import sys
+from PyQt4 import uic
 import maya.cmds as mc
-from PyQt4 import QtGui, uic
 from functools import partial
 from tools.maya.cam import camZoom
+from tools.maya.util.proc.scripts import procUi as pUi
+try:
+    import pymel.core as pm
+    import maya.OpenMayaUI as mOpen
+except:
+    pass
 
 
 camZoomClass, camZoomUiClass = uic.loadUiType(camZoom.uiList['camZoom'])
 class CamZoomUi(camZoomClass, camZoomUiClass):
 
-    def __init__(self):
+    def __init__(self, _parent=pUi.getMayaMainWindow()):
         print "##### Launching camZoom Ui #####"
-        super(CamZoomUi, self).__init__()
+        super(CamZoomUi, self).__init__(_parent)
         self._setupUi()
 
     def _setupUi(self):
@@ -109,3 +114,11 @@ class CamZoomUi(camZoomClass, camZoomUiClass):
                 mc.warning("Warning: Stored params not found !!!" % cam)
         else:
             mc.warning("Warning: Initialized camera is not a valide camera (%s) !!!" % cam)
+
+
+def launch():
+    toolName = 'camZoomUi'
+    if pm.window(toolName, q=True, ex=True):
+        pm.deleteUI(toolName)
+    tool = CamZoomUi()
+    tool.show()
