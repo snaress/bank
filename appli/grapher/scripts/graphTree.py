@@ -439,8 +439,8 @@ class GraphTree(QtGui.QTreeWidget):
         selNode._widget.setGraphNodeName(newNodeName)
         self.renameDialog.close()
         if self.mainUi.miNodeEditor.isChecked():
-            if str(self.mainUi.nodeEditor.leName.text()) == oldName:
-                self.mainUi.nodeEditor.leName.setText(newNodeName)
+            if str(self.mainUi.nodeEditor.leNodeName.text()) == oldName:
+                self.mainUi.nodeEditor.leNodeName.setText(newNodeName)
 
     def getItemFromNodeName(self, nodeName):
         """ Get QTreeWidgetItem from given nodeName
