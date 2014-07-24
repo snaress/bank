@@ -3,7 +3,6 @@ from appli import grapher
 from functools import partial
 from PyQt4 import QtGui, QtCore, uic
 from lib.qt.scripts import procQt as pQt
-from appli.grapher.scripts import grapher as gp
 from lib.system.scripts import procFile as pFile
 from appli.grapher.scripts import nodeEditor, core
 
@@ -515,6 +514,10 @@ class GraphTree(QtGui.QTreeWidget):
             kwargs['nodeLoop'] = {'type': 'range', 'iter': 'i', 'checkFile': 'tmpCheck',
                                           'start': '1', 'stop': '10', 'step': '1',
                                           'list': '2,3,4', 'single': '1'}
+        if not 'nodeCmd' in keyList:
+            kwargs['nodeCmd'] = ""
+        if not 'nodeCmdInit' in keyList:
+            kwargs['nodeCmdInit'] = ""
         if not 'nodeScript' in keyList:
             kwargs['nodeScript'] = {'001': ""}
         if not 'nodeNotes' in keyList:
@@ -736,7 +739,7 @@ class GraphNode(graphNodeClass, graphNodeUiClass, core.Style):
     def __init__(self, tree, item):
         self._tree = tree
         self._item = item
-        self._data = gp.GraphNodeData()
+        self._data = GraphNodeData()
         self.mainUi = self._tree.mainUi
         super(GraphNode, self).__init__()
         self._setupUi()
@@ -817,3 +820,31 @@ class GraphNode(graphNodeClass, graphNodeUiClass, core.Style):
         else:
             self.pbExpand.setText('+')
         self._tree.rf_graphColumns()
+
+
+class GraphNodeData(object):
+    """ Class used by Grapher for graphNode data storage """
+
+    def __init__(self):
+        self.nodeType = None
+        self.currentVersion = None
+        self.versionTitle = {}
+        self.nodeComment = {}
+        self.nodeVariables = {}
+        self.nodeLoop = {}
+        self.nodeCmd = None
+        self.nodeCmdInit = None
+        self.nodeScript = {}
+        self.nodeNotes = {}
+
+    def __repr2__(self):
+        return self.__dict__
+
+    def __str__(self):
+        txt = []
+        for k, v in self.__repr2__().iteritems():
+            if isinstance(v, str):
+                txt.append("%s = %r" % (k, v))
+            else:
+                txt.append("%s = %s" % (k, v))
+        return '\n'.join(txt)

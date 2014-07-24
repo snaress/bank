@@ -3,6 +3,7 @@ from appli import grapher
 from functools import partial
 from PyQt4 import QtGui, QtCore, uic
 from lib.qt.scripts import textEditor
+from lib.qt.scripts import scriptEditor
 from lib.qt.scripts import procQt as pQt
 from lib.system.scripts import procFile as pFile
 
@@ -70,6 +71,19 @@ class Comment(textEditor.TextEditor):
     def resetComment(self):
         """ Reset Grapher comment """
         self.teText.clear()
+
+
+class ScriptEditor(scriptEditor.ScriptEditor):
+
+    def __init__(self, parent):
+        self.parent = parent
+        super(ScriptEditor, self).__init__()
+
+    def __repr2__(self):
+        return str(self._widget.toPlainText())
+
+    def __str__(self):
+        return self.__repr2__()
 
 
 varEditorClass, varEditorUiClass = uic.loadUiType(grapher.uiList['varEditor'])

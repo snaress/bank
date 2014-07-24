@@ -1,7 +1,10 @@
 import os, time
-from PyQt4 import QtGui
 from appli import grapher
 from lib.system.scripts import procFile as pFile
+try:
+    from PyQt4 import QtGui
+except:
+    pass
 
 
 class FileCmds(object):
@@ -65,9 +68,40 @@ class FileCmds(object):
                 os.mkdir(tmpGraphPath)
             tmpUserPath = os.path.join(tmpGraphPath, grapher.user)
             if not os.path.exists(tmpUserPath):
-                print "\t\t\tCreate folder '%s'" % tmpUserPath
+                print "\t\t\tCreate folder '%s'" % grapher.user
                 os.mkdir(tmpUserPath)
             return tmpUserPath
+
+    @staticmethod
+    def initScriptPath(graphPath, graphFile):
+        """ Initialize grapher script path
+            @param graphPath: (str) : Current graph path
+            @param graphFile: (str) : Current graph file name
+            @return: (str) : Script graph path """
+        if not os.path.exists(graphPath):
+            print "!!! ERROR: Graph path not found %s !!!" % graphPath
+        else:
+            scriptPath = os.path.join(graphPath, 'scripts')
+            if not os.path.exists(scriptPath):
+                print "\t\t\tCreate folder 'scripts'"
+                os.mkdir(scriptPath)
+            scriptGraphPath = os.path.join(scriptPath, graphFile.replace('.py', ''))
+            if not os.path.exists(scriptGraphPath):
+                print "\t\t\tCreate folder '%s'" % graphFile.replace('.py', '')
+                os.mkdir(scriptGraphPath)
+            scriptUserPath = os.path.join(scriptGraphPath, grapher.user)
+            if not os.path.exists(scriptUserPath):
+                print "\t\t\tCreate folder '%s'" % grapher.user
+                os.mkdir(scriptUserPath)
+            return scriptUserPath
+
+    def createMelFromPy(self, pyFile):
+        melFile = pyFile.replace('/scripts/', '/tmp/').replace('.py', '.mel')
+        print 'pyFile:', pyFile
+        print 'melFile', melFile
+        txt = ['python("execfile(%r)");' % pyFile]
+        pFile.writeFile(melFile, '\n'.join(txt))
+        return melFile
 
     @staticmethod
     def _defaultErrorDialog(message, parent):

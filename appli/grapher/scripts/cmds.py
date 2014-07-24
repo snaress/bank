@@ -187,9 +187,7 @@ class Menu(object):
         self.grapher.ud_commentFromUi(self.mainUi)
         self.grapher.ud_variablesFromUi(self.mainUi)
         self.grapher.ud_graphTreeFromUi(self.mainUi)
-        tmpPath = self.mainUi.initTmpPath(self.grapher._path, self.grapher._file)
-        if os.path.exists(tmpPath):
-            self.grapher.execGraph()
+        self.grapher.execGraph()
 
     #====================================== MENU HELP =========================================#
 
@@ -204,3 +202,7 @@ class Menu(object):
     def on_grapherUiStr(self):
         """ Command launched when miGrapherUiStr is clicked """
         print self.mainUi.__str__()
+
+
+
+

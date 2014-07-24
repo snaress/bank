@@ -3,7 +3,6 @@ from appli import grapher
 from functools import partial
 from lib.qt.scripts import procQt as pQt
 from appli.grapher.scripts import widgets
-from lib.qt.scripts import scriptEditor
 
 
 #F:\rnd\server\_archive\_old\apps\grapher\ui
@@ -45,7 +44,10 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.rbLoopList.clicked.connect(self.on_loopType)
         self.rbLoopSingle.clicked.connect(self.on_loopType)
         #-- Script --#
-        self.wgScript = scriptEditor.ScriptEditor()
+        self.cbCmdInitVis.clicked.connect(self.rf_cmdInitVis)
+        self.wgCmdInit = widgets.ScriptEditor(self)
+        self.vlCmdInit.insertWidget(-1, self.wgCmdInit)
+        self.wgScript = widgets.ScriptEditor(self)
         self.vlScript.insertWidget(-1, self.wgScript)
         #-- Notes --#
         self.cbNotes.clicked.connect(self.rf_notesVis)
@@ -73,6 +75,8 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.cbNodeVersion.clear()
         self.wgComment.resetComment()
         self.wgVariables.resetTree()
+        self.leCmd.clear()
+        self.wgCmdInit.resetScript()
         self.wgScript.resetScript()
         self.teNotes.clear()
         self.setVisible(False)
@@ -126,6 +130,14 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
             self.qfLoop.setVisible(False)
             self.qfScript.setVisible(True)
             self.qfScriptSpacer.setVisible(False)
+            if self.currentType == 'cmdData':
+                self.cbCmdInitVis.setVisible(True)
+                self.qfCmd.setVisible(True)
+                self.qfCmdInit.setVisible(True)
+            else:
+                self.cbCmdInitVis.setVisible(False)
+                self.qfCmd.setVisible(False)
+                self.qfCmdInit.setVisible(False)
         elif self.currentType == 'loop':
             self.qfLoop.setVisible(True)
             self.qfScript.setVisible(False)
@@ -153,8 +165,23 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.leLoopList.setText(loopDict['list'])
         self.leLoopSingle.setText(loopDict['single'])
 
+    def rf_cmd(self):
+        """ Refresh node command """
+        self.leCmd.clear()
+        self.leCmd.setText(self.graphNode._data.nodeCmd)
+
+    def rf_cmdInitVis(self):
+        """ Refresh node command init visibility """
+        self.qfCmdInit.setVisible(self.cbCmdInitVis.isChecked())
+
+    def rf_cmdInit(self):
+        """ Refresh node command init """
+        self.wgCmdInit.resetScript()
+        self.wgCmdInit._widget.setText(self.graphNode._data.nodeCmdInit)
+
     def rf_script(self):
         """ Refresh node script """
+        self.rf_cmdInitVis()
         self.wgScript.resetScript()
         if self.currentVersion in self.graphNode._data.nodeScript:
             self.wgScript._widget.setText(self.graphNode._data.nodeScript[self.currentVersion])
@@ -176,6 +203,8 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.rf_comment()
         self.rf_variables()
         self.rf_loop()
+        self.rf_cmd()
+        self.rf_cmdInit()
         self.rf_script()
         self.rf_notes()
 
@@ -214,10 +243,18 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
                          'list': str(self.leLoopList.text()),
                          'single': str(self.leLoopSingle.text())}
 
+    def ud_cmd(self):
+        """ Update graphNode command """
+        self.graphNode._data.nodeCmd = str(self.leCmd.text())
+
+    def ud_cmdInit(self):
+        """ Update graphNode init command """
+        self.graphNode._data.nodeCmdInit = str(self.wgCmdInit._widget.toPlainText())
+
     def ud_script(self):
         """ Update graphNode script """
         data = self.graphNode._data
-        data.nodeScript[self.currentVersion] = str(self.wgScript._widget.toPlainText())
+        data.nodeScript[self.currentVersion] = str(self.wgScript.__repr2__())
 
     def ud_notes(self):
         """ Update graphNode notes """
@@ -305,6 +342,8 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.ud_comment()
         self.ud_variables()
         self.ud_loop()
+        self.ud_cmd()
+        self.ud_cmdInit()
         self.ud_script()
         self.ud_notes()
 
