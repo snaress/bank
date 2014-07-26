@@ -93,116 +93,19 @@ def secondsToStr(seconds):
     seconds = S - (minutes * 60)
     return "%s:%s:%s" % (hours, minutes, seconds)
 
-def dictToList(d):
-    """ Translate dict to str list
-        @param d: (dict) : Dict to translate
-        @return: (list) : List of strings """
-    txt = []
-    if not isinstance(d, dict):
-        raise TypeError, "Argument should be of type 'dict', got %s" % type(d)
-    for k, v in sorted(d.iteritems()):
-        if isinstance(v, str):
-            txt.append("%s = %r" % (k, v))
-        else:
-            #-- Dict Type --#
-            if isinstance(v, dict):
-                txtDict = []
-                if not len(v.keys()):
-                    txtDict.append("%s = {}" % k)
-                else:
-                    for n, attr in enumerate(sorted(v.keys())):
-                        if n == 0:
-                            if isinstance(v[attr], str):
-                                txtDict.append("%s = {%r: %r," % (k, attr, v[attr]))
-                            else:
-                                txtDict.append("%s = {%r: %s," % (k, attr, v[attr]))
-                        elif n == len(v.keys()) - 1:
-                            if isinstance(v[attr], str):
-                                txtDict.append("%s %r: %r}" % (' ' * (len(k) + 3), attr, v[attr]))
-                            else:
-                                txtDict.append("%s %r: %s}" % (' ' * (len(k) + 3), attr, v[attr]))
-                        else:
-                            if isinstance(v[attr], str):
-                                txtDict.append("%s %r: %r," % (' ' * (len(k) + 3), attr, v[attr]))
-                            else:
-                                txtDict.append("%s %r: %s," % (' ' * (len(k) + 3), attr, v[attr]))
-                txt.extend(txtDict)
-            #-- List Type --#
-            elif isinstance(v, list):
-                txtDict = []
-                if not len(v):
-                    txtDict.append("%s = []" % k)
-                else:
-                    for n, attr in enumerate(sorted(v)):
-                        if n == 0:
-                            if isinstance(v[attr], str):
-                                txtDict.append("%s = [%r," % (k, v[attr]))
-                            else:
-                                txtDict.append("%s = [%s," % (k, v[attr]))
-                        elif n == len(v) - 1:
-                            if isinstance(v[attr], str):
-                                txtDict.append("%s %r]" % (len(k) + 3, v[attr]))
-                            else:
-                                txtDict.append("%s %s]" % (len(k) + 3, v[attr]))
-                        else:
-                            if isinstance(v[attr], str):
-                                txtDict.append("%s %r," % (len(k) + 3, v[attr]))
-                            else:
-                                txtDict.append("%s %s," % (len(k) + 3, v[attr]))
-                txt.extend(txtDict)
-            #-- Other Type --#
-            else:
-                txt.append("%s = %s" % (k, v))
-    return txt
-
-
-class PathToDict(object):
-    """ Convert treePath to dict
-        @param rootPath: (str) : Absolut path """
-
-    def __init__(self, rootPath):
-        self.rootPath = rootPath
-
-    @property
-    def getPathDict(self):
-        """ Get path
-            @return: (dict) : Root path contents """
-        pathDict = {'root': [], 'flds': [], 'files': []}
-        for root, folders, files in os.walk(self.rootPath):
-            if self._verifPath(root):
-                pathDict['root'].append(root)
-                pathDict['flds'].append(self._getFolders(folders))
-                pathDict['files'].append(self._getFiles(files))
-        return pathDict
-
-    def _verifPath(self, path):
-        """ Check path validity
-            @param path: (str) : Path to check
-            @return: (bool) : True if valid, else False """
-        for item in path.split(os.sep):
-            if item.startswith('.'):
-                return False
-        return True
-
-    def _getFolders(self, folders):
-        """ Get valif folders
-            @param folders: (list) : Folders list
-            @return: (list) : Valid folders list """
-        Lflds = []
-        for fld in folders:
-            if not fld.startswith('.'):
-                Lflds.append(fld)
-        return Lflds
-
-    def _getFiles(self, files):
-        """ Get valif files
-            @param files: (list) : files list
-            @return: (list) : Valid files list """
-        Lfiles = []
-        for f in files:
-            if not f.startswith('.'):
-                Lfiles.append(f)
-        return Lfiles
+def dRange(start, stop, step, preci=3):
+    """ Get decimal range list
+        @param start: (float) : Range start
+        @param stop: (float) : Range stop
+        @param step: (float) : Range step
+        @param preci: (int) : Decimals
+        @return: (list) : Range list """
+    r = start
+    iters = []
+    while r < stop:
+        iters.append(str(round(r, preci)))
+        r += step
+    return iters
 
 
 class ProgressBar(object):
