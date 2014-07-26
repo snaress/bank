@@ -104,15 +104,12 @@ def dRange(start, stop, step, preci=3):
     rangeStart = start
     rangeStop = stop
     rangeStep = step
-
     if isinstance(rangeStart, float) or isinstance(rangeStop, float) or isinstance(rangeStep, float):
-        print 'float'
         r = rangeStart
         while r < rangeStop:
             iters.append(str(round(r, preci)))
             r += rangeStep
     else:
-        print 'int'
         for r in range(rangeStart, (rangeStop + 1), rangeStep):
             iters.append(r)
     return iters
