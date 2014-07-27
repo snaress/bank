@@ -79,7 +79,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.wgCmdInit.resetScript()
         self.wgScript.resetScript()
         self.teNotes.clear()
-        self.setVisible(False)
+        # self.setVisible(False)
 
     #========================================== REFRESH ==========================================#
 

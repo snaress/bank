@@ -95,12 +95,12 @@ class Grapher(core.FileCmds):
             eg = ExecGraph(self)
             self.initScriptPath(self._path, self._file)
             self.initTmpPath(self._path, self._file)
-            exeFile = os.path.join(self.tmpPath, 'test.py').replace('\\', '/')
+            exeFile = pFile.conformPath(os.path.join(self.tmpPath, 'test.py'))
             #-- Init Grapher Files --#
-            eg.graphNodesToFile()
-            exeTxt = eg.execHeader()
+            graphLoops = eg.graphNodesToFile()
+            exeTxt = eg.execHeader(graphLoops)
             #-- Store Graph --#
-            exeTxt.extend(eg.parseGraph())
+            exeTxt.extend(eg.parseGraph(graphLoops))
             #-- Write & Launch --#
             pFile.writeFile(exeFile, '\n'.join(exeTxt))
             print "\n[grapher] : #-- Launch Graph File --#"
@@ -206,89 +206,170 @@ class ExecGraph(object):
         self.graphTree = self.grapher.graphTree
 
     def graphNodesToFile(self):
-        """ Write graph nodes to file """
+        """ Write graph nodes to file
+            @return: (dict) : Loop's children nodes """
         if not os.path.exists(self.grapher.scriptPath):
             raise IOError, "!!! ERROR: Script path not found: %s" % self.grapher.scriptPath
         else:
-            for node in self.grapher.graphTree['_order']:
-                print "\nWriting %s to file ..." % node
+            graphLoops = {}
+            for node in self.graphTree['_order']:
                 nodeTxt = []
-                print "\tGet grapher variables ..."
-                nodeTxt.append("#-- Grapher Variables --#")
-                nodeTxt.extend(self._getGrapherVar())
-                print "\tGet global variables ..."
-                nodeTxt.append("#-- Global Variables --#")
-                nodeTxt.extend(self._getGlobalVar())
-                print "\tGet parent node variables ..."
-                nodeTxt.append("#-- Parent Variables --#")
-                nodeTxt.extend(self._getParentsVar(node))
-                print "\tGet node variables ..."
-                nodeTxt.append("#-- %s variables --#" % node)
-                nodeTxt.extend(self._getNodeVar(node))
-                if self.graphTree[node]['nodeType'] in ['sysData', 'cmdData', 'purData']:
-                    if self.graphTree[node]['nodeType'] == 'cmdData':
-                        print "\tGet node init command ..."
-                        nodeTxt.append("#-- %s cmd init --#" % node)
-                        nodeTxt.extend(self.graphTree[node]['nodeCmdInit'].split('\n'))
-                    print "\tGet node script ..."
-                    nodeTxt.append("#-- %s script --#" % node)
-                    v = self.grapher.nodeVersion(node)
-                    nodeTxt.extend(self.graphTree[node]['nodeScript'][v].split('\n'))
-                print "\tSave node to file ..."
-                scriptFile = os.path.join(self.grapher.scriptPath, '%s.py' % node).replace('\\','/')
-                try:
-                    pFile.writeFile(scriptFile, '\n'.join(nodeTxt))
-                    print '\t\t', scriptFile
-                except:
-                    raise IOError, "!!! ERROR: Can not create node file %s !!!" % node
+                if not self.graphTree[node]['nodeType'] in ['modul', 'loop']:
+                    print "\nWriting %s to file ..." % node
+                    nodeTxt.append("#-- Grapher Variables --#")
+                    nodeTxt.extend(self._getGrapherVar())
+                    nodeTxt.append("#-- Global Variables --#")
+                    nodeTxt.extend(self._getGlobalVar())
+                    nodeTxt.append("#-- Parent Variables --#")
+                    nodeTxt.extend(self._getParentsVar(node))
+                    nodeTxt.append("#-- %s variables --#" % node)
+                    nodeTxt.extend(self._getNodeVar(node))
+                    if self.graphTree[node]['nodeType'] in ['sysData', 'cmdData', 'purData']:
+                        if self.graphTree[node]['nodeType'] == 'cmdData':
+                            nodeTxt.append("#-- %s cmd init --#" % node)
+                            nodeTxt.append('print "Info: Init cmdData ..."')
+                            nodeTxt.extend(self.graphTree[node]['nodeCmdInit'].split('\n'))
+                            nodeTxt.extend(['print "Info: Init cmdData done"', 'print ""'])
+                        nodeTxt.append("#-- %s script --#" % node)
+                        v = self.grapher.nodeVersion(node)
+                        nodeTxt.extend(self.graphTree[node]['nodeScript'][v].split('\n'))
+                    scriptFile = pFile.conformPath(os.path.join(self.grapher.scriptPath, '%s.py' % node))
+                    try:
+                        pFile.writeFile(scriptFile, '\n'.join(nodeTxt))
+                        print '\t', scriptFile
+                    except:
+                        raise IOError, "!!! ERROR: Can not create node file %s !!!" % node
+                else:
+                    if self.graphTree[node]['nodeType'] == 'loop':
+                        nodeTxt.append("#-- %s params --#" % node)
+                        graphLoops[node] = self.grapher.getAllChildren(node)
+                        if node in graphLoops[node]:
+                            graphLoops[node].pop(graphLoops[node].index(node))
+            return graphLoops
 
-    def execHeader(self):
+    def execHeader(self, graphLoops):
         """ Init script header
+            @param graphLoops: (dict) : Loop's children
             @return: (list) : Script header """
-        txt = ['print "###################"',
+        txt = ['graphLoops = %s' % graphLoops,
+               'print "###################"',
                'print "##### GRAPHER #####"',
                'print "###################"',
-               'print "ExecGraph %s"' % self.grapher._absPath,
                'print ""', 'execfile("%s")' % grapher.envFile,
-               'print ""', 'print ""', 'print "#-- Import Grapher Var --#"',
-               'print "GP_PATH = %r"' % self.grapher._path,
-               'print "GP_FILE = %r"' % self.grapher._file,
-               'print ""', 'print ""', 'print "#-- Import Global Var --#"']
+               'from lib.system.scripts import procFile as pFile',
+               'print ""', 'print ""', 'print "#-- Import Grapher Var --#"']
+        for gVar in self._getGrapherVar():
+            txt.append(gVar)
+            txt.append('print %r' % gVar)
+        txt.extend(['print ""', 'print ""', 'print "#-- Import Global Var --#"'])
         for var in self.grapher._varDictToStr(self.grapher.variables):
+            txt.append(var)
             txt.append('print %r' % var)
         txt.extend(['print ""', 'print ""', 'print "#-- Exec Graph --#"'])
         return txt
 
-    def parseGraph(self):
+    def parseGraph(self, graphLoops):
+        """ Parsing graphTree
+            @param graphLoops: (dict) : Loop's children
+            @return: (list) : Graph node params """
         print "\n[grapher] : #-- Parse graph ---#"
         txt = []
         disable = []
         for node in self.graphTree['_order']:
             if not node in disable:
                 if not self.graphTree[node]['nodeEnabled']:
-                    disable.append(node)
-                    for child in self.grapher.getAllChildren(node):
-                        if not child in disable:
-                            disable.append(child)
+                    disable = self._parseDisabled(disable, node)
                 else:
-                    nodeFile = os.path.join(self.grapher.scriptPath, '%s.py' % node).replace('\\', '/')
-                    txt.extend(['print ""', 'print ""',
-                                'print "##### Exec Graph Node %s #####"' % node])
-                    if self.graphTree[node]['nodeType'] == 'sysData':
-                        txt.append('execfile("%s")' % nodeFile)
-                    elif self.graphTree[node]['nodeType'] == 'cmdData':
-                        melFile = self.grapher.createMelFromPy(nodeFile)
-                        nodeCmd = self.graphTree[node]['nodeCmd'].replace('$script', melFile)
-                        txt.append('print %r' % nodeCmd.replace(self.grapher._path, 'GP_PATH'))
-                        txt.append('print ""')
-                        txt.append('os.system("%s")' % nodeCmd)
+                    if not self.graphTree[node]['nodeType'] == 'purData':
+                        nodeFile = os.path.join(self.grapher.scriptPath, '%s.py' % node)
+                        nodeFile = pFile.conformPath(nodeFile)
+                        tab = self._getTab(node, graphLoops)
+                        txt.extend(['%sprint ""' % tab, '%sprint ""' % tab,
+                                    '%sprint "##### Exec Graph Node %s #####"' % (tab, node),
+                                    '%sprint "#-- Import Node Variables --#"' % tab])
+                        txt.extend(self._parseAllVars(tab, node))
+                        if self.graphTree[node]['nodeType'] == 'loop':
+                            txt.extend(self._parseLoop(tab, node))
+                        elif self.graphTree[node]['nodeType'] == 'sysData':
+                            txt.extend(self._parseSysData(tab, nodeFile))
+                        elif self.graphTree[node]['nodeType'] == 'cmdData':
+                            txt.extend(self._parseCmdData(tab, nodeFile, node))
         return txt
+
+    def _parseDisabled(self, disabledNodes, nodeName):
+        """ Store disabled graph nodes
+            @param disabledNodes: (list) : Disabled Nodes list
+            @param nodeName: (str) : Node name
+            @return: (list) : Disabled Nodes list """
+        disabledNodes.append(nodeName)
+        for child in self.grapher.getAllChildren(nodeName):
+            if not child in disabledNodes:
+                disabledNodes.append(child)
+        return disabledNodes
+
+    def _parseAllVars(self, tab, nodeName):
+        """ Store node variables
+            @param tab: (str) : Text tabulation (space)
+            @param nodeName: (str) : Node name
+            @return: (list) : Graph exec text """
+        varList = []
+        nodeVar = self._getNodeVar(nodeName)
+        for var in nodeVar:
+            varList.append('%s%s' % (tab, var))
+            varList.append('%sprint %r' % (tab, var))
+        return varList
+
+    def _parseLoop(self, tab, nodeName):
+        """ Store loop params
+            @param tab: (str) : Text tabulation (space)
+            @param nodeName: (str) : Node name
+            @return: (list) : Graph exec text """
+        loopList = ['%sprint "#-- Import Loop Params --#"' % tab]
+        loopIter = self.graphTree[nodeName]['nodeLoop']['iter']
+        loopParams = self._getLoopParams(nodeName)
+        for lVar in loopParams:
+            loopList.append('%s%s' % (tab, lVar))
+            loopList.append('%sprint %r' % (tab, lVar))
+        if self.graphTree[nodeName]['nodeLoop']['type'] == 'range':
+            loopList.append('%s%s_iterList = pFile.dRange(%s_start, %s_stop, %s_step)'
+                            % (tab, nodeName, nodeName, nodeName, nodeName))
+        elif self.graphTree[nodeName]['nodeLoop']['type'] == 'list':
+            loopList.append('%s%s_iterList = %s_list' % (tab, nodeName, nodeName))
+        elif self.graphTree[nodeName]['nodeLoop']['type'] == 'single':
+            loopList.append('%s%s_iterList = [%s_single]' % (tab, nodeName, nodeName))
+        loopList.extend(['%sfor %s in %s_iterList:' % (tab, loopIter, nodeName),
+                         '%s    print ""' % tab, '%s    print "%s"' % (tab, ('-' * 120)),
+                         '%s    print "%s =", %s' % (tab, loopIter, loopIter),
+                         '%s    print "%s"' % (tab, ('-' * 120))])
+        return loopList
+
+    def _parseSysData(self, tab, nodeFile):
+        """ Store sysData
+            @param tab: (str) : Text tabulation (space)
+            @param nodeFile: (str) : Node script file
+            @return: (list) : Graph exec text """
+        return ['%sprint "#-- Execute Node Script --#"' % tab,
+                '%sexecfile("%s")' % (tab, nodeFile)]
+
+    def _parseCmdData(self, tab, nodeFile, nodeName):
+        """ Store cmdData
+            @param tab: (str) : Text tabulation (space)
+            @param nodeFile: (str) : Node script file
+            @param nodeName: (str) : Node name
+            @return: (list) : Graph exec text """
+        melFile = self.grapher.createMelFromPy(nodeFile)
+        nodeCmd = self.graphTree[nodeName]['nodeCmd'].replace('$script', melFile)
+        return ['%sprint %r' % (tab, nodeCmd.replace(self.grapher._path, 'GP_PATH')),
+                '%sprint ""' % tab, '%sos.system("%s")' % (tab, nodeCmd)]
 
     def _getGrapherVar(self):
         """ Get internal grapher variables
             @return: (list) : Internal grapher variables """
-        return ['GP_PATH = "%s"' % self.grapher._path,
-                'GP_FILE = "%s"' % self.grapher._file]
+        return ['GP_USER = "%s"' % grapher.user,
+                'GP_PATH = "%s"' % self.grapher._path,
+                'GP_FILE = "%s"' % self.grapher._file,
+                'GP_TMP = "%s"' % pFile.conformPath(self.grapher.tmpPath),
+                'GP_SCRIPTS = "%s"' % pFile.conformPath(self.grapher.scriptPath)]
 
     def _getGlobalVar(self):
         """ Get grapher global variables
@@ -306,7 +387,7 @@ class ExecGraph(object):
             if not p == nodeName:
                 v = self.grapher.nodeVersion(p)
                 if v in self.graphTree[p]['nodeVariables'].keys():
-                    nodeTxt.append("#-- %s variables --#" % p)
+                    nodeTxt.append("# %s variables #" % p)
                     varDict = self.grapher._varDictToStr(self.graphTree[p]['nodeVariables'][v])
                     nodeTxt.extend(varDict)
         return nodeTxt
@@ -321,3 +402,33 @@ class ExecGraph(object):
             nodeVarDict = self.grapher._varDictToStr(self.graphTree[nodeName]['nodeVariables'][v])
             nodeTxt.extend(nodeVarDict)
         return nodeTxt
+
+    def _getLoopParams(self, nodeName):
+        """ Get loop node params
+            @param nodeName: (str) : Loop node name
+            @return: (dict) : Loop node params """
+        loopParams = self.graphTree[nodeName]['nodeLoop']
+        nodeTxt = ['%s_loopType = "%s"' % (nodeName, loopParams['type']),
+                   '%s_loopIter = "%s"' % (nodeName, loopParams['iter']),
+                   '%s_loopCheckFile = "%s"' % (nodeName, loopParams['checkFile'])]
+        if loopParams['type'] == 'range':
+            nodeTxt.extend(['%s_start = %s' % (nodeName, loopParams['start']),
+                            '%s_stop = %s' % (nodeName, loopParams['stop']),
+                            '%s_step = %s' % (nodeName, loopParams['step'])])
+        elif loopParams['type'] == 'list':
+            nodeTxt.append('%s_list = %s' % (nodeName, loopParams['list']))
+        elif loopParams['type'] == 'single':
+            nodeTxt.append('%s_single = %s' % (nodeName, loopParams['single']))
+        return nodeTxt
+
+    def _getTab(self, nodeName, graphLoops):
+        """ Get loop tabulation
+            @param nodeName: (str) : Loop node name
+            @param graphLoops: (dict) : Loop's children
+            @return: (str) : Loop tabulation """
+        tabChar = '    '
+        tab = ''
+        for loop in graphLoops.keys():
+            if nodeName in graphLoops[loop]:
+                tab = '%s%s' % (tab, tabChar)
+        return tab

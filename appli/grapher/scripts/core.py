@@ -95,7 +95,24 @@ class FileCmds(object):
                 os.mkdir(scriptUserPath)
             return scriptUserPath
 
+    @staticmethod
+    def cleanPath(gpPath):
+        """ !!! OBSOLET !!! Clean given path
+            @param gpPath: (str) : Grapher path to clean """
+        files = os.listdir(gpPath) or []
+        for f in files:
+            absPath = os.path.join(gpPath, f)
+            if os.path.isfile(absPath):
+                os.remove(os.path.join(gpPath, f))
+        try:
+            os.rmdir(gpPath)
+        except:
+            print "!!! Warning: Can not remove gpPath: %s !!!" % gpPath
+
     def createMelFromPy(self, pyFile):
+        """ Create mel file for mayabath using pyScript
+            @param pyFile: (str) : Python file
+            @return: (str) : Mel file """
         melFile = pyFile.replace('/scripts/', '/tmp/').replace('.py', '.mel')
         print 'pyFile:', pyFile
         print 'melFile', melFile

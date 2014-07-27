@@ -202,7 +202,3 @@ class Menu(object):
     def on_grapherUiStr(self):
         """ Command launched when miGrapherUiStr is clicked """
         print self.mainUi.__str__()
-
-
-
-
