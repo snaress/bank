@@ -3,6 +3,12 @@ import sys
 import math
 
 
+def conformPath(path):
+    """ Comform path separator with '/'
+        @param path: (str) : Path to conform
+        @return: (str) : Conformed path """
+    return path.replace('\\', '/')
+
 def readFile(filePath):
     """ Get text from file
         @param filePath: (str) : File absolut path
