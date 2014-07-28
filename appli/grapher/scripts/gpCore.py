@@ -40,9 +40,9 @@ class FileCmds(object):
                 print "\tRemoving lockFile %s ..." % os.path.basename(lockFile)
                 return True
             except:
-                raise IOError, "!!! Error: Can't remove lockFile: %s" % lockFile
+                raise IOError, "!!! Error: Can't remove lockFile: %s !!!" % lockFile
         else:
-            raise IOError, "!!! Error: LockFile not found: %s" % lockFile
+            raise IOError, "!!! Error: LockFile not found: %s !!!" % lockFile
 
     @staticmethod
     def xtermLauncher():
@@ -96,20 +96,7 @@ class FileCmds(object):
             return scriptUserPath
 
     @staticmethod
-    def cleanPath(gpPath):
-        """ !!! OBSOLET !!! Clean given path
-            @param gpPath: (str) : Grapher path to clean """
-        files = os.listdir(gpPath) or []
-        for f in files:
-            absPath = os.path.join(gpPath, f)
-            if os.path.isfile(absPath):
-                os.remove(os.path.join(gpPath, f))
-        try:
-            os.rmdir(gpPath)
-        except:
-            print "!!! Warning: Can not remove gpPath: %s !!!" % gpPath
-
-    def createMelFromPy(self, pyFile):
+    def createMelFromPy(pyFile):
         """ Create mel file for mayabath using pyScript
             @param pyFile: (str) : Python file
             @return: (str) : Mel file """
@@ -119,6 +106,27 @@ class FileCmds(object):
         txt = ['python("execfile(%r)");' % pyFile]
         pFile.writeFile(melFile, '\n'.join(txt))
         return melFile
+
+    @staticmethod
+    def checkLoopTmpFile(tmpFile, **kwargs):
+        """ Check given loopNode tmp file
+            @param tmpFile: (str) : Loop check file absolut path
+            @param kwargs: (dict) : Loop params to write
+            @return: (bool): True if checkFile doesn't exists, False if exists """
+        if not os.path.exists(tmpFile):
+            print "Info: Create %s" % os.path.basename(tmpFile)
+            txt = []
+            for k, v in kwargs.iteritems():
+                txt.append('%s = %s' % (k, v))
+            try:
+                pFile.writeFile(tmpFile, '\n'.join(txt))
+                print "Info: %s successfully created, Launch child nodes" % os.path.basename(tmpFile)
+                return True
+            except:
+                raise IOError, "!!! Error: Can't create %s !!!" % os.path.basename(tmpFile)
+        else:
+            print "Info: %s already exists, skip iter" % os.path.basename(tmpFile)
+            return False
 
     @staticmethod
     def _defaultErrorDialog(message, parent):

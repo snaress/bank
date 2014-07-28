@@ -1,10 +1,10 @@
 import os
 from appli import grapher
-from appli.grapher.scripts import core
+from appli.grapher.scripts import gpCore
 from lib.system.scripts import procFile as pFile
 
 
-class Grapher(core.FileCmds):
+class Grapher(gpCore.FileCmds):
     """ Class containing all grapher's commands for creation, loading,
         editing and writing datas in or from tool """
 
@@ -188,14 +188,17 @@ class Grapher(core.FileCmds):
             @return: (list) : Variables as string """
         varStr = []
         for var in sorted(varDict.keys()):
-            if varDict[var]['type'] == 'num':
-                if '.' in varDict[var]['value']:
-                    varLine = '%s = %s' % (varDict[var]['label'], float(varDict[var]['value']))
+            if varDict[var]['enabled']:
+                if varDict[var]['type'] == '=':
+                    varLine = '%s = %s' % (varDict[var]['label'], varDict[var]['value'])
+                elif varDict[var]['type'] == 'num':
+                    if '.' in varDict[var]['value']:
+                        varLine = '%s = %s' % (varDict[var]['label'], float(varDict[var]['value']))
+                    else:
+                        varLine = '%s = %s' % (varDict[var]['label'], int(varDict[var]['value']))
                 else:
-                    varLine = '%s = %s' % (varDict[var]['label'], int(varDict[var]['value']))
-            else:
-                varLine = '%s = %s' % (varDict[var]['label'], varDict[var]['value'])
-            varStr.append(varLine)
+                    varLine = '%s.append(%s)' % (varDict[var]['label'], varDict[var]['value'])
+                varStr.append(varLine)
         return varStr
 
 
@@ -256,7 +259,9 @@ class ExecGraph(object):
                'print "##### GRAPHER #####"',
                'print "###################"',
                'print ""', 'execfile("%s")' % grapher.envFile,
+               'import os',
                'from lib.system.scripts import procFile as pFile',
+               'from appli.grapher.scripts import gpCore',
                'print ""', 'print ""', 'print "#-- Import Grapher Var --#"']
         for gVar in self._getGrapherVar():
             txt.append(gVar)
@@ -327,6 +332,7 @@ class ExecGraph(object):
         loopList = ['%sprint "#-- Import Loop Params --#"' % tab]
         loopIter = self.graphTree[nodeName]['nodeLoop']['iter']
         loopParams = self._getLoopParams(nodeName)
+        #-- Variables And Params --#
         for lVar in loopParams:
             loopList.append('%s%s' % (tab, lVar))
             loopList.append('%sprint %r' % (tab, lVar))
@@ -337,10 +343,21 @@ class ExecGraph(object):
             loopList.append('%s%s_iterList = %s_list' % (tab, nodeName, nodeName))
         elif self.graphTree[nodeName]['nodeLoop']['type'] == 'single':
             loopList.append('%s%s_iterList = [%s_single]' % (tab, nodeName, nodeName))
+        #-- Exec Loop Text --#
         loopList.extend(['%sfor %s in %s_iterList:' % (tab, loopIter, nodeName),
-                         '%s    print ""' % tab, '%s    print "%s"' % (tab, ('-' * 120)),
+                         '%s    print ""' % tab, '%s    print "%s"' % (tab, ('-' * 100)),
                          '%s    print "%s =", %s' % (tab, loopIter, loopIter),
-                         '%s    print "%s"' % (tab, ('-' * 120))])
+                         '%s    print "Info: Check Tmp Loop File ..."' % tab])
+        if self.graphTree[nodeName]['nodeLoop']['type'] in ['range', 'list']:
+            loopList.extend(['%s    GP_loopFile = "checkFile__%s."+str(%s)+".py"' % (tab, nodeName, loopIter),
+                             '%s    GP_loopCheckFile = os.path.join(GP_TMP, GP_loopFile)' % tab,
+                             '%s    GP_loopCheckDict = {"iterLabel": "%s", "iter": %s}' % (tab, loopIter, loopIter),
+                             '%s    GP_loopCheckResult = gpCore.FileCmds.checkLoopTmpFile(GP_loopCheckFile, **GP_loopCheckDict)' % tab])
+        else:
+            loopList.extend(['%s    GP_loopCheckResult = True' % tab])
+        loopList.extend(['%s    print "%s"' % (tab, ('-' * 100)),
+                         '%s    if not GP_loopCheckResult:' % tab,
+                         '%s        continue' % tab])
         return loopList
 
     def _parseSysData(self, tab, nodeFile):

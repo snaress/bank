@@ -217,6 +217,8 @@
     <addaction name="miPushNodes"/>
     <addaction name="miPushBranch"/>
     <addaction name="miPullNodes"/>
+    <addaction name="separator"/>
+    <addaction name="miCleanCheckFiles"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -229,8 +231,17 @@
     <addaction name="separator"/>
     <addaction name="miExecGraph"/>
    </widget>
+   <widget class="QMenu" name="menuLib">
+    <property name="title">
+     <string>Lib</string>
+    </property>
+    <addaction name="miScript"/>
+    <addaction name="miNode"/>
+    <addaction name="miBranch"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuGraph"/>
+   <addaction name="menuLib"/>
    <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -386,6 +397,26 @@
   <action name="miExecGraph">
    <property name="text">
     <string>Exec Graph</string>
+   </property>
+  </action>
+  <action name="miCleanCheckFiles">
+   <property name="text">
+    <string>Clean Check Files</string>
+   </property>
+  </action>
+  <action name="miScript">
+   <property name="text">
+    <string>Script</string>
+   </property>
+  </action>
+  <action name="miNode">
+   <property name="text">
+    <string>Node</string>
+   </property>
+  </action>
+  <action name="miBranch">
+   <property name="text">
+    <string>Branch</string>
    </property>
   </action>
  </widget>

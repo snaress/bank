@@ -5,11 +5,11 @@ from functools import partial
 from lib.qt.scripts import procQt as pQt
 from appli.grapher.scripts import grapher as gp
 from lib.system.scripts import procFile as pFile
-from appli.grapher.scripts import widgets, graphTree, nodeEditor, cmds, core
+from appli.grapher.scripts import widgets, graphTree, nodeEditor, cmds, gpCore
 
 
 grapherClass, grapherUiClass = uic.loadUiType(grapher.uiList['grapher'])
-class GrapherUi(grapherClass, grapherUiClass, core.FileCmds, core.Style):
+class GrapherUi(grapherClass, grapherUiClass, gpCore.FileCmds, gpCore.Style):
     """ Class containing all grapher's Ui actions for creation, loading,
         editing and writing datas in or from tool """
 

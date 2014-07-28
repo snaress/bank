@@ -4,7 +4,7 @@ from functools import partial
 from PyQt4 import QtGui, QtCore, uic
 from lib.qt.scripts import procQt as pQt
 from lib.system.scripts import procFile as pFile
-from appli.grapher.scripts import nodeEditor, core
+from appli.grapher.scripts import nodeEditor, gpCore
 
 
 class GraphTree(QtGui.QTreeWidget):
@@ -86,6 +86,8 @@ class GraphTree(QtGui.QTreeWidget):
         self.mainUi.miPushBranch.setShortcut("Shift+P")
         self.mainUi.miPullNodes.triggered.connect(self.on_pullNodes)
         self.mainUi.miPullNodes.setShortcut("Alt+P")
+        #-- Menu Loop --#
+        self.mainUi.miCleanCheckFiles.triggered.connect(self.on_cleanCheckFiles)
 
     def _popUpMenu(self):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -93,10 +95,16 @@ class GraphTree(QtGui.QTreeWidget):
                      self.on_popUpMenu)
         self.tbGraph = QtGui.QToolBar()
         self.pMenu = QtGui.QMenu(self.mainUi)
+        self.miCleanCheckFiles1 = self.tbGraph.addAction("Clean Check Files", self.on_cleanCheckFiles)
+        self.miCleanCheckFiles2 = self.tbGraph.addAction("Clean Check Files", self.on_cleanCheckFiles)
+        self.pMenu.addAction(self.miCleanCheckFiles1)
+        self.pMenu.addSeparator()
         self._menuCreate()
         self._menuMove()
         self._menuEdit()
         self._menuStorage()
+        self.pMenu.addSeparator()
+        self.pMenu.addAction(self.miCleanCheckFiles2)
 
     def _menuCreate(self):
         #-- New Graph Node --#
@@ -384,6 +392,20 @@ class GraphTree(QtGui.QTreeWidget):
                 self.rf_graphColumns()
         else:
             self.mainUi._defaultErrorDialog("!!! Warning: Select only one node !!!", self.mainUi)
+
+    def on_cleanCheckFiles(self):
+        """ Clean check files from selected loop node """
+        selItems = self.selectedItems()
+        if not len(selItems) == 1:
+            self.mainUi._defaultErrorDialog("!!! Warning: Select only one loop node !!!", self.mainUi)
+        else:
+            print "Clean check files ..."
+            checkFile =  "checkFile__%s" % selItems[0].__repr2__()['nodeLoop']['checkFile']
+            tmpPath = self.grapher.tmpPath
+            files = os.listdir(tmpPath) or []
+            for f in files:
+                if f.startswith('%s.' % checkFile) and f.endswith('.py'):
+                    os.remove(os.path.join(tmpPath, f))
 
     def addGraphNode(self, index=None, **kwargs):
         """ Add new QTreeWidgetItem
@@ -731,7 +753,7 @@ class GraphItem(QtGui.QTreeWidgetItem):
 
 
 graphNodeClass, graphNodeUiClass = uic.loadUiType(grapher.uiList['graphNode'])
-class GraphNode(graphNodeClass, graphNodeUiClass, core.Style):
+class GraphNode(graphNodeClass, graphNodeUiClass, gpCore.Style):
     """ Class used by GraphItem(), adding widgets to QTreeWidgetItem
         @param tree: (object) : Parent QTreeWidget
         @param item: (object) : Parent QTreeWidgetItem """
