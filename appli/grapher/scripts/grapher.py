@@ -298,7 +298,7 @@ class ExecGraph(object):
                         elif self.graphTree[node]['nodeType'] == 'sysData':
                             txt.extend(self._parseSysData(tab, nodeFile))
                         elif self.graphTree[node]['nodeType'] == 'cmdData':
-                            txt.extend(self._parseCmdData(tab, nodeFile, node))
+                            txt.extend(self._parseCmdData(tab, nodeFile, node, graphLoops))
         return txt
 
     def _parseDisabled(self, disabledNodes, nodeName):
@@ -330,34 +330,35 @@ class ExecGraph(object):
             @param nodeName: (str) : Node name
             @return: (list) : Graph exec text """
         loopList = ['%sprint "#-- Import Loop Params --#"' % tab]
+        loopType = self.graphTree[nodeName]['nodeLoop']['type']
         loopIter = self.graphTree[nodeName]['nodeLoop']['iter']
+        loopCheck = self.graphTree[nodeName]['nodeLoop']['checkFile']
         loopParams = self._getLoopParams(nodeName)
         #-- Variables And Params --#
         for lVar in loopParams:
             loopList.append('%s%s' % (tab, lVar))
             loopList.append('%sprint %r' % (tab, lVar))
-        if self.graphTree[nodeName]['nodeLoop']['type'] == 'range':
+        if loopType == 'range':
             loopList.append('%s%s_iterList = pFile.dRange(%s_start, %s_stop, %s_step)'
                             % (tab, nodeName, nodeName, nodeName, nodeName))
-        elif self.graphTree[nodeName]['nodeLoop']['type'] == 'list':
+        elif loopType == 'list':
             loopList.append('%s%s_iterList = %s_list' % (tab, nodeName, nodeName))
-        elif self.graphTree[nodeName]['nodeLoop']['type'] == 'single':
+        elif loopType == 'single':
             loopList.append('%s%s_iterList = [%s_single]' % (tab, nodeName, nodeName))
         #-- Exec Loop Text --#
+        lTab = '%s    ' % tab
         loopList.extend(['%sfor %s in %s_iterList:' % (tab, loopIter, nodeName),
-                         '%s    print ""' % tab, '%s    print "%s"' % (tab, ('-' * 100)),
-                         '%s    print "%s =", %s' % (tab, loopIter, loopIter),
-                         '%s    print "Info: Check Tmp Loop File ..."' % tab])
-        if self.graphTree[nodeName]['nodeLoop']['type'] in ['range', 'list']:
-            loopList.extend(['%s    GP_loopFile = "checkFile__%s."+str(%s)+".py"' % (tab, nodeName, loopIter),
-                             '%s    GP_loopCheckFile = os.path.join(GP_TMP, GP_loopFile)' % tab,
-                             '%s    GP_loopCheckDict = {"iterLabel": "%s", "iter": %s}' % (tab, loopIter, loopIter),
-                             '%s    GP_loopCheckResult = gpCore.FileCmds.checkLoopTmpFile(GP_loopCheckFile, **GP_loopCheckDict)' % tab])
-        else:
-            loopList.extend(['%s    GP_loopCheckResult = True' % tab])
-        loopList.extend(['%s    print "%s"' % (tab, ('-' * 100)),
-                         '%s    if not GP_loopCheckResult:' % tab,
-                         '%s        continue' % tab])
+                         '%sprint ""' % lTab, '%sprint "%s"' % (lTab, ('-' * 100)),
+                         '%sprint "%s =", %s' % (lTab, loopIter, loopIter),
+                         '%sprint "Info: Check Tmp Loop File ..."' % lTab,
+                         '%sGP_%s__file = "checkFile__%s."+str(%s)+".py"' % (lTab, nodeName, loopCheck, loopIter),
+                         '%sGP_%s__checkFile = os.path.join(GP_TMP, GP_%s__file)' % (lTab, nodeName, nodeName),
+                         '%sGP_%s__checkDict = {"%s": %s}' % (lTab, nodeName, loopIter, loopIter),
+                         '%sGP_%s__checkResult = gpCore.FileCmds.checkLoopTmpFile(GP_%s__checkFile, %r, **GP_%s__checkDict)'
+                                                 % (lTab, nodeName, nodeName, loopType, nodeName),
+                         '%sprint "%s"' % (lTab, ('-' * 100)),
+                         '%sif not GP_%s__checkResult:' % (lTab, nodeName),
+                         '%s    continue' % lTab])
         return loopList
 
     def _parseSysData(self, tab, nodeFile):
@@ -368,16 +369,24 @@ class ExecGraph(object):
         return ['%sprint "#-- Execute Node Script --#"' % tab,
                 '%sexecfile("%s")' % (tab, nodeFile)]
 
-    def _parseCmdData(self, tab, nodeFile, nodeName):
+    def _parseCmdData(self, tab, nodeFile, nodeName, graphLoops):
         """ Store cmdData
             @param tab: (str) : Text tabulation (space)
             @param nodeFile: (str) : Node script file
             @param nodeName: (str) : Node name
+            @param graphLoops: (dict) : Loop's children
             @return: (list) : Graph exec text """
-        melFile = self.grapher.createMelFromPy(nodeFile)
-        nodeCmd = self.graphTree[nodeName]['nodeCmd'].replace('$script', melFile)
-        return ['%sprint %r' % (tab, nodeCmd.replace(self.grapher._path, 'GP_PATH')),
-                '%sprint ""' % tab, '%sos.system("%s")' % (tab, nodeCmd)]
+        iterators = []
+        for loop in graphLoops:
+            if nodeName in graphLoops[loop]:
+                iterators.append(self.graphTree[loop]['nodeLoop']['iter'])
+        return ['%siters = []' % tab,
+                '%sfor nodeLoopIter in %s:' % (tab, iterators),
+                '%s    iters.append(eval(nodeLoopIter))' % tab,
+                '%sGP_melFile = gpCore.FileCmds.createMelFromPy("%s", %s, iters)' % (tab, nodeFile, iterators),
+                '%sGP_nodeCmd = "%s".replace("$script", GP_melFile)' % (tab, self.graphTree[nodeName]['nodeCmd']),
+                '%sprint GP_nodeCmd.replace("%s", GP_PATH)' % (tab, self.grapher._path),
+                '%sprint ""' % tab, '%sos.system(GP_nodeCmd)' % tab]
 
     def _getGrapherVar(self):
         """ Get internal grapher variables
@@ -407,6 +416,15 @@ class ExecGraph(object):
                     nodeTxt.append("# %s variables #" % p)
                     varDict = self.grapher._varDictToStr(self.graphTree[p]['nodeVariables'][v])
                     nodeTxt.extend(varDict)
+        # if self.graphTree[nodeName]['nodeType'] == 'cmdData':
+        #     for loop in graphLoops.keys():
+        #         if nodeName in graphLoops[loop]:
+        #             nodeTxt.extend(['print "Loop node init: %s"' % loop,
+        #                             '_checkFile = "checkFile__%s"' % self.graphTree[loop]['nodeLoop']['checkFile'],
+        #                             '_checkPath = "%s/%s" % (GP_TMP, _checkFile)',
+        #                             '_checkPath = _checkPath+"."+%s+".py"' % self.graphTree[loop]['nodeLoop']['iter'],
+        #                             'print _checkPath',
+        #                             'execfile("%s") % _checkPath'])
         return nodeTxt
 
     def _getNodeVar(self, nodeName):
@@ -443,9 +461,8 @@ class ExecGraph(object):
             @param nodeName: (str) : Loop node name
             @param graphLoops: (dict) : Loop's children
             @return: (str) : Loop tabulation """
-        tabChar = '    '
         tab = ''
         for loop in graphLoops.keys():
             if nodeName in graphLoops[loop]:
-                tab = '%s%s' % (tab, tabChar)
+                tab = '%s    ' % tab
         return tab

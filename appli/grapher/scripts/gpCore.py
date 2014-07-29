@@ -96,37 +96,59 @@ class FileCmds(object):
             return scriptUserPath
 
     @staticmethod
-    def createMelFromPy(pyFile):
+    def createMelFromPy(pyFile, iterators, iters):
         """ Create mel file for mayabath using pyScript
             @param pyFile: (str) : Python file
             @return: (str) : Mel file """
-        melFile = pyFile.replace('/scripts/', '/tmp/').replace('.py', '.mel')
-        print 'pyFile:', pyFile
-        print 'melFile', melFile
-        txt = ['python("execfile(%r)");' % pyFile]
+        txt = []
+        if not iterators:
+            melFile = pyFile.replace('/scripts/', '/tmp/').replace('.py', '.mel')
+        else:
+            ext = 'mel'
+            for n, iterator in enumerate(iterators):
+                ext = '%s.%s' % (iters[n], ext)
+                if isinstance(iters[n], str):
+                    txt.append('python("%s = %r");' % (iterator, iters[n]))
+                else:
+                    txt.append('python("%s = %s");' % (iterator, iters[n]))
+            melFile = pyFile.replace('/scripts/', '/tmp/').replace('.py', '.%s' % ext)
+        txt.append('python("execfile(%r)");' % pyFile)
         pFile.writeFile(melFile, '\n'.join(txt))
         return melFile
 
     @staticmethod
-    def checkLoopTmpFile(tmpFile, **kwargs):
+    def checkLoopTmpFile(tmpFile, loopType, **kwargs):
         """ Check given loopNode tmp file
             @param tmpFile: (str) : Loop check file absolut path
             @param kwargs: (dict) : Loop params to write
             @return: (bool): True if checkFile doesn't exists, False if exists """
+        txt = []
+        for k, v in kwargs.iteritems():
+            txt.append('%s = %s' % (k, v))
         if not os.path.exists(tmpFile):
-            print "Info: Create %s" % os.path.basename(tmpFile)
-            txt = []
-            for k, v in kwargs.iteritems():
-                txt.append('%s = %s' % (k, v))
-            try:
-                pFile.writeFile(tmpFile, '\n'.join(txt))
-                print "Info: %s successfully created, Launch child nodes" % os.path.basename(tmpFile)
-                return True
-            except:
-                raise IOError, "!!! Error: Can't create %s !!!" % os.path.basename(tmpFile)
+            result = FileCmds.createLoopTmpFile(tmpFile, txt)
+            return result
         else:
-            print "Info: %s already exists, skip iter" % os.path.basename(tmpFile)
-            return False
+            if not loopType == 'single':
+                print "Info: %s already exists, skip iter" % os.path.basename(tmpFile)
+                return False
+            else:
+                result = FileCmds.createLoopTmpFile(tmpFile, txt)
+                return result
+
+    @staticmethod
+    def createLoopTmpFile(tmpFile, txt):
+        """ create given loopNode tmp file
+            @param tmpFile: (str) : Loop check file absolut path
+            @param txt: (list) : Text to write
+            @return: (bool): True if success """
+        print "Info: Create %s" % os.path.basename(tmpFile)
+        try:
+            pFile.writeFile(tmpFile, '\n'.join(txt))
+            print "Info: %s successfully created, Launch child nodes" % os.path.basename(tmpFile)
+            return True
+        except:
+            raise IOError, "!!! Error: Can't create %s !!!" % os.path.basename(tmpFile)
 
     @staticmethod
     def _defaultErrorDialog(message, parent):
