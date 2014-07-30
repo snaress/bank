@@ -1,3 +1,4 @@
+import os
 from lib import qt
 from PyQt4 import QtGui, QtCore, uic
 
@@ -7,15 +8,65 @@ class ScriptEditor(scriptEditorClass, scriptEditorUiClass):
 
     def __init__(self):
         super(ScriptEditor, self).__init__()
+        self.iconDir = os.path.join(qt.toolPath, '_lib', 'ima', 'textEditor')
         self._setupUi()
 
     def _setupUi(self):
         self.setupUi(self)
         self._widget = ScriptZone()
         self.glScriptEditor.addWidget(self._widget, 1, 1, 1, 1)
+        # self._setupToolBar()
+
+    def _setupToolBar(self):
+        self.bIndent = self.newToolBarBtn(os.path.join(self.iconDir, 'textIndent.png'),
+                                          self.on_textIndent, "Add Tabulation")
+        self.bIndent.setShortcut("Ctrl+Tab")
+        self.tbEdit.addWidget(self.bIndent)
+
+    def on_textIndent(self):
+        print 'toto'
+        #-- Get Selected Text --#
+        # cursor = self._widget.textCursor()
+        # cursor.setPosition(cursor.selectionStart(), QtGui.QTextCursor.KeepAnchor)
+        # cursor.movePosition(cursor.selectionEnd(), QtGui.QTextCursor.KeepAnchor)
+        # start = cursor.selectionStart()
+        # end = cursor.selectionEnd()
+        # cursor.movePosition(end, QtGui.QTextCursor.KeepAnchor)
+        # script = cursor.selectedText().replace(u'\u2029', '\n')
+        # #-- Get Selected Block --#
+        # cursor.setPosition(end)
+        # cursor.movePosition(cursor.EndOfLine)
+        # end = cursor.position()
+        # cursor.setPosition(start)
+        # cursor.movePosition(cursor.StartOfLine)
+        # start = cursor.position()
+        # #-- Select Block --#
+        # cursor.removeSelectedText()
+        # cursor.setPosition(start, QtGui.QTextCursor.KeepAnchor)
+        # cursor.movePosition(end, QtGui.QTextCursor.KeepAnchor)
+        # print script
+        # tab = '\t'
+        # while cursor.position() < end:
+        #     cursor.movePosition(cursor.StartOfLine)
+        #     cursor.insertText(tab)
+        #     end += tab.count(end)
+        #     cursor.movePosition(cursor.EndOfLine)
 
     def resetScript(self):
         self._widget.clear()
+
+    @staticmethod
+    def newToolBarBtn(iconPath, cmd, toolTip):
+        """ Create new toolBar action
+            @param iconPath: (str) : Icon absolut path
+            @param cmd: (object) : Command to connect
+            @param toolTip: (str) : Tool tip
+            @return: (object) : New toolBar button """
+        newBtn = QtGui.QPushButton()
+        newBtn.setIcon(QtGui.QIcon(iconPath))
+        newBtn.clicked.connect(cmd)
+        newBtn.setToolTip(toolTip)
+        return newBtn
 
 
 class ScriptZone(QtGui.QTextEdit):
@@ -68,7 +119,7 @@ class PythonHighlighter(QtGui.QSyntaxHighlighter):
     keyWords1 = ("and", "assert", "break", "class", "continue", "def", "del", "elif", "else",
                  "except", "exec", "finally", "for", "from", "global", "if", "import", "in", "is",
                  "lambda", "not", "or", "pass", "print", "raise", "return", "try", "while", "yield")
-    keyWords2 = ("basestring", "delattr", "dict", "execfile", "float", "getattr", "int",
+    keyWords2 = ("basestring", "delattr", "dict", "execfile", "float", "getattr", "int", "IOError",
                  "isinstance", "list", "map", "max", "min", "None", "object","setattr", "str",
                  "super")
 
