@@ -41,6 +41,7 @@ class ScriptZone(QtGui.QTextEdit):
         self.setFont(scriptFont)
         self.setTextColor(QtGui.QColor(200, 200, 200))
         self.setTabStopWidth(4 * metrics.width(' '))
+        self.setWordWrapMode(QtGui.QTextOption.NoWrap)
 
     def getCode(self):
         self._code = self.toPlainText()
@@ -66,7 +67,7 @@ class PythonHighlighter(QtGui.QSyntaxHighlighter):
 
     keyWords1 = ("and", "assert", "break", "class", "continue", "def", "del", "elif", "else",
                  "except", "exec", "finally", "for", "from", "global", "if", "import", "in", "is",
-                 "lambda", "not", "or", "pass", "print", "return", "try", "while", "yield")
+                 "lambda", "not", "or", "pass", "print", "raise", "return", "try", "while", "yield")
     keyWords2 = ("basestring", "delattr", "dict", "execfile", "float", "getattr", "int",
                  "isinstance", "list", "map", "max", "min", "None", "object","setattr", "str",
                  "super")

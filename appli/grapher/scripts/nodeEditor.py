@@ -1,8 +1,10 @@
+import os
 from PyQt4 import uic
 from appli import grapher
 from functools import partial
 from lib.qt.scripts import procQt as pQt
 from appli.grapher.scripts import widgets
+from lib.system.scripts import procFile as pFile
 
 
 #F:\rnd\server\_archive\_old\apps\grapher\ui
@@ -45,6 +47,8 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.rbLoopSingle.clicked.connect(self.on_loopType)
         #-- Script --#
         self.cbCmdInitVis.clicked.connect(self.rf_cmdInitVis)
+        self.bExtern.clicked.connect(self.on_externalizeScript)
+        self.bUpdate.clicked.connect(self.on_updateScript)
         self.wgCmdInit = widgets.ScriptEditor(self)
         self.vlCmdInit.insertWidget(-1, self.wgCmdInit)
         self.wgScript = widgets.ScriptEditor(self)
@@ -332,6 +336,36 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
             self.qfLoopRange.setVisible(False)
             self.qfLoopList.setVisible(False)
             self.qfLoopSingle.setVisible(True)
+
+    def on_externalizeScript(self):
+        """ Open current script in external editor """
+        script = self.wgScript.__repr2__()
+        nodeName = str(self.leNodeName.text())
+        tmpFile = pFile.conformPath(os.path.join(self.grapher.tmpPath, "extern__%s.py" % nodeName))
+        if self.mainUi.createExternScript(tmpFile, script):
+            print "[grapherUI] : External script successfully created"
+            os.system("start %s %s" % (self.mainUi.scriptLauncher(), tmpFile))
+        else:
+            mess = "!!! Error: Can't create extern script %s" % tmpFile
+            self.mainUi._defaultErrorDialog(mess, self.mainUi)
+
+    def on_updateScript(self):
+        """ Import external script to nodeEditor """
+        nodeName = str(self.leNodeName.text())
+        tmpFile = pFile.conformPath(os.path.join(self.grapher.tmpPath, "extern__%s.py" % nodeName))
+        if os.path.exists(tmpFile):
+            try:
+                script = pFile.readFile(tmpFile)
+                print "[grapherUI] : External script successfully loaded"
+            except:
+                raise IOError, "!!! Error: Can't load external script %s" % tmpFile
+            self.wgScript._widget.setText(''.join(script))
+            print "[grapherUI] : Remove external script ..."
+            os.remove(tmpFile)
+            print "[grapherUI] : NodeEditor script updated"
+        else:
+            mess = "!!! Error: Can't find external script %s" % tmpFile
+            self.mainUi._defaultErrorDialog(mess, self.mainUi)
 
     def on_save(self):
         """ Command launch when bSave is clicked """

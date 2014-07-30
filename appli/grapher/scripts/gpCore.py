@@ -46,8 +46,15 @@ class FileCmds(object):
 
     @staticmethod
     def xtermLauncher():
-        """ Default xterm launcher """
+        """ Default xterm launcher
+            return: (str) : Default xTerm launcher """
         return "cmd.exe"
+
+    @staticmethod
+    def scriptLauncher():
+        """ Default script editor launcher
+            @return: (str) : Script editor launcher """
+        return "F:/rnd/soft/PyCharm/bin/pycharm.exe"
 
     @staticmethod
     def initTmpPath(graphPath, graphFile):
@@ -99,6 +106,8 @@ class FileCmds(object):
     def createMelFromPy(pyFile, iterators, iters):
         """ Create mel file for mayabath using pyScript
             @param pyFile: (str) : Python file
+            @param iterators: (list) : Iterators list
+            @param iters: (list) : Iter value list
             @return: (str) : Mel file """
         txt = []
         if not iterators:
@@ -113,8 +122,11 @@ class FileCmds(object):
                     txt.append('python("%s = %s");' % (iterator, iters[n]))
             melFile = pyFile.replace('/scripts/', '/tmp/').replace('.py', '.%s' % ext)
         txt.append('python("execfile(%r)");' % pyFile)
-        pFile.writeFile(melFile, '\n'.join(txt))
-        return melFile
+        try:
+            pFile.writeFile(melFile, '\n'.join(txt))
+            return melFile
+        except:
+            raise IOError, "!!! Error: Can't create %s !!!" % os.path.basename(melFile)
 
     @staticmethod
     def checkLoopTmpFile(tmpFile, loopType, **kwargs):
@@ -149,6 +161,18 @@ class FileCmds(object):
             return True
         except:
             raise IOError, "!!! Error: Can't create %s !!!" % os.path.basename(tmpFile)
+
+    @staticmethod
+    def createExternScript(tmpFile, script):
+        """ Create tmp extern script
+            @param tmpFile: (str) : Script tmp file
+            @param script: (str) : Script
+            @return: (bool) : True if success, else False """
+        try:
+            pFile.writeFile(tmpFile, script)
+            return True
+        except:
+            raise IOError, "!!! Error: Can't create external script %s" % tmpFile
 
     @staticmethod
     def _defaultErrorDialog(message, parent):
