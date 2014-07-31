@@ -57,17 +57,18 @@ class FileCmds(object):
         return "F:/rnd/soft/PyCharm/bin/pycharm.exe"
 
     @staticmethod
-    def initTmpPath(graphPath, graphFile):
-        """ Initialize grapher tmp path
+    def initGrapherPath(graphPath, graphFolder, graphFile):
+        """ Initialize grapher path
             @param graphPath: (str) : Current graph path
+            @param graphFolder: (str) : 'tmp' or 'scripts'
             @param graphFile: (str) : Current graph file name
-            @return: (str) : Tmp graph path """
+            @return: (str) : Graph path """
         if not os.path.exists(graphPath):
             print "!!! ERROR: Graph path not found %s !!!" % graphPath
         else:
-            tmpPath = os.path.join(graphPath, 'tmp')
+            tmpPath = os.path.join(graphPath, graphFolder)
             if not os.path.exists(tmpPath):
-                print "\t\t\tCreate folder 'tmp'"
+                print "\t\t\tCreate folder '%s'" % graphFolder
                 os.mkdir(tmpPath)
             tmpGraphPath = os.path.join(tmpPath, graphFile.replace('.py', ''))
             if not os.path.exists(tmpGraphPath):
@@ -78,29 +79,6 @@ class FileCmds(object):
                 print "\t\t\tCreate folder '%s'" % grapher.user
                 os.mkdir(tmpUserPath)
             return tmpUserPath
-
-    @staticmethod
-    def initScriptPath(graphPath, graphFile):
-        """ Initialize grapher script path
-            @param graphPath: (str) : Current graph path
-            @param graphFile: (str) : Current graph file name
-            @return: (str) : Script graph path """
-        if not os.path.exists(graphPath):
-            print "!!! ERROR: Graph path not found %s !!!" % graphPath
-        else:
-            scriptPath = os.path.join(graphPath, 'scripts')
-            if not os.path.exists(scriptPath):
-                print "\t\t\tCreate folder 'scripts'"
-                os.mkdir(scriptPath)
-            scriptGraphPath = os.path.join(scriptPath, graphFile.replace('.py', ''))
-            if not os.path.exists(scriptGraphPath):
-                print "\t\t\tCreate folder '%s'" % graphFile.replace('.py', '')
-                os.mkdir(scriptGraphPath)
-            scriptUserPath = os.path.join(scriptGraphPath, grapher.user)
-            if not os.path.exists(scriptUserPath):
-                print "\t\t\tCreate folder '%s'" % grapher.user
-                os.mkdir(scriptUserPath)
-            return scriptUserPath
 
     @staticmethod
     def createMelFromPy(pyFile, iterators, iters):
