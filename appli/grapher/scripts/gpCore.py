@@ -245,6 +245,12 @@ class Style(object):
             return "background-color:GreenYellow;"
 
     @property
+    def graphInstanceBgc(self):
+        """ Graph instance background color
+            @return: (str) : Background color """
+        return "background-color:Plum;"
+
+    @property
     def nodeEditorScriptFont(self):
         """ Node editor script font params
             @return: (object) : Qfont """

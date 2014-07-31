@@ -98,9 +98,10 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
 
     def rf_versionTitle(self):
         """ Refresh node version title """
-        if not self.currentVersion == '':
-            title = self.graphNode._data.versionTitle[self.currentVersion]
-            self.leVersionTitle.setText(title)
+        if self.graphNode._data is not None:
+            if not self.currentVersion == '':
+                title = self.graphNode._data.versionTitle[self.currentVersion]
+                self.leVersionTitle.setText(title)
 
     def rf_versionList(self, versions):
         """ Refresh node version list

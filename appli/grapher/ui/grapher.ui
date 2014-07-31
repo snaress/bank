@@ -217,8 +217,6 @@
     <addaction name="miPushNodes"/>
     <addaction name="miPushBranch"/>
     <addaction name="miPullNodes"/>
-    <addaction name="separator"/>
-    <addaction name="miCleanCheckFiles"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">

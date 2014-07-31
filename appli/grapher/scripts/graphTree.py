@@ -86,8 +86,6 @@ class GraphTree(QtGui.QTreeWidget):
         self.mainUi.miPushBranch.setShortcut("Shift+P")
         self.mainUi.miPullNodes.triggered.connect(self.on_pullNodes)
         self.mainUi.miPullNodes.setShortcut("Alt+P")
-        #-- Menu Loop --#
-        self.mainUi.miCleanCheckFiles.triggered.connect(self.on_cleanCheckFiles)
 
     def _popUpMenu(self):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -115,6 +113,10 @@ class GraphTree(QtGui.QTreeWidget):
         self.miRenameGraphNode =  self.tbGraph.addAction("Rename Node", self.on_renameNode)
         self.miRenameGraphNode.setShortcut("F2")
         self.pMenu.addAction(self.miRenameGraphNode)
+        #-- Instanciate Graph Node --#
+        self.miInstanceGraphNode = self.tbGraph.addAction("Instanciate Node", self.on_instanceNode)
+        self.miInstanceGraphNode.setShortcut("F3")
+        self.pMenu.addAction(self.miInstanceGraphNode)
         #-- Delete Graph Node --#
         self.miDelGraphNode = self.tbGraph.addAction("Delete Nodes", self.on_delNode)
         self.miDelGraphNode.setShortcut("Del")
@@ -210,12 +212,27 @@ class GraphTree(QtGui.QTreeWidget):
         for node in self.grapher.graphTree['_order']:
             nodeDict = self.grapher.graphTree[node]
             nodeDict['nodeParent'] = self.getItemFromNodeName(nodeDict['nodeParent'])
+            nodeDict['instanceFrom'] = self.getItemFromNodeName(nodeDict['instanceFrom'])
             self.addGraphNode(**nodeDict)
         self.rf_graphColumns()
 
     def on_popUpMenu(self, point):
         """ Show popup menu
             @param point: (object) : QPoint """
+        selItems = self.selectedItems()
+        if selItems[0]._instanceFrom is None:
+            nodeType = selItems[0]._widget._data.nodeType
+            self.miInstanceGraphNode.setVisible(True)
+        else:
+            nodeType = selItems[0]._instanceFrom.__repr2__()['nodeType']
+            self.miInstanceGraphNode.setVisible(False)
+        if len(selItems) == 1 and nodeType == 'loop':
+            self.miCleanCheckFiles1.setVisible(True)
+            self.miCleanCheckFiles2.setVisible(True)
+            self.miInstanceGraphNode.setVisible(False)
+        else:
+            self.miCleanCheckFiles1.setVisible(False)
+            self.miCleanCheckFiles2.setVisible(False)
         self.pMenu.exec_(self.mapToGlobal(point))
 
     def on_newNode(self):
@@ -223,7 +240,7 @@ class GraphTree(QtGui.QTreeWidget):
             @return: (object) : QTreeWidgetItem """
         selItems = self.selectedItems()
         attrs = {'nodeName': 'NewNode', 'nodeType': 'modul', 'currentVersion': '001',
-                 'versionTitle': {'001': 'New Version'}}
+                 'versionTitle': {'001': 'New Version'}, 'instanceFrom': None}
         if not len(selItems) > 1:
             if selItems:
                 attrs['nodeParent'] = selItems[0]
@@ -242,6 +259,21 @@ class GraphTree(QtGui.QTreeWidget):
             message = "Enter New Node Name"
             self.renameDialog = pQt.PromptDialog(message, partial(self.renameNode, selItems[0]))
             self.renameDialog.exec_()
+
+    def on_instanceNode(self):
+        """ Command launch when menuItem 'Instanciate Node' is clicked
+            @return: (object) : QTreeWidgetItem """
+        selItems = self.selectedItems()
+        if len(selItems) == 1:
+            if selItems[0]._instanceFrom is None:
+                nodeDict = selItems[0].__repr2__()
+                if nodeDict['nodeParent'] is not None:
+                    nodeDict['nodeParent'] = self.getItemFromNodeName(nodeDict['nodeParent'])
+                    nodeDict['nodeName'] = self._checkInstanceName("[i1]_%s" % nodeDict['nodeName'])
+                    nodeDict['instanceFrom'] = selItems[0]
+                newItem = self.addGraphNode(**nodeDict)
+                newItem._widget.setGraphNodeBgc()
+                return newItem
 
     def on_delNode(self):
         """ Command launch when menuItem 'Delete Node' is clicked """
@@ -322,12 +354,18 @@ class GraphTree(QtGui.QTreeWidget):
             self.cpBuffer = {'mode': mode, 'nodeList': []}
             if mode == 'node':
                 for item in selItems:
-                    self.cpBuffer['nodeList'].append(item.__repr2__())
+                    if item._instanceFrom is None:
+                        self.cpBuffer['nodeList'].append(item.__repr2__())
+                    else:
+                        self.cpBuffer['nodeList'].append(self.getInstanceDict(item))
             elif mode == 'branch':
                 if len(selItems) == 1:
                     children = selItems[0].getChildren()
                     for child in children:
-                        self.cpBuffer['nodeList'].append(child.__repr2__())
+                        if child._instanceFrom is None:
+                            self.cpBuffer['nodeList'].append(child.__repr2__())
+                        else:
+                            self.cpBuffer['nodeList'].append(self.getInstanceDict(child))
                 else:
                     message = "!!! Warning: Select only one node !!!"
                     self.mainUi._defaultErrorDialog(message, self.mainUi)
@@ -358,12 +396,18 @@ class GraphTree(QtGui.QTreeWidget):
             txt = ["pushMode = %r" % mode]
             if mode == 'node':
                 for n, item in enumerate(selItems):
-                    txt.append("selNode_%s = %s" % ((n + 1), item.__repr2__()))
+                    if item._instanceFrom is None:
+                        txt.append("selNode_%s = %s" % ((n + 1), item.__repr2__()))
+                    else:
+                        txt.append("selNode_%s = %s" % ((n + 1), self.getInstanceDict(item)))
             elif mode == 'branch':
                 if len(selItems) == 1:
                     children = selItems[0].getChildren()
                     for n, child in enumerate(children):
-                        txt.append("selNode_%s = %s" % ((n + 1), child.__repr2__()))
+                        if child._instanceFrom is None:
+                            txt.append("selNode_%s = %s" % ((n + 1), child.__repr2__()))
+                        else:
+                            txt.append("selNode_%s = %s" % ((n + 1), self.getInstanceDict(child)))
                 else:
                     message = "!!! Warning: Select only one node !!!"
                     self.mainUi._defaultErrorDialog(message, self.mainUi)
@@ -429,10 +473,15 @@ class GraphTree(QtGui.QTreeWidget):
                 kwargs['nodeParent'].addChild(newItem)
             else:
                 kwargs['nodeParent'].insertChild(index, newItem)
+        if kwargs['instanceFrom'] is not None:
+            newItem._instanceFrom = kwargs['instanceFrom']
         #-- Edit New QTreeWidgetItem --#
         nodeParams = self._checkNodeDict(**kwargs)
         newItem.setParams(**nodeParams)
-        newItem.setDatas(**nodeParams)
+        if newItem._instanceFrom is not None:
+            newItem._widget._data = None
+        else:
+            newItem.setDatas(**nodeParams)
         self.rf_graphColumns()
         newItem._widget.setGraphNodeBgc()
         return newItem
@@ -460,9 +509,19 @@ class GraphTree(QtGui.QTreeWidget):
         oldName = selNode._widget.__repr2__()['nodeName']
         selNode._widget.setGraphNodeName(newNodeName)
         self.renameDialog.close()
+        #-- Refresh UI --#
         if self.mainUi.miNodeEditor.isChecked():
             if str(self.mainUi.nodeEditor.leNodeName.text()) == oldName:
                 self.mainUi.nodeEditor.leNodeName.setText(newNodeName)
+        #-- Refresh Instance --#
+        allItems = pQt.getAllItems(self)
+        for item in allItems:
+            if item._instanceFrom is not None:
+                if item._instanceFrom.__repr2__()['nodeName'] == newNodeName:
+                    iName = item.__repr2__()['nodeName']
+                    iNewName = "%s]_%s" % (iName.split(']')[0], newNodeName)
+                    print "[grapherUi] : Renaming %s ---> %s" % (iName, iNewName)
+                    item._widget.setGraphNodeName(iNewName)
 
     def getItemFromNodeName(self, nodeName):
         """ Get QTreeWidgetItem from given nodeName
@@ -475,6 +534,26 @@ class GraphTree(QtGui.QTreeWidget):
             for item in allItems:
                 if item._widget.__repr2__()['nodeName'] == nodeName:
                     return item
+
+    def getAllInstance(self):
+        """ Get graph instance node
+            @return: (list) : Instance node """
+        instances = []
+        allItems = pQt.getAllItems(self)
+        for item in allItems:
+            if item._instanceFrom is not None:
+                instances.append(item)
+        return instances
+
+    def getInstanceDict(self, instance):
+        """ Get given instance dict
+            @param instance: (object) : QTreeWidgetItem
+            @return: (dict) : Instance dict """
+        instDict = instance.__repr2__()
+        refDict = instance._instanceFrom.__repr2__()
+        for k, v in instDict.iteritems():
+            refDict[k] = v
+        return refDict
 
     def resetGraph(self):
         """ Reset graph tree """
@@ -513,6 +592,25 @@ class GraphTree(QtGui.QTreeWidget):
             else:
                 return '%s_%s' % (tmpBaseName, (max(indexes) + 1))
 
+    def _checkInstanceName(self, instName):
+        """ Check if new instance name is valide
+            @param instName: (str) : Instance node name
+            @return: (str) : Valide instance Name """
+        baseName = instName.split(']')[-1]
+        allInstance = self.getAllInstance()
+        indexList = []
+        for instance in allInstance:
+            iName = instance.__repr2__()['nodeName']
+            if iName.endswith(']%s' % baseName):
+                index = iName.split(']')[0].replace('[', '')
+                indexList.append(index)
+        if not indexList:
+            return instName
+        else:
+            i = sorted(indexList)[-1].replace('i', '')
+            newIndex = 'i%s' % (int(i) + 1)
+            return "[%s]%s" % (newIndex, baseName)
+
     def _checkNodeDict(self, **kwargs):
         """ Check and fill node params with default value
             @param kwargs: (dict) : Node params
@@ -524,6 +622,8 @@ class GraphTree(QtGui.QTreeWidget):
             kwargs['nodeExpanded'] = False
         if not 'nodeType' in keyList:
             kwargs['nodeType'] = 'modul'
+        if not 'instanceFrom' in keyList:
+            kwargs['instanceFrom'] = None
         if not 'currentVersion' in keyList:
             kwargs['currentVersion'] = '001'
         if not 'versionTitle' in keyList:
@@ -607,6 +707,8 @@ class GraphTree(QtGui.QTreeWidget):
                 nodeDict['nodeParent'] = selItems[0]
             else:
                 nodeDict['nodeParent'] = None
+            if nodeDict['instanceFrom'] is not None:
+                nodeDict['instanceFrom'] = self.getItemFromNodeName(nodeDict['instanceFrom'])
             self.addGraphNode(**nodeDict)
 
     def _pasteBranch(self, selItems):
@@ -619,11 +721,15 @@ class GraphTree(QtGui.QTreeWidget):
                     nodeDict['nodeParent'] = selItems[0]
                 else:
                     nodeDict['nodeParent'] = None
+                if nodeDict['instanceFrom'] is not None:
+                    nodeDict['instanceFrom'] = self.getItemFromNodeName(nodeDict['instanceFrom'])
                 newNode = self.addGraphNode(**nodeDict)
                 convertedDict[nodeDict['nodeName']] = newNode.__repr2__()
             else:
                 _parent = self.getItemFromNodeName(convertedDict[nodeDict['nodeParent']]['nodeName'])
                 nodeDict['nodeParent'] = _parent
+                if nodeDict['instanceFrom'] is not None:
+                    nodeDict['instanceFrom'] = self.getItemFromNodeName(nodeDict['instanceFrom'])
                 newNode = self.addGraphNode(**nodeDict)
                 convertedDict[nodeDict['nodeName']] = newNode.__repr2__()
 
@@ -638,6 +744,8 @@ class GraphTree(QtGui.QTreeWidget):
                     nodeDict['nodeParent'] = selItems[0]
                 else:
                     nodeDict['nodeParent'] = None
+                if nodeDict['instanceFrom'] is not None:
+                    nodeDict['instanceFrom'] = self.getItemFromNodeName(nodeDict['instanceFrom'])
                 self.addGraphNode(**nodeDict)
 
     def _pullBranch(self, nodesDict, selItems):
@@ -653,11 +761,15 @@ class GraphTree(QtGui.QTreeWidget):
                     nodeDict['nodeParent'] = selItems[0]
                 else:
                     nodeDict['nodeParent'] = None
+                if nodeDict['instanceFrom'] is not None:
+                    nodeDict['instanceFrom'] = self.getItemFromNodeName(nodeDict['instanceFrom'])
                 newNode = self.addGraphNode(**nodeDict)
                 convertedDict[nodeDict['nodeName']] = newNode.__repr2__()
             else:
                 _parent = self.getItemFromNodeName(convertedDict[nodeDict['nodeParent']]['nodeName'])
                 nodeDict['nodeParent'] = _parent
+                if nodeDict['instanceFrom'] is not None:
+                    nodeDict['instanceFrom'] = self.getItemFromNodeName(nodeDict['instanceFrom'])
                 newNode = self.addGraphNode(**nodeDict)
                 convertedDict[nodeDict['nodeName']] = newNode.__repr2__()
 
@@ -680,6 +792,7 @@ class GraphItem(QtGui.QTreeWidgetItem):
         self._tree = tree
         self._parent = parent
         self._widget = GraphNode(self._tree, self)
+        self._instanceFrom = None
         if self._parent is None:
             self._widgetIndex = 0
         else:
@@ -688,11 +801,17 @@ class GraphItem(QtGui.QTreeWidgetItem):
 
     def __repr2__(self):
         itemDict = self._widget.__repr2__()
+        #-- Add Parent Item --#
         if self.parent() is None:
             itemDict['nodeParent'] = None
         else:
             parentName = self.parent()._widget.__repr2__()['nodeName']
             itemDict['nodeParent'] = parentName
+        #-- Add Instance Info --#
+        if self._instanceFrom is not None:
+            itemDict['instanceFrom'] = self._instanceFrom.__repr2__()['nodeName']
+        else:
+            itemDict['instanceFrom'] = None
         return itemDict
 
     def __str__(self):
@@ -770,8 +889,9 @@ class GraphNode(graphNodeClass, graphNodeUiClass, gpCore.Style):
         nodeDict = {'nodeName': str(self.pbNode.text()),
                     'nodeEnabled': self.cbNode.isChecked(),
                     'nodeExpanded': self._item.isExpanded()}
-        for k, v in self._data.__repr2__().iteritems():
-            nodeDict[k] = v
+        if self._data is not None:
+            for k, v in self._data.__repr2__().iteritems():
+                nodeDict[k] = v
         return nodeDict
 
     def __str__(self):
@@ -807,20 +927,29 @@ class GraphNode(graphNodeClass, graphNodeUiClass, gpCore.Style):
     def _singleClick(self):
         """ Connect graphNode to nodeEditor """
         if self.mainUi.miNodeEditor.isChecked():
-            self.mainUi.nodeEditor.connectGraphNode(self)
+            if self._item._instanceFrom is None:
+                self.mainUi.nodeEditor.connectGraphNode(self)
+            else:
+                self.mainUi.nodeEditor.connectGraphNode(self._item._instanceFrom._widget)
             self.mainUi.nodeEditor.bClose.setVisible(False)
 
     def _doubleClick(self):
         """ Connect graphNode in an external nodeEditor """
         self.nodeEditor = nodeEditor.NodeEditor(self.mainUi)
         self.nodeEditor.show()
-        self.nodeEditor.connectGraphNode(self)
+        if self._item._instanceFrom is None:
+            self.nodeEditor.connectGraphNode(self)
+        else:
+            self.nodeEditor.connectGraphNode(self._item._instanceFrom._widget)
         self.nodeEditor.bClose.setVisible(True)
 
     def setGraphNodeBgc(self):
         """ Edit graphNode color """
-        if self._data.nodeType is not None:
-            self.setStyleSheet(self.graphNodeBgc(self._data.nodeType))
+        if self._item._instanceFrom is None:
+            if self._data.nodeType is not None:
+                self.setStyleSheet(self.graphNodeBgc(self._data.nodeType))
+        else:
+            self.setStyleSheet(self.graphInstanceBgc)
 
     def setGraphNodeName(self, nodeName):
         """ Edit graphNode button name

@@ -217,7 +217,11 @@ class ExecGraph(object):
             graphLoops = {}
             for node in self.graphTree['_order']:
                 nodeTxt = []
-                if not self.graphTree[node]['nodeType'] in ['modul', 'loop']:
+                if self.graphTree[node]['instanceFrom'] is None:
+                    refName = node
+                else:
+                    refName = self.graphTree[node]['instanceFrom']
+                if not self.graphTree[refName]['nodeType'] in ['modul', 'loop']:
                     print "\nWriting %s to file ..." % node
                     nodeTxt.append("#-- Grapher Variables --#")
                     nodeTxt.extend(self._getGrapherVar())
@@ -225,26 +229,27 @@ class ExecGraph(object):
                     nodeTxt.extend(self._getGlobalVar())
                     nodeTxt.append("#-- Parent Variables --#")
                     nodeTxt.extend(self._getParentsVar(node))
-                    nodeTxt.append("#-- %s variables --#" % node)
-                    nodeTxt.extend(self._getNodeVar(node))
-                    if self.graphTree[node]['nodeType'] in ['sysData', 'cmdData', 'purData']:
-                        if self.graphTree[node]['nodeType'] == 'cmdData':
-                            nodeTxt.append("#-- %s cmd init --#" % node)
+                    nodeTxt.append("#-- %s variables --#" % refName)
+                    nodeTxt.extend(self._getNodeVar(refName))
+                    if self.graphTree[refName]['nodeType'] in ['sysData', 'cmdData', 'purData']:
+                        if self.graphTree[refName]['nodeType'] == 'cmdData':
+                            nodeTxt.append("#-- %s cmd init --#" % refName)
                             nodeTxt.append('print "Info: Init cmdData ..."')
-                            nodeTxt.extend(self.graphTree[node]['nodeCmdInit'].split('\n'))
+                            nodeTxt.extend(self.graphTree[refName]['nodeCmdInit'].split('\n'))
                             nodeTxt.extend(['print "Info: Init cmdData done"', 'print ""'])
-                        nodeTxt.append("#-- %s script --#" % node)
-                        v = self.grapher.nodeVersion(node)
-                        nodeTxt.extend(self.graphTree[node]['nodeScript'][v].split('\n'))
-                    scriptFile = pFile.conformPath(os.path.join(self.grapher.scriptPath, '%s.py' % node))
+                        nodeTxt.append("#-- %s script --#" % refName)
+                        v = self.grapher.nodeVersion(refName)
+                        nodeTxt.extend(self.graphTree[refName]['nodeScript'][v].split('\n'))
+                    scriptFile = pFile.conformPath(os.path.join(self.grapher.scriptPath,
+                                                                '%s.py' % node))
                     try:
                         pFile.writeFile(scriptFile, '\n'.join(nodeTxt))
                         print '\t', scriptFile
                     except:
                         raise IOError, "!!! ERROR: Can not create node file %s !!!" % node
                 else:
-                    if self.graphTree[node]['nodeType'] == 'loop':
-                        nodeTxt.append("#-- %s params --#" % node)
+                    if self.graphTree[refName]['nodeType'] == 'loop':
+                        nodeTxt.append("#-- %s params --#" % refName)
                         graphLoops[node] = self.grapher.getAllChildren(node)
                         if node in graphLoops[node]:
                             graphLoops[node].pop(graphLoops[node].index(node))
@@ -285,19 +290,23 @@ class ExecGraph(object):
                 if not self.graphTree[node]['nodeEnabled']:
                     disable = self._parseDisabled(disable, node)
                 else:
-                    if not self.graphTree[node]['nodeType'] == 'purData':
+                    if self.graphTree[node]['instanceFrom'] is None:
+                        refName = node
+                    else:
+                        refName = self.graphTree[node]['instanceFrom']
+                    if not self.graphTree[refName]['nodeType'] == 'purData':
                         nodeFile = os.path.join(self.grapher.scriptPath, '%s.py' % node)
                         nodeFile = pFile.conformPath(nodeFile)
                         tab = self._getTab(node, graphLoops)
                         txt.extend(['%sprint ""' % tab, '%sprint ""' % tab,
                                     '%sprint "##### Exec Graph Node %s #####"' % (tab, node),
                                     '%sprint "#-- Import Node Variables --#"' % tab])
-                        txt.extend(self._parseAllVars(tab, node))
-                        if self.graphTree[node]['nodeType'] == 'loop':
-                            txt.extend(self._parseLoop(tab, node))
-                        elif self.graphTree[node]['nodeType'] == 'sysData':
+                        txt.extend(self._parseAllVars(tab, refName))
+                        if self.graphTree[refName]['nodeType'] == 'loop':
+                            txt.extend(self._parseLoop(tab, refName))
+                        elif self.graphTree[refName]['nodeType'] == 'sysData':
                             txt.extend(self._parseSysData(tab, nodeFile))
-                        elif self.graphTree[node]['nodeType'] == 'cmdData':
+                        elif self.graphTree[refName]['nodeType'] == 'cmdData':
                             txt.extend(self._parseCmdData(tab, nodeFile, node, graphLoops))
         return txt
 
