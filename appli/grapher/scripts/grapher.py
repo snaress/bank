@@ -93,8 +93,8 @@ class Grapher(gpCore.FileCmds):
             print "[grapher] : #-- Init Graph File --#"
             #-- Init Path --#
             eg = ExecGraph(self)
-            self.initScriptPath(self._path, self._file)
-            self.initTmpPath(self._path, self._file)
+            self.initGrapherPath(self._path, 'scripts', self._file)
+            self.initGrapherPath(self._path, 'tmp', self._file)
             exeFile = pFile.conformPath(os.path.join(self.tmpPath, 'test.py'))
             #-- Init Grapher Files --#
             graphLoops = eg.graphNodesToFile()

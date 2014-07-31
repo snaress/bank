@@ -443,13 +443,14 @@ class GraphTree(QtGui.QTreeWidget):
         if not len(selItems) == 1:
             self.mainUi._defaultErrorDialog("!!! Warning: Select only one loop node !!!", self.mainUi)
         else:
-            print "Clean check files ..."
             checkFile =  "checkFile__%s" % selItems[0].__repr2__()['nodeLoop']['checkFile']
-            tmpPath = self.grapher.tmpPath
-            files = os.listdir(tmpPath) or []
-            for f in files:
-                if f.startswith('%s.' % checkFile) and f.endswith('.py'):
-                    os.remove(os.path.join(tmpPath, f))
+            tmpPath = pFile.conformPath(self.grapher.tmpPath)
+            if os.path.exists(tmpPath):
+                print "Clean check files ..."
+                files = os.listdir(tmpPath) or []
+                for f in files:
+                    if f.startswith('%s.' % checkFile) and f.endswith('.py'):
+                        os.remove(os.path.join(tmpPath, f))
 
     def addGraphNode(self, index=None, **kwargs):
         """ Add new QTreeWidgetItem
