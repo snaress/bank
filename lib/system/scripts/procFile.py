@@ -9,17 +9,32 @@ def conformPath(path):
         @return: (str) : Conformed path """
     return path.replace('\\', '/')
 
+def mkPathFolders(rootPath, absPath, sep=None):
+    if not os.path.exists(rootPath):
+        raise IOError, "!!! ERROR: rootPath not found !!!"
+    if sep is None:
+        sep = os.sep
+    relPath = absPath.replace('%s%s' % (rootPath, sep), '')
+    checkPath = rootPath
+    for fld in relPath.split(sep):
+        checkPath = "%s%s%s" % (checkPath, sep, fld)
+        if not os.path.exists(checkPath):
+            print "[sysInfo] : Create folder %s in %s" % (fld, sep.join(checkPath.split(sep)[:-1]))
+            try:
+                os.mkdir(checkPath)
+            except:
+                raise IOError, "!!! ERROR: Can not create %s !!!" % checkPath
+
 def readFile(filePath):
     """ Get text from file
         @param filePath: (str) : File absolut path
         @return: (list) : Text line by line """
-    if os.path.exists(filePath):
-        fileId = open(filePath, 'r')
-        getText = fileId.readlines()
-        fileId.close()
-        return getText
-    else:
-        print "!!! Error: Can't read, file doesn't exists !!!"
+    if not os.path.exists(filePath):
+        raise IOError, "!!! Error: Can't read, file doesn't exists !!!"
+    fileId = open(filePath, 'r')
+    getText = fileId.readlines()
+    fileId.close()
+    return getText
 
 def readPyFile(filePath, filterIn=None, keepBuiltin=False):
     """ Get text from pyFile
@@ -27,34 +42,33 @@ def readPyFile(filePath, filterIn=None, keepBuiltin=False):
         @param filterIn: (list) : Keep only key starting with filterIn
         @param keepBuiltin: (bool) : Keep builtins key
         @return: (dict) : File dict """
-    if os.path.exists(filePath):
-        params = {}
-        execfile(filePath, params)
-        if filterIn is None:
-            if keepBuiltin:
-                return params
-            else:
-                if '__builtins__' in params.keys():
-                    params.pop('__builtins__')
-                    return params
+    if not os.path.exists(filePath):
+        raise IOError, "!!! Error: Can't read, file doesn't exists !!!"
+    params = {}
+    execfile(filePath, params)
+    if filterIn is None:
+        if keepBuiltin:
+            return params
         else:
-            filterParams = {}
-            for k, v in params.iteritems():
-                check = False
-                for ft in filterIn:
-                    if k.startswith(ft):
-                        check = True
-                        break
-                if check:
-                    filterParams[k] = v
-            if keepBuiltin:
-                return filterParams
-            else:
-                if '__builtins__' in filterParams.keys():
-                    filterParams.pop('__builtins__')
-                    return filterParams
+            if '__builtins__' in params.keys():
+                params.pop('__builtins__')
+                return params
     else:
-        print "!!! Error: Can't read, file doesn't exists !!!"
+        filterParams = {}
+        for k, v in params.iteritems():
+            check = False
+            for ft in filterIn:
+                if k.startswith(ft):
+                    check = True
+                    break
+            if check:
+                filterParams[k] = v
+        if keepBuiltin:
+            return filterParams
+        else:
+            if '__builtins__' in filterParams.keys():
+                filterParams.pop('__builtins__')
+                return filterParams
 
 # noinspection PyTypeChecker
 def writeFile(filePath, textToWrite, add=False):
