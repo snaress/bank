@@ -172,17 +172,7 @@ class Menu(object):
         miAddCat.triggered.connect(partial(self.on_addCategory, 'studio', studioPath))
         self.mainUi.menuLib.menuStorage['studio']['newCat'] = miAddCat
         self.mainUi.menuStudio.addSeparator()
-        #-- Populate Studio --#
-        cats = os.listdir(studioPath) or []
-        for cat in cats:
-            newCatMenu = self._addSubMenu(cat, self.mainUi.menuStudio)
-            self.mainUi.menuLib.menuStorage['studio'][cat] = newCatMenu
-            #-- Populate Lib Type --#
-            libPath = os.path.join(studioPath, cat)
-            libs = os.listdir(libPath) or []
-            for lib in libs:
-                newLibMenu = self._addSubMenu(lib, newCatMenu)
-                self.mainUi.menuLib.menuStorage['studio']['%s/%s' % (cat, lib)] = newLibMenu
+        self._addCategory(studioPath, self.mainUi.menuStudio, 'studio')
 
     def rf_prodMenu(self):
         """ refresh project menuItem """
@@ -203,17 +193,7 @@ class Menu(object):
             miAddCat.triggered.connect(partial(self.on_addCategory, prod, catPath))
             self.mainUi.menuLib.menuStorage['prod']['%s/%s' % (prod, 'newCat')] = miAddCat
             newProdMenu.addSeparator()
-            #-- Populate Category --#
-            cats = os.listdir(catPath) or []
-            for cat in cats:
-                newCatMenu = self._addSubMenu(cat, newProdMenu)
-                self.mainUi.menuLib.menuStorage['prod']['%s/%s' % (prod, cat)] = newCatMenu
-                #-- Populate Lib Type --#
-                libPath = os.path.join(catPath, cat)
-                libs = os.listdir(libPath) or []
-                for lib in libs:
-                    newLibMenu = self._addSubMenu(lib, newCatMenu)
-                    self.mainUi.menuLib.menuStorage['prod']['%s/%s/%s' % (prod, cat, lib)] = newLibMenu
+            self._addCategory(catPath, newProdMenu, 'prod', rootKey=prod)
 
     def rf_usersMenu(self):
         """ refresh users menuItem """
@@ -225,15 +205,7 @@ class Menu(object):
         miAddCat = self.mainUi.menuUser.addAction("Add Category")
         miAddCat.triggered.connect(partial(self.on_addCategory, grapher.user, userPath))
         self.mainUi.menuUser.addSeparator()
-        cats = os.listdir(userPath) or []
-        for cat in cats:
-            newCatMenu = self._addSubMenu(cat, self.mainUi.menuUser)
-            self.mainUi.menuLib.menuStorage['users']['%s/%s' % (grapher.user, cat)] = newCatMenu
-            libPath = os.path.join(userPath, cat)
-            libs = os.listdir(libPath) or []
-            for lib in libs:
-                newLibMenu = self._addSubMenu(lib, newCatMenu)
-                self.mainUi.menuLib.menuStorage['users']['%s/%s/%s' % (grapher.user, cat, lib)] = newLibMenu
+        self._addCategory(userPath, self.mainUi.menuUser, 'users')
         #-- Populate All Users Menu --#
         self.mainUi.menuUsers.addSeparator()
         rootPath = os.path.join(grapher.binPath, 'users')
@@ -249,16 +221,9 @@ class Menu(object):
                 miAddUserCat = newUserMenu.addAction("Add Category")
                 catPath = os.path.join(userPath, user, 'lib')
                 miAddUserCat.triggered.connect(partial(self.on_addCategory, user, catPath))
+                self.mainUi.menuLib.menuStorage['users']['%s/%s' % (root, user)] = newUserMenu
                 newUserMenu.addSeparator()
-                cats = os.listdir(catPath) or []
-                for cat in cats:
-                    newCatMenu = self._addSubMenu(cat, newUserMenu)
-                    self.mainUi.menuLib.menuStorage['users']['%s/%s/%s' % (root, user, cat)] = newCatMenu
-                    libPath = os.path.join(catPath, cat)
-                    libs = os.listdir(libPath) or []
-                    for lib in libs:
-                        newLibMenu = self._addSubMenu(lib, newCatMenu)
-                        self.mainUi.menuLib.menuStorage['users']['%s/%s/%s/%s' % (root, user, cat, lib)] = newLibMenu
+                self._addCategory(catPath, newUserMenu, 'users', rootKey='%s/%s' % (root, user))
 
     def _addSubMenu(self, prod, _parent):
         """ Add project menu
@@ -269,6 +234,24 @@ class Menu(object):
         newProdMenu.setTearOffEnabled(True)
         _parent.addMenu(newProdMenu)
         return newProdMenu
+
+    def _addCategory(self, catPath, _parent, libType, rootKey=None):
+        cats = os.listdir(catPath) or []
+        for cat in cats:
+            newCatMenu = self._addSubMenu(cat, _parent)
+            if rootKey is None:
+                self.mainUi.menuLib.menuStorage[libType][cat] = newCatMenu
+            else:
+                self.mainUi.menuLib.menuStorage[libType]['%s/%s' % (rootKey, cat)] = newCatMenu
+            #-- Populate Lib Type --#
+            libPath = os.path.join(catPath, cat)
+            libs = os.listdir(libPath) or []
+            for lib in libs:
+                newLibMenu = self._addSubMenu(lib, newCatMenu)
+                if rootKey is None:
+                    self.mainUi.menuLib.menuStorage[libType]['%s/%s' % (cat, lib)] = newLibMenu
+                else:
+                    self.mainUi.menuLib.menuStorage[libType]['%s/%s/%s' % (rootKey, cat, lib)] = newLibMenu
 
     def on_addProject(self):
         """ Command launch when 'lib/prod/addProject' is clicked """
