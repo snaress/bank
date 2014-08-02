@@ -136,18 +136,6 @@ class Grapher(gpCore.FileCmds):
         self.graphTree = {}
         print "[grapher] : Params successfully reseted."
 
-    @property
-    def scriptPath(self):
-        """ Get grapher script path
-            @return: (str) : Grapher script path """
-        return os.path.join(self._path, 'scripts', self._file.replace('.py', ''), grapher.user)
-
-    @property
-    def tmpPath(self):
-        """ Get grapher tmp path
-            @return: (str) : Grapher tmp path """
-        return os.path.join(self._path, 'tmp', self._file.replace('.py', ''), grapher.user)
-
     def nodeVersion(self, nodeName):
         """ Get given node current version
             @param nodeName: (str) : Node name
@@ -181,6 +169,24 @@ class Grapher(gpCore.FileCmds):
                 if not node in items:
                     items.append(node)
         return items
+
+    @property
+    def userBinPath(self):
+        """ Get user bin path
+            @return: (str) : User bin path """
+        return os.path.join(grapher.binPath, 'users', grapher.user[0], grapher.user)
+
+    @property
+    def scriptPath(self):
+        """ Get grapher script path
+            @return: (str) : Grapher script path """
+        return os.path.join(self._path, 'scripts', self._file.replace('.py', ''), grapher.user)
+
+    @property
+    def tmpPath(self):
+        """ Get grapher tmp path
+            @return: (str) : Grapher tmp path """
+        return os.path.join(self._path, 'tmp', self._file.replace('.py', ''), grapher.user)
 
     @staticmethod
     def _varDictToStr(varDict):
@@ -475,3 +481,11 @@ class ExecGraph(object):
             if nodeName in graphLoops[loop]:
                 tab = '%s    ' % tab
         return tab
+
+
+if __name__ == '__main__':
+    print "Test Exec Graph"
+    fileName = "G:/ddd/assets/chars/main/anglaigus/gp_anglaigus.py"
+    gp = Grapher()
+    gp.loadGraph(fileName)
+    gp.execGraph()

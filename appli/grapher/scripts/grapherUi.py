@@ -47,6 +47,11 @@ class GrapherUi(grapherClass, grapherUiClass, gpCore.FileCmds, gpCore.Style):
         self.miSaveGraphAs.setShortcut("Ctrl+Shift+S")
         self.miQuitGrapher.triggered.connect(self.cmds_menu.on_quitGrapher)
         self.miQuitGrapher.setShortcut("Ctrl+Shift+W")
+        #-- Menu Lib --#
+        self.menuLib.menuStorage = {'studio': {}, 'prod': {}, 'users': {}}
+        self.menuStudio.aboutToShow.connect(self.cmds_menu.rf_studioMenu)
+        self.menuProd.aboutToShow.connect(self.cmds_menu.rf_prodMenu)
+        self.menuUsers.aboutToShow.connect(self.cmds_menu.rf_usersMenu)
         #-- Menu Window --#
         self.miNodeEditor.triggered.connect(self.cmds_menu.on_nodeEditor)
         self.miNodeEditor.setShortcut("E")

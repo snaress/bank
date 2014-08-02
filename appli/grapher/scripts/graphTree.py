@@ -61,6 +61,8 @@ class GraphTree(QtGui.QTreeWidget):
         self.mainUi.miNewGraphNode.setShortcut("Alt+N")
         self.mainUi.miRenameGraphNode.triggered.connect(self.on_renameNode)
         self.mainUi.miRenameGraphNode.setShortcut("F2")
+        self.mainUi.miInstanceGraphNode.triggered.connect(self.on_instanceNode)
+        self.mainUi.miInstanceGraphNode.setShortcut("F3")
         self.mainUi.miDelGraphNode.triggered.connect(self.on_delNode)
         self.mainUi.miDelGraphNode.setShortcut("Del")
         #-- Menu Move --#
@@ -387,10 +389,11 @@ class GraphTree(QtGui.QTreeWidget):
         """ Push selected nodes into buffer
             @param mode: (str) : 'node' or 'branch' """
         if not os.path.exists(grapher.binPath):
-            mess = "!!! ERROR: rndBin path not found, check user pref !!!"
+            mess = "!!! ERROR: rndBin path not found, check __init__.py !!!"
             self.mainUi._defaultErrorDialog(mess, self.mainUi)
         else:
-            tmpPath = os.path.join(grapher.binPath, 'user', grapher.user)
+            tmpPath = os.path.join(self.grapher.userBinPath, 'tmp')
+            pFile.mkPathFolders(grapher.binPath, tmpPath)
             tmpFile = os.path.join(tmpPath, 'nodeBuffer.py')
             selItems = self.selectedItems()
             txt = ["pushMode = %r" % mode]
@@ -426,7 +429,7 @@ class GraphTree(QtGui.QTreeWidget):
                 mess = "!!! ERROR: rndBin path not found, check user pref !!!"
                 self.mainUi._defaultErrorDialog(mess, self.mainUi)
             else:
-                tmpPath = os.path.join(grapher.binPath, 'user', grapher.user)
+                tmpPath = os.path.join(self.grapher.userBinPath, 'tmp')
                 tmpFile = os.path.join(tmpPath, 'nodeBuffer.py')
                 nodesDict = pFile.readPyFile(tmpFile)
                 if nodesDict['pushMode'] == 'node':

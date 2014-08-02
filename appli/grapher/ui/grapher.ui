@@ -203,6 +203,7 @@
     </property>
     <addaction name="miNewGraphNode"/>
     <addaction name="miRenameGraphNode"/>
+    <addaction name="miInstanceGraphNode"/>
     <addaction name="miDelGraphNode"/>
     <addaction name="separator"/>
     <addaction name="miMoveNodesUp"/>
@@ -233,9 +234,33 @@
     <property name="title">
      <string>Lib</string>
     </property>
-    <addaction name="miScript"/>
-    <addaction name="miNode"/>
-    <addaction name="miBranch"/>
+    <widget class="QMenu" name="menuStudio">
+     <property name="tearOffEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="title">
+      <string>Studio</string>
+     </property>
+    </widget>
+    <widget class="QMenu" name="menuProd">
+     <property name="tearOffEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="title">
+      <string>Prod</string>
+     </property>
+    </widget>
+    <widget class="QMenu" name="menuUsers">
+     <property name="tearOffEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="title">
+      <string>Users</string>
+     </property>
+    </widget>
+    <addaction name="menuStudio"/>
+    <addaction name="menuProd"/>
+    <addaction name="menuUsers"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuGraph"/>
@@ -415,6 +440,51 @@
   <action name="miBranch">
    <property name="text">
     <string>Branch</string>
+   </property>
+  </action>
+  <action name="miInstanceGraphNode">
+   <property name="text">
+    <string>Instanciate Node</string>
+   </property>
+  </action>
+  <action name="actionProd">
+   <property name="text">
+    <string>Prod</string>
+   </property>
+  </action>
+  <action name="miAddProject">
+   <property name="text">
+    <string>Add Project</string>
+   </property>
+  </action>
+  <action name="miAddStudioScriptCategory">
+   <property name="text">
+    <string>Add Category</string>
+   </property>
+  </action>
+  <action name="miAddStudioNodeCategory">
+   <property name="text">
+    <string>Add Category</string>
+   </property>
+  </action>
+  <action name="miAddStudioBranchCategory">
+   <property name="text">
+    <string>Add Category</string>
+   </property>
+  </action>
+  <action name="miAddUserScriptCategory">
+   <property name="text">
+    <string>Add Category</string>
+   </property>
+  </action>
+  <action name="AddUserNodeCategory">
+   <property name="text">
+    <string>Add Category</string>
+   </property>
+  </action>
+  <action name="miAddUserBranchCategory">
+   <property name="text">
+    <string>Add Category</string>
    </property>
   </action>
  </widget>

@@ -95,6 +95,7 @@ class VarEditor(varEditorClass, varEditorUiClass):
     def __init__(self, mainUi, parent):
         self.mainUi = mainUi
         self._parent = parent
+        self.grapher = self.mainUi.grapher
         super(VarEditor, self).__init__()
         self._setupUi()
 
@@ -160,10 +161,11 @@ class VarEditor(varEditorClass, varEditorUiClass):
     def on_pushVar(self):
         """ Push selected items into buffer """
         if not os.path.exists(grapher.binPath):
-            mess = "!!! ERROR: rndBin path not found, check user pref !!!"
+            mess = "!!! ERROR: rndBin path not found, check __init__.py !!!"
             self.mainUi._defaultErrorDialog(mess, self.mainUi)
         else:
-            tmpPath = os.path.join(grapher.binPath, 'user', grapher.user)
+            tmpPath = os.path.join(self.grapher.userBinPath, 'tmp')
+            pFile.mkPathFolders(grapher.binPath, tmpPath)
             tmpFile = os.path.join(tmpPath, 'varBuffer.py')
             selItems = self.twVariables.selectedItems()
             txt = []
@@ -182,7 +184,7 @@ class VarEditor(varEditorClass, varEditorUiClass):
             mess = "!!! ERROR: rndBin path not found, check user pref !!!"
             self.mainUi._defaultErrorDialog(mess, self.mainUi)
         else:
-            tmpPath = os.path.join(grapher.binPath, 'user', grapher.user)
+            tmpPath = os.path.join(self.grapher.userBinPath, 'tmp')
             tmpFile = os.path.join(tmpPath, 'varBuffer.py')
             varDict = pFile.readPyFile(tmpFile)
             for var in sorted(varDict.keys()):

@@ -81,6 +81,21 @@ class FileCmds(object):
             return tmpUserPath
 
     @staticmethod
+    def initGrapherBinPath(binType):
+        """ Initialise Grapher bin path
+            @param binType: (str) : 'studio', 'prod', or 'users' """
+        binPath = os.path.join(grapher.binPath, binType)
+        if not os.path.exists(grapher.binPath):
+            raise IOError, "!!! ERROR: rndBin path not found, check __init__.py !!!"
+        if not os.path.exists(binPath):
+            print "[grapher] : Create %s" % binPath
+            try:
+                os.mkdir(binPath)
+                return binPath
+            except:
+                raise IOError, "!!! ERROR: Can not create %s" % binPath
+
+    @staticmethod
     def createMelFromPy(pyFile, iterators, iters):
         """ Create mel file for mayabath using pyScript
             @param pyFile: (str) : Python file

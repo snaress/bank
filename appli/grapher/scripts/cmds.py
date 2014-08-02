@@ -1,6 +1,7 @@
 import os
 from PyQt4 import QtGui
 from appli import grapher
+from functools import partial
 from lib.qt.scripts import procQt as pQt
 from lib.system.scripts import procFile as pFile
 
@@ -159,6 +160,159 @@ class Menu(object):
                 self.mainUi.removeLockFile(self.mainUi.lockFile)
         self.quitDialog.close()
         self.mainUi.close()
+
+    #====================================== MENU LIB ==========================================#
+
+    def rf_studioMenu(self):
+        """ refresh studio menuItem """
+        self.mainUi.menuStudio.clear()
+        studioPath = os.path.join(grapher.binPath, 'studio')
+        #-- Default Category Action --#
+        miAddCat = self.mainUi.menuStudio.addAction("Add Category")
+        miAddCat.triggered.connect(partial(self.on_addCategory, 'studio', studioPath))
+        self.mainUi.menuLib.menuStorage['studio']['newCat'] = miAddCat
+        self.mainUi.menuStudio.addSeparator()
+        #-- Populate Studio --#
+        cats = os.listdir(studioPath) or []
+        for cat in cats:
+            newCatMenu = self._addSubMenu(cat, self.mainUi.menuStudio)
+            self.mainUi.menuLib.menuStorage['studio'][cat] = newCatMenu
+            #-- Populate Lib Type --#
+            libPath = os.path.join(studioPath, cat)
+            libs = os.listdir(libPath) or []
+            for lib in libs:
+                newLibMenu = self._addSubMenu(lib, newCatMenu)
+                self.mainUi.menuLib.menuStorage['studio']['%s/%s' % (cat, lib)] = newLibMenu
+
+    def rf_prodMenu(self):
+        """ refresh project menuItem """
+        self.mainUi.menuProd.clear()
+        #-- Default Prod Action --#
+        prodPath = os.path.join(grapher.binPath, 'prod')
+        self.mainUi.miAddProject = self.mainUi.menuProd.addAction("Add Project")
+        self.mainUi.miAddProject.triggered.connect(self.on_addProject)
+        self.mainUi.menuProd.addSeparator()
+        #-- Populate Prod --#
+        prods = os.listdir(prodPath) or []
+        for prod in prods:
+            newProdMenu = self._addSubMenu(prod, self.mainUi.menuProd)
+            self.mainUi.menuLib.menuStorage['prod'][prod] = newProdMenu
+            #-- Default Category Action --#
+            catPath = os.path.join(prodPath, prod)
+            miAddCat = newProdMenu.addAction("Add Category")
+            miAddCat.triggered.connect(partial(self.on_addCategory, prod, catPath))
+            self.mainUi.menuLib.menuStorage['prod']['%s/%s' % (prod, 'newCat')] = miAddCat
+            newProdMenu.addSeparator()
+            #-- Populate Category --#
+            cats = os.listdir(catPath) or []
+            for cat in cats:
+                newCatMenu = self._addSubMenu(cat, newProdMenu)
+                self.mainUi.menuLib.menuStorage['prod']['%s/%s' % (prod, cat)] = newCatMenu
+                #-- Populate Lib Type --#
+                libPath = os.path.join(catPath, cat)
+                libs = os.listdir(libPath) or []
+                for lib in libs:
+                    newLibMenu = self._addSubMenu(lib, newCatMenu)
+                    self.mainUi.menuLib.menuStorage['prod']['%s/%s/%s' % (prod, cat, lib)] = newLibMenu
+
+    def rf_usersMenu(self):
+        """ refresh users menuItem """
+        self.mainUi.menuUsers.clear()
+        #-- Populate User Menu --#
+        self.mainUi.menuUser = self.mainUi.menuUsers.addMenu(grapher.user)
+        self.mainUi.menuUser.setTearOffEnabled(True)
+        userPath = os.path.join(self.grapher.userBinPath, 'lib')
+        miAddCat = self.mainUi.menuUser.addAction("Add Category")
+        miAddCat.triggered.connect(partial(self.on_addCategory, grapher.user, userPath))
+        self.mainUi.menuUser.addSeparator()
+        cats = os.listdir(userPath) or []
+        for cat in cats:
+            newCatMenu = self._addSubMenu(cat, self.mainUi.menuUser)
+            self.mainUi.menuLib.menuStorage['users']['%s/%s' % (grapher.user, cat)] = newCatMenu
+            libPath = os.path.join(userPath, cat)
+            libs = os.listdir(libPath) or []
+            for lib in libs:
+                newLibMenu = self._addSubMenu(lib, newCatMenu)
+                self.mainUi.menuLib.menuStorage['users']['%s/%s/%s' % (grapher.user, cat, lib)] = newLibMenu
+        #-- Populate All Users Menu --#
+        self.mainUi.menuUsers.addSeparator()
+        rootPath = os.path.join(grapher.binPath, 'users')
+        roots = os.listdir(rootPath) or []
+        for root in roots:
+            newRootMenu = self._addSubMenu(root, self.mainUi.menuUsers)
+            self.mainUi.menuLib.menuStorage['users'][root] = newRootMenu
+            userPath = os.path.join(rootPath, root)
+            users = os.listdir(userPath) or []
+            for user in users:
+                newUserMenu = self._addSubMenu(user, newRootMenu)
+                self.mainUi.menuLib.menuStorage['users']['%s/%s' % (root, user)] = newUserMenu
+                miAddUserCat = newUserMenu.addAction("Add Category")
+                catPath = os.path.join(userPath, user, 'lib')
+                miAddUserCat.triggered.connect(partial(self.on_addCategory, user, catPath))
+                newUserMenu.addSeparator()
+                cats = os.listdir(catPath) or []
+                for cat in cats:
+                    newCatMenu = self._addSubMenu(cat, newUserMenu)
+                    self.mainUi.menuLib.menuStorage['users']['%s/%s/%s' % (root, user, cat)] = newCatMenu
+                    libPath = os.path.join(catPath, cat)
+                    libs = os.listdir(libPath) or []
+                    for lib in libs:
+                        newLibMenu = self._addSubMenu(lib, newCatMenu)
+                        self.mainUi.menuLib.menuStorage['users']['%s/%s/%s/%s' % (root, user, cat, lib)] = newLibMenu
+
+    def _addSubMenu(self, prod, _parent):
+        """ Add project menu
+            @param prod: (str) : Project name
+            @param _parent: (object) : Parent QMenu
+            @return: (object) : QMenu """
+        newProdMenu = QtGui.QMenu(prod)
+        newProdMenu.setTearOffEnabled(True)
+        _parent.addMenu(newProdMenu)
+        return newProdMenu
+
+    def on_addProject(self):
+        """ Command launch when 'lib/prod/addProject' is clicked """
+        message = "Enter New Project Name"
+        self.addProjectDialog = pQt.PromptDialog(message, self.addProject)
+        self.addProjectDialog.exec_()
+
+    def addProject(self):
+        """ Add given project to lib """
+        result = self.addProjectDialog.result()['result_1']
+        prodPath = os.path.join(grapher.binPath, 'prod')
+        prods = os.listdir(prodPath) or []
+        if result in prods:
+            mess = "!!! Error: Project %s already exists !!!" % result
+            self.mainUi._defaultErrorDialog(mess, self.addProjectDialog)
+        else:
+            newProdPath = os.path.join(prodPath, result)
+            print "[grapherUI] : Add project %s" % newProdPath
+            os.mkdir(newProdPath)
+            self.addProjectDialog.close()
+
+    def on_addCategory(self, parentFld, catPath):
+        """ Command launch when 'lib/prod/addProject/addCategory' is clicked
+            @param parentFld: (str) : Parent fodler name
+            @param catPath: (str) : Category root path """
+        message = "Enter new category name for %s" % parentFld
+        self.addCatDialog = pQt.PromptDialog(message, partial(self.addCategory, catPath))
+        self.addCatDialog.exec_()
+
+    def addCategory(self, catPath):
+        """ Add given category to lib """
+        result = self.addCatDialog.result()['result_1']
+        cats = os.listdir(catPath) or []
+        if result in cats:
+            mess = "!!! Error: Category %s already exists !!!" % result
+            self.mainUi._defaultErrorDialog(mess, self.addCatDialog)
+        else:
+            newCatPath = os.path.join(catPath, result)
+            print "[grapherUI] : Add category %s" % newCatPath
+            os.mkdir(newCatPath)
+            for libType in ['script', 'node', 'branch']:
+                print "[grapherUI] : Add libType %s" % libType
+                os.mkdir(os.path.join(newCatPath, libType))
+            self.addCatDialog.close()
 
     #===================================== MENU WINDOW ========================================#
 

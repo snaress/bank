@@ -10,6 +10,10 @@ def conformPath(path):
     return path.replace('\\', '/')
 
 def mkPathFolders(rootPath, absPath, sep=None):
+    """ Create absPath folders not in rootPath
+        @param rootPath: (str) : Root path
+        @param absPath: (str) : Absolut Path
+        @param sep: (str) : Os separator """
     if not os.path.exists(rootPath):
         raise IOError, "!!! ERROR: rootPath not found !!!"
     if sep is None:
