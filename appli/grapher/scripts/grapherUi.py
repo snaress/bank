@@ -16,6 +16,7 @@ class GrapherUi(grapherClass, grapherUiClass, gpCore.FileCmds, gpCore.Style):
     def __init__(self):
         self._lock = False
         self.grapher = gp.Grapher()
+        self.menuStorage = {'studio': {}, 'prod': {}, 'users': {}}
         self.cmds_menu = cmds.Menu(self)
         super(GrapherUi, self).__init__()
         self._setupUi()
@@ -48,13 +49,14 @@ class GrapherUi(grapherClass, grapherUiClass, gpCore.FileCmds, gpCore.Style):
         self.miQuitGrapher.triggered.connect(self.cmds_menu.on_quitGrapher)
         self.miQuitGrapher.setShortcut("Ctrl+Shift+W")
         #-- Menu Lib --#
-        self.menuLib.menuStorage = {'studio': {}, 'prod': {}, 'users': {}}
         self.menuStudio.aboutToShow.connect(self.cmds_menu.rf_studioMenu)
         self.menuProd.aboutToShow.connect(self.cmds_menu.rf_prodMenu)
         self.menuUsers.aboutToShow.connect(self.cmds_menu.rf_usersMenu)
         #-- Menu Window --#
         self.miNodeEditor.triggered.connect(self.cmds_menu.on_nodeEditor)
-        self.miNodeEditor.setShortcut("E")
+        self.miNodeEditor.setShortcut("Ctrl+E")
+        self.miLibEditor.triggered.connect(self.cmds_menu.on_editLib)
+        self.miLibEditor.setShortcut("Ctrl+L")
         self.miXterm.triggered.connect(self.cmds_menu.on_xTerm)
         self.miXterm.setShortcut("Alt+O")
         self.miXplorer.triggered.connect(self.cmds_menu.on_xPlorer)

@@ -2,10 +2,9 @@ import os
 from appli import grapher
 from functools import partial
 from PyQt4 import QtGui, QtCore, uic
-from lib.qt.scripts import textEditor
-from lib.qt.scripts import scriptEditor
 from lib.qt.scripts import procQt as pQt
 from lib.system.scripts import procFile as pFile
+from lib.qt.scripts import textEditor, scriptEditor
 
 
 class Comment(textEditor.TextEditor):
@@ -315,3 +314,192 @@ class VarTree(QtGui.QTreeWidget):
             @return: (objrct) : QLineEdit """
         newWidget = QtGui.QLineEdit()
         return newWidget
+
+
+libEditorClass, libEditorUiClass = uic.loadUiType(grapher.uiList['libEditor'])
+class LibEditor(libEditorClass, libEditorUiClass):
+    """ Class used by the grapher libEditor Ui for lib edition
+        @param mainUi: (object) : QMainWindow """
+
+    def __init__(self, mainUi):
+        self.mainUi = mainUi
+        super(LibEditor, self).__init__()
+        self._setupUi()
+        self.rf_libTree()
+        self.rf_libPath()
+        self.rf_libTab()
+
+    def _setupUi(self):
+        self.setupUi(self)
+        self.rbStudio.clicked.connect(self.on_libRoot)
+        self.rbProd.clicked.connect(self.on_libRoot)
+        self.rbUsers.clicked.connect(self.on_libRoot)
+        self.rbScript.clicked.connect(self.on_libType)
+        self.rbNode.clicked.connect(self.on_libType)
+        self.rbBranch.clicked.connect(self.on_libType)
+        self.twLibTree.clicked.connect(self.on_libTree)
+        self.wgScript = ScriptEditor(self)
+        self.vlScript.insertWidget(-1, self.wgScript)
+        self.pbSave.clicked.connect(self.on_save)
+
+    def rf_libTree(self):
+        """ Refresh lib tree """
+        self.twLibTree.clear()
+        rootPath, libFld = self.libRootPath
+        if libFld == 'prod':
+            prods = os.listdir(rootPath) or []
+            for prod in prods:
+                prodPath = os.path.join(rootPath, prod)
+                if os.path.isdir(prodPath):
+                    newProdItem = self.newLibItem(prod, prodPath, 'fld')
+                    self._addCategory(prodPath, newProdItem)
+        else:
+            self._addCategory(rootPath)
+
+    def rf_libPath(self):
+        """ Refresh lib path label """
+        selItems = self.twLibTree.selectedItems()
+        if not selItems:
+            path, fld = self.libRootPath
+            self.lLibPathVal.setText(path)
+        else:
+            if selItems[0].itemType == 'fld':
+                if not hasattr(selItems[0], 'isRoot'):
+                    self.lLibPathVal.setText(selItems[0].path)
+                else:
+                    self.lLibPathVal.setText(os.path.join(selItems[0].path, self.getItemType))
+            else:
+                self.lLibPathVal.setText(os.path.join(selItems[0].path.split(os.sep))[:-1])
+
+    def rf_libFileName(self):
+        """ Refresh lib fileName lineEdit """
+        self.leFileName.clear()
+        selItems = self.twLibTree.selectedItems()
+        if selItems:
+            if selItems[0].itemType == 'file':
+                fileName = selItems[0].path.split(os.sep)[-1].replace('.py', '')
+                self.leFileName.setText(fileName)
+
+    def rf_libTab(self):
+        """ Refresh lib edit tab """
+        if self.rbScript.isChecked():
+            self.flScript.setVisible(True)
+            self.flSaveSpacer.setVisible(False)
+        else:
+            self.flScript.setVisible(False)
+            self.flSaveSpacer.setVisible(True)
+
+    def _addCategory(self, rootPath, _parent=None):
+        """ Add lib subFolders and files
+            @param rootPath: (str) : Lib root path
+            @param _parent: (object) : Parent QTreeWidgetItem """
+        cats = os.listdir(rootPath) or []
+        for cat in cats:
+            libPath = None
+            catPath = os.path.join(rootPath, cat)
+            newCatItem = self.newLibItem(cat, catPath, 'fld', _parent=_parent)
+            newCatItem.isRoot = True
+            if self.rbScript.isChecked():
+                libPath = os.path.join(catPath, 'script')
+            elif self.rbNode.isChecked():
+                libPath = os.path.join(catPath, 'node')
+            elif self.rbBranch.isChecked():
+                libPath = os.path.join(catPath, 'branch')
+            files = os.listdir(libPath) or []
+            for f in files:
+                filePath = os.path.join(libPath, f)
+                if os.path.isfile(filePath):
+                    self.newLibItem(f, filePath, 'file', _parent=newCatItem)
+
+    def newLibItem(self, label, libPath, itemType, _parent=None):
+        """ Create new QTreeWidgetItem
+            @param label: (str) : Item label
+            @param libPath: (str) : Item lib path
+            @param itemType: (str) : 'fld' or 'file'
+            @param _parent: (object) : Parent QtreeWidgetItem
+            @return: (object) : Parent QtreeWidgetItem """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setText(0, label)
+        if itemType == 'file':
+            newItem.setTextColor(0, QtGui.QColor(0, 0, 255))
+        newItem.name = label
+        newItem.path = libPath
+        newItem.itemType = itemType
+        if _parent is None:
+            self.twLibTree.addTopLevelItem(newItem)
+        else:
+            _parent.addChild(newItem)
+        return newItem
+
+    def on_libRoot(self):
+        """ Command launch when rbLibRoot is clicked """
+        self.rf_libTree()
+        self.rf_libPath()
+        self.rf_libFileName()
+
+    def on_libType(self):
+        """ Command launch when rbLibType is clicked """
+        self.rf_libPath()
+        self.rf_libFileName()
+        self.rf_libTab()
+
+    def on_libTree(self):
+        """ Command launch when itemTree QTreeWidgetItem is clicked """
+        self.rf_libPath()
+        self.rf_libFileName()
+        self.rf_libTab()
+
+    def on_save(self):
+        """ Command launch when QPushButton 'save' is clicked """
+        checkFN = True
+        filePath = str(self.lLibPathVal.text())
+        fileName = str(self.leFileName.text())
+        #-- Check FileName --#
+        exclude = [' ', '/', '\\', '.']
+        if fileName == '' or fileName == ' ' or fileName.startswith('_'):
+            mess = "!!! ERROR: FileName can not be empty !!!"
+            self.mainUi._defaultErrorDialog(mess, self)
+        else:
+            for iter in exclude:
+                if iter in fileName:
+                    checkFN = False
+            if not checkFN:
+                mess = "!!! ERROR: FileName is not valid !!!"
+                self.mainUi._defaultErrorDialog(mess, self)
+            else:
+                #-- Check FilePath --#
+                if not (filePath.endswith('script') or not filePath.endswith('node')
+                        or not filePath.endswith('branch')):
+                    mess = "!!! ERROR: FilePath is not valid !!!"
+                    self.mainUi._defaultErrorDialog(mess, self)
+                else:
+                    absPath = os.path.join(filePath, "%s.py" % fileName)
+                    if os.path.exists(absPath):
+                        print 'exists'
+
+    @property
+    def libRootPath(self):
+        """ Get lib root path
+            @return: (str), (str) : Lib root path, Lib folder """
+        path = grapher.binPath
+        libFld = None
+        #-- Lib Root --#
+        if self.rbStudio.isChecked():
+            libFld = 'studio'
+            path = os.path.join(path, libFld)
+        elif self.rbProd.isChecked():
+            libFld = 'prod'
+            path = os.path.join(path, libFld)
+        elif self.rbUsers.isChecked():
+            libFld = 'users'
+            path = os.path.join(path, libFld, grapher.user[0], grapher.user, 'lib')
+        return path, libFld
+
+    @property
+    def getItemType(self):
+        if self.rbScript.isChecked():
+            return 'script'
+        elif self.rbNode.isChecked():
+            return 'node'
+        elif self.rbBranch.isChecked():
+            return 'branch'
