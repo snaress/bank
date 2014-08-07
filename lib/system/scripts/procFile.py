@@ -1,6 +1,4 @@
-import os
-import sys
-import math
+import os, sys, math, time
 
 
 def conformPath(path):
@@ -116,6 +114,16 @@ def secondsToStr(seconds):
     minutes = S / 60
     seconds = S - (minutes * 60)
     return "%s:%s:%s" % (hours, minutes, seconds)
+
+def getDate():
+    """ Get current date
+        @return: (str) : yyyy_mm_dd """
+    return time.strftime("%Y_%m_%d")
+
+def getTime():
+    """ Get current time
+        @return: (str) : hh_mm_ss """
+    return time.strftime("%H_%M_%S")
 
 def dRange(start, stop, step, preci=3):
     """ Get decimal range list
