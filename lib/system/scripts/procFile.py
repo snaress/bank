@@ -7,6 +7,18 @@ def conformPath(path):
         @return: (str) : Conformed path """
     return path.replace('\\', '/')
 
+def pathToDict(path):
+    """ Translate directory contents to dict
+        @param path: (str) : Absolut path
+        @return: (dict) : Path contents """
+    if not os.path.exists(path):
+        raise IOError, "!!! ERROR: Path not found!!!\n%s" % path
+    pathDict = {'_order': []}
+    for root, flds, files in os.walk(path):
+        pathDict['_order'].append(root)
+        pathDict[root] = {'folders': flds, 'files': files}
+    return pathDict
+
 def mkPathFolders(rootPath, absPath, sep=None):
     """ Create absPath folders not in rootPath
         @param rootPath: (str) : Root path
