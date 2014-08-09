@@ -229,16 +229,6 @@ class Menu(object):
                         newUserMenu.addSeparator()
                         self._addCategory(catPath, newUserMenu, 'users', rootKey='%s/%s' % (root, user))
 
-    def _addSubMenu(self, prod, _parent):
-        """ Add project menu
-            @param prod: (str) : Project name
-            @param _parent: (object) : Parent QMenu
-            @return: (object) : QMenu """
-        newProdMenu = QtGui.QMenu(prod)
-        newProdMenu.setTearOffEnabled(True)
-        _parent.addMenu(newProdMenu)
-        return newProdMenu
-
     def _addCategory(self, catPath, _parent, libType, rootKey=None):
         """ Add category and libType items
             @param catPath: (str) : Category root path
@@ -262,6 +252,27 @@ class Menu(object):
                         self.menuStorage[libType]['%s/%s' % (cat, lib)] = newLibMenu
                     else:
                         self.menuStorage[libType]['%s/%s/%s' % (rootKey, cat, lib)] = newLibMenu
+                    #-- Populate Files --#
+                    filePath = os.path.join(libPath, lib)
+                    files = os.listdir(filePath)
+                    for f in files:
+                        libFile = os.path.join(filePath, f)
+                        miLibAction = newLibMenu.addAction(f.replace('.py', ''))
+                        miLibAction.triggered.connect(partial(self.on_libFile, libFile, lib))
+                        if rootKey is None:
+                            self.menuStorage[libType]['%s/%s/%s' % (cat, lib, f)] = miLibAction
+                        else:
+                            self.menuStorage[libType]['%s/%s/%s/%s' % (rootKey, cat, lib, f)] = miLibAction
+
+    def _addSubMenu(self, prod, _parent):
+        """ Add project menu
+            @param prod: (str) : Project name
+            @param _parent: (object) : Parent QMenu
+            @return: (object) : QMenu """
+        newProdMenu = QtGui.QMenu(prod)
+        newProdMenu.setTearOffEnabled(True)
+        _parent.addMenu(newProdMenu)
+        return newProdMenu
 
     def on_addProject(self):
         """ Command launch when 'lib/prod/addProject' is clicked """
@@ -308,16 +319,33 @@ class Menu(object):
                 os.mkdir(os.path.join(newCatPath, libType))
             self.addCatDialog.close()
 
-    def on_editLib(self):
-        """ Command launch when 'editLib' is clicked """
-        self.libEditor = widgets.LibEditor(self.mainUi)
-        self.libEditor.show()
+    def on_libFile(self, libFile, libType):
+        """ Command launch when a libFile is clicked
+            @param libFile: (str) : File absolut path
+            @param libType: (str) : 'script' or 'node' or 'branch' """
+        selItems = self.mainUi.wgGraph.selectedItems()
+        if libType == 'script':
+            script = pFile.readFile(libFile)
+            self.scriptPopUp = widgets.ScriptEditor(self.mainUi)
+            self.scriptPopUp._widget.setText(''.join(script))
+            self.scriptPopUp.show()
+        elif libType == 'node':
+            nodesDict = pFile.readPyFile(libFile)
+            self.mainUi.wgGraph._pullNodes(nodesDict, selItems)
+        elif libType == 'branch':
+            nodesDict = pFile.readPyFile(libFile)
+            self.mainUi.wgGraph._pullBranch(nodesDict, selItems)
 
     #===================================== MENU WINDOW ========================================#
 
     def on_nodeEditor(self):
         """ Command launched when miNodeEditor is clicked """
         self.mainUi.nodeEditor.rf_nodeEditorVis()
+
+    def on_libEditor(self):
+        """ Command launch when 'editLib' is clicked """
+        self.libEditor = widgets.LibEditor(self.mainUi)
+        self.libEditor.show()
 
     def on_xTerm(self):
         """ Command launched when miXterm is clicked """

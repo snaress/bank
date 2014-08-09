@@ -328,6 +328,7 @@ class LibEditor(libEditorClass, libEditorUiClass):
         self.rf_libTree()
         self.rf_libPath()
         self.rf_libTab()
+        self.rf_delInfo()
 
     def _setupUi(self):
         self.setupUi(self)
@@ -341,6 +342,7 @@ class LibEditor(libEditorClass, libEditorUiClass):
         self.wgScript = ScriptEditor(self)
         self.vlScript.insertWidget(-1, self.wgScript)
         self.pbSave.clicked.connect(self.on_save)
+        self.pbDelete.clicked.connect(self.on_delete)
 
     def rf_libTree(self):
         """ Refresh lib tree """
@@ -369,7 +371,8 @@ class LibEditor(libEditorClass, libEditorUiClass):
                 else:
                     self.lLibPathVal.setText(os.path.join(selItems[0].path, self.getItemType))
             else:
-                self.lLibPathVal.setText(os.path.join(selItems[0].path.split(os.sep))[:-1])
+
+                self.lLibPathVal.setText(os.path.dirname(selItems[0].path))
 
     def rf_libFileName(self):
         """ Refresh lib fileName lineEdit """
@@ -388,6 +391,40 @@ class LibEditor(libEditorClass, libEditorUiClass):
         else:
             self.flScript.setVisible(False)
             self.flSaveSpacer.setVisible(True)
+
+    def rf_delInfo(self):
+        """ Refresh delete text info """
+        self.lDelInfo.clear()
+        delTxt = ["#-- Delete Info --#"]
+        #-- Lib Root --#
+        if self.rbStudio.isChecked():
+            delTxt.append("Lib Root: studio")
+        elif self.rbProd.isChecked():
+            delTxt.append("Lib Root: prod")
+        elif self.rbUsers.isChecked():
+            delTxt.append("Lib Root: users")
+        #-- Lib Type --#
+        if self.rbScript.isChecked():
+            delTxt.append("Lib Type: script")
+        if self.rbNode.isChecked():
+            delTxt.append("Lib Type: node")
+        if self.rbBranch.isChecked():
+            delTxt.append("Lib Type: branch")
+        #-- Selected Item --#
+        selItems = self.twLibTree.selectedItems()
+        if selItems:
+            selType = selItems[0].itemType
+            delTxt.append("Sel Type: %s" % selType)
+            if selType == 'fld':
+                delTxt.append("Sel Contents:")
+                pathDict = pFile.pathToDict(selItems[0].path)
+                for root in pathDict['_order']:
+                    delTxt.extend(["    %s:" % root,
+                                   "        Folders = %s" % pathDict[root]['folders'],
+                                   "        Files = %s" % pathDict[root]['files']])
+            else:
+                delTxt.append("Sel LibFile: %s" % selItems[0].path)
+        self.lDelInfo.setText('\n'.join(delTxt))
 
     def _addCategory(self, rootPath, _parent=None):
         """ Add lib subFolders and files
@@ -436,18 +473,22 @@ class LibEditor(libEditorClass, libEditorUiClass):
         self.rf_libTree()
         self.rf_libPath()
         self.rf_libFileName()
+        self.rf_delInfo()
 
     def on_libType(self):
         """ Command launch when rbLibType is clicked """
+        self.rf_libTree()
         self.rf_libPath()
         self.rf_libFileName()
         self.rf_libTab()
+        self.rf_delInfo()
 
     def on_libTree(self):
         """ Command launch when itemTree QTreeWidgetItem is clicked """
         self.rf_libPath()
         self.rf_libFileName()
         self.rf_libTab()
+        self.rf_delInfo()
 
     def on_save(self):
         """ Command launch when QPushButton 'save' is clicked """
@@ -474,8 +515,87 @@ class LibEditor(libEditorClass, libEditorUiClass):
                     self.mainUi._defaultErrorDialog(mess, self)
                 else:
                     absPath = os.path.join(filePath, "%s.py" % fileName)
+                    itemType = filePath.split(os.sep)[-1]
                     if os.path.exists(absPath):
-                        print 'exists'
+                        mess = "%s already exists ! Overwrite ?" % fileName
+                        cmds = [partial(self.writeLibFile, absPath, itemType, True)]
+                        self.confirmSave = pQt.ConfirmDialog(mess, ['Ok'], cmds)
+                        self.confirmSave.exec_()
+                    else:
+                        self.writeLibFile(absPath, itemType)
+
+    def on_delete(self):
+        """ Command launch when QPushButton 'delete' is clicked """
+        selItems = self.twLibTree.selectedItems()
+        if selItems:
+            itemType = selItems[0].itemType
+            if itemType == 'file':
+                mess = 'Delete selected lib file ?\nAre you sure ?'
+            else:
+                mess = 'Delete selected lib folders and his children ?\nAre you sure ?'
+            self.confDelUi = pQt.ConfirmDialog(mess, ['Delete'], [partial(self.delLibFile, itemType)])
+            self.confDelUi.exec_()
+        else:
+            txt = str(self.lDelInfo.text()).split('\n')
+            txt.append("\n!!! Select at least one item in libTree !!!")
+            self.lDelInfo.setText('\n'.join(txt))
+
+    def writeLibFile(self, fileName, itemType, closeDial=False):
+        """ Write file with given text
+            @param fileName: (str) : File absolute path
+            @param itemType: (str) : 'script', 'node' or 'branch' """
+        if closeDial:
+            self.confirmSave.close()
+        if itemType == 'script':
+            txt = str(self.wgScript._widget.toPlainText())
+        else:
+            nodeParams = self.mainUi.wgGraph._pushNode(itemType)
+            txt = '\n'.join(nodeParams)
+        try:
+            pFile.writeFile(fileName, txt)
+            print "[grapherUI] : Write lib file %s" % fileName
+        except:
+            mess = "!!! ERROR: Can not write libFile !!!"
+            self.mainUi._defaultErrorDialog(mess, self)
+        self.wgScript.resetScript()
+        self.rf_libPath()
+        self.rf_libFileName()
+        self.rf_libTree()
+
+    def delLibFile(self, itemType):
+        """ Delete given lib file or folder
+            @param itemType: (str) : 'fld' or 'file' """
+        self.confDelUi.close()
+        selItems = self.twLibTree.selectedItems()
+        if itemType == 'file':
+            libFile = selItems[0].path
+            if not os.path.exists(libFile):
+                raise IOError, "!!! Error, libFile not found !!!"
+            else:
+                try:
+                    os.remove(libFile)
+                    print "[grapherUI] : Lib file successfully removed\n%s" % libFile
+                except:
+                    raise IOError, "!!! Error: Can not remove libFile\n%s" % libFile
+        else:
+            pathDict = pFile.pathToDict(selItems[0].path)
+            pathDict['_order'].reverse()
+            for root in pathDict['_order']:
+                print root
+                for f in pathDict[root]['files']:
+                    path = os.path.join(root, f)
+                    print "Remove %s" % path
+                    os.remove(path)
+                for fld in pathDict[root]['folders']:
+                    path = os.path.join(root, fld)
+                    print "Remove %s" % path
+                    os.rmdir(path)
+                print "Remove %s" % root
+                os.rmdir(root)
+        self.rf_libPath()
+        self.rf_libFileName()
+        self.rf_libTree()
+        self.rf_delInfo()
 
     @property
     def libRootPath(self):
@@ -483,7 +603,6 @@ class LibEditor(libEditorClass, libEditorUiClass):
             @return: (str), (str) : Lib root path, Lib folder """
         path = grapher.binPath
         libFld = None
-        #-- Lib Root --#
         if self.rbStudio.isChecked():
             libFld = 'studio'
             path = os.path.join(path, libFld)

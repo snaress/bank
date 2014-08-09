@@ -1,4 +1,4 @@
-import os, time
+import os
 from appli import grapher
 from lib.system.scripts import procFile as pFile
 try:
@@ -20,8 +20,8 @@ class FileCmds(object):
             @return: (bool) : True if success, False if failed """
         lockTxt = ["user = %r" % grapher.user,
                    "station = %r" % grapher.station,
-                   "date = %r" % time.strftime("%Y/%m/%d", time.localtime()),
-                   "time = %r" % time.strftime("%H:%M:%S", time.localtime())]
+                   "date = %r" % pFile.getDate(),
+                   "time = %r" % pFile.getTime()]
         try:
             pFile.writeFile(lockFile, '\n'.join(lockTxt))
             print "\tCreating lockFile %s ..." % os.path.basename(lockFile)

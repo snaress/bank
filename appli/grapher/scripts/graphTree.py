@@ -395,25 +395,7 @@ class GraphTree(QtGui.QTreeWidget):
             tmpPath = os.path.join(self.grapher.userBinPath, 'tmp')
             pFile.mkPathFolders(grapher.binPath, tmpPath)
             tmpFile = os.path.join(tmpPath, 'nodeBuffer.py')
-            selItems = self.selectedItems()
-            txt = ["pushMode = %r" % mode]
-            if mode == 'node':
-                for n, item in enumerate(selItems):
-                    if item._instanceFrom is None:
-                        txt.append("selNode_%s = %s" % ((n + 1), item.__repr2__()))
-                    else:
-                        txt.append("selNode_%s = %s" % ((n + 1), self.getInstanceDict(item)))
-            elif mode == 'branch':
-                if len(selItems) == 1:
-                    children = selItems[0].getChildren()
-                    for n, child in enumerate(children):
-                        if child._instanceFrom is None:
-                            txt.append("selNode_%s = %s" % ((n + 1), child.__repr2__()))
-                        else:
-                            txt.append("selNode_%s = %s" % ((n + 1), self.getInstanceDict(child)))
-                else:
-                    message = "!!! Warning: Select only one node !!!"
-                    self.mainUi._defaultErrorDialog(message, self.mainUi)
+            txt = self._pushNode(mode)
             try:
                 pFile.writeFile(tmpFile, '\n'.join(txt))
                 print "[grapherUI] : Nodes successfully pushed in user buffer with mode %r." % mode
@@ -702,6 +684,31 @@ class GraphTree(QtGui.QTreeWidget):
             else:
                 return False
         return True
+
+    def _pushNode(self, mode):
+        """ Get node params
+            @param mode: (str) : 'node' or 'branch'
+            @return: (list) : Node params """
+        selItems = self.selectedItems()
+        txt = ["pushMode = %r" % mode]
+        if mode == 'node':
+            for n, item in enumerate(selItems):
+                if item._instanceFrom is None:
+                    txt.append("selNode_%s = %s" % ((n + 1), item.__repr2__()))
+                else:
+                    txt.append("selNode_%s = %s" % ((n + 1), self.getInstanceDict(item)))
+        elif mode == 'branch':
+            if len(selItems) == 1:
+                children = selItems[0].getChildren()
+                for n, child in enumerate(children):
+                    if child._instanceFrom is None:
+                        txt.append("selNode_%s = %s" % ((n + 1), child.__repr2__()))
+                    else:
+                        txt.append("selNode_%s = %s" % ((n + 1), self.getInstanceDict(child)))
+            else:
+                message = "!!! Warning: Select only one node !!!"
+                self.mainUi._defaultErrorDialog(message, self.mainUi)
+        return txt
 
     def _pasteNode(self, selItems):
         """ Paste stored items with mode 'node'

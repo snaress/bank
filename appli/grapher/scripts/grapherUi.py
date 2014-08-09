@@ -55,7 +55,7 @@ class GrapherUi(grapherClass, grapherUiClass, gpCore.FileCmds, gpCore.Style):
         #-- Menu Window --#
         self.miNodeEditor.triggered.connect(self.cmds_menu.on_nodeEditor)
         self.miNodeEditor.setShortcut("Ctrl+E")
-        self.miLibEditor.triggered.connect(self.cmds_menu.on_editLib)
+        self.miLibEditor.triggered.connect(self.cmds_menu.on_libEditor)
         self.miLibEditor.setShortcut("Ctrl+L")
         self.miXterm.triggered.connect(self.cmds_menu.on_xTerm)
         self.miXterm.setShortcut("Alt+O")
