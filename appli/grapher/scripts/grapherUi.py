@@ -196,6 +196,7 @@ def launch(graph=None):
 
 
 if __name__ == '__main__':
+    # fileName = "F:/devZone/leVoeu/shots/s0020/p0010/gp_s0020_p0010.py"
     fileName = "G:/ddd/assets/chars/main/anglaigus/gp_anglaigus.py"
     launch(graph=fileName)
     # launch()

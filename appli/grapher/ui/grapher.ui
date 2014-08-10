@@ -214,10 +214,6 @@
     <addaction name="miCopyNodes"/>
     <addaction name="miCopyBranch"/>
     <addaction name="miPasteNodes"/>
-    <addaction name="separator"/>
-    <addaction name="miPushNodes"/>
-    <addaction name="miPushBranch"/>
-    <addaction name="miPullNodes"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
