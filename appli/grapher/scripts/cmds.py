@@ -331,10 +331,10 @@ class Menu(object):
             self.scriptPopUp.show()
         elif libType == 'node':
             nodesDict = pFile.readPyFile(libFile)
-            self.mainUi.wgGraph._pullNodes(nodesDict, selItems)
+            self.mainUi.wgGraph._pasteNode(nodesDict, selItems)
         elif libType == 'branch':
             nodesDict = pFile.readPyFile(libFile)
-            self.mainUi.wgGraph._pullBranch(nodesDict, selItems)
+            self.mainUi.wgGraph._pasteBranch(nodesDict, selItems)
 
     #===================================== MENU WINDOW ========================================#
 

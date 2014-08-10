@@ -102,7 +102,8 @@ class VarEditor(varEditorClass, varEditorUiClass):
         items = pQt.getTopItems(self.twVariables)
         varDict = {}
         for n, item in enumerate(items):
-            varDict['var%s' % (n + 1)] = self.getItemDict(item)
+            padd = str(n+1).zfill(2)
+            varDict['var%s' % padd] = self.getItemDict(item)
         return varDict
 
     def __str__(self):
@@ -145,6 +146,7 @@ class VarEditor(varEditorClass, varEditorUiClass):
         self.twVariables.setItemWidget(newItem, 3, newItem.wdgType)
         self.twVariables.setItemWidget(newItem, 4, newItem.wdgValue)
         self.twVariables.setItemWidget(newItem, 5, newItem.wdgComment)
+        newItem.wdgEnabled.clicked.connect(partial(self.on_varEnable ,newItem))
         return newItem
 
     def on_delVar(self):
@@ -549,7 +551,7 @@ class LibEditor(libEditorClass, libEditorUiClass):
         if itemType == 'script':
             txt = str(self.wgScript._widget.toPlainText())
         else:
-            nodeParams = self.mainUi.wgGraph._pushNode(itemType)
+            nodeParams = self.mainUi.wgGraph._copySelection(itemType)
             txt = '\n'.join(nodeParams)
         try:
             pFile.writeFile(fileName, txt)
