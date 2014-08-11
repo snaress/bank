@@ -9,15 +9,19 @@ class NukeResize(object):
         @param imaX: (int) : Image Width
         @param imaY: (int) : Image Height
         @param rszX: (int) : New image width
-        @param rszY: (int) : New image height """
+        @param rszY: (int) : New image height
+        @param tmpPath: (str) : Tmp path. If None, use image file path
+        @param keepNkFile = (bool) : If false, delete tmpFile """
 
-    def __init__(self, imaIn, imaOut, imaX, imaY, rszX, rszY):
+    def __init__(self, imaIn, imaOut, imaX, imaY, rszX, rszY, tmpPath=None, keepNkFile=False):
         self.imaIn = os.path.normpath(imaIn)
         self.imaOut = os.path.normpath(imaOut)
         self.imaX = imaX
         self.imaY = imaY
         self.rszX = rszX
         self.rszY = rszY
+        self.tmpPath = tmpPath
+        self.keepNkFile = keepNkFile
         self.nkFile = self.getNkFile()
         self.nkData = pFile.readFile(self.nkFile)
         self.rszData = self.getRszData()
@@ -66,13 +70,17 @@ class NukeResize(object):
         tmpFile = self.saveTmpFile()
         if tmpFile is not None:
             os.system("nuke5.0.exe -x %s 1" % tmpFile)
+            if not self.keepNkFile:
+                print "[RI] Deleting tmp file ..."
+                os.remove(tmpFile)
 
     def saveTmpFile(self):
         """ Save resizeData nuke tmp file
             @return: (str) : TmpFile absolut path """
-        tmpPath = os.sep.join(self.imaIn.split(os.sep)[:-1])
-        tmpName = '.'.join(self.imaIn.split(os.sep)[-1].split('.')[:-1])
-        tmpFile = os.path.join(tmpPath, 'ri__%s.nk' % tmpName)
+        if self.tmpPath is None:
+            self.tmpPath = os.path.dirname(self.imaIn)
+        tmpName = '.'.join(os.path.basename(self.imaIn).split('.')[:-1])
+        tmpFile = pFile.conformPath(os.path.join(self.tmpPath, 'ri__%s.nk' % tmpName))
         try:
             pFile.writeFile(tmpFile, self.rszData)
             print "[RI] Writing tmpFile: %s" % tmpFile
