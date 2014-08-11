@@ -71,8 +71,9 @@ class NukeResize(object):
         if tmpFile is not None:
             os.system("nuke5.0.exe -x %s 1" % tmpFile)
             if not self.keepNkFile:
-                print "[RI] Deleting tmp file ..."
-                os.remove(tmpFile)
+                if os.path.exists(tmpFile):
+                    print "[RI] Deleting tmp file ..."
+                    os.remove(tmpFile)
 
     def saveTmpFile(self):
         """ Save resizeData nuke tmp file
