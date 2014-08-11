@@ -3,7 +3,7 @@ from PyQt4 import uic
 from appli import grapher
 from functools import partial
 from lib.qt.scripts import procQt as pQt
-from appli.grapher.scripts import widgets
+from appli.grapher.scripts import gpWidget
 from lib.system.scripts import procFile as pFile
 
 
@@ -34,11 +34,11 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.bNewVersion.clicked.connect(self.on_newVersion)
         self.bDelVersion.clicked.connect(self.on_delVersion)
         #-- Comment --#
-        self.wgComment = widgets.Comment(self)
+        self.wgComment = gpWidget.Comment(self)
         self.vlComment.insertWidget(-1, self.wgComment)
         self.cbComment.clicked.connect(partial(self.mainUi.rf_commentVis, self))
         #-- Variables --#
-        self.wgVariables = widgets.VarEditor(self.mainUi, self)
+        self.wgVariables = gpWidget.VarEditor(self.mainUi, self)
         self.vlVariables.insertWidget(-1, self.wgVariables)
         self.cbVariables.clicked.connect(partial(self.mainUi.rf_variablesVis, self))
         #-- Loop --#
@@ -49,9 +49,9 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.cbCmdInitVis.clicked.connect(self.rf_cmdInitVis)
         self.bExtern.clicked.connect(self.on_externalizeScript)
         self.bUpdate.clicked.connect(self.on_updateScript)
-        self.wgCmdInit = widgets.ScriptEditor(self)
+        self.wgCmdInit = gpWidget.ScriptEditor(self)
         self.vlCmdInit.insertWidget(-1, self.wgCmdInit)
-        self.wgScript = widgets.ScriptEditor(self)
+        self.wgScript = gpWidget.ScriptEditor(self)
         self.vlScript.insertWidget(-1, self.wgScript)
         #-- Notes --#
         self.cbNotes.clicked.connect(self.rf_notesVis)

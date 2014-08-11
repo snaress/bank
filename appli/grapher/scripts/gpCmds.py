@@ -3,7 +3,7 @@ from PyQt4 import QtGui
 from appli import grapher
 from functools import partial
 from lib.qt.scripts import procQt as pQt
-from appli.grapher.scripts import widgets
+from appli.grapher.scripts import gpWidget
 from lib.system.scripts import procFile as pFile
 
 
@@ -326,7 +326,7 @@ class Menu(object):
         selItems = self.mainUi.wgGraph.selectedItems()
         if libType == 'script':
             script = pFile.readFile(libFile)
-            self.scriptPopUp = widgets.ScriptEditor(self.mainUi)
+            self.scriptPopUp = gpWidget.ScriptEditor(self.mainUi)
             self.scriptPopUp._widget.setText(''.join(script))
             self.scriptPopUp.show()
         elif libType == 'node':
@@ -344,7 +344,7 @@ class Menu(object):
 
     def on_libEditor(self):
         """ Command launch when 'editLib' is clicked """
-        self.libEditor = widgets.LibEditor(self.mainUi)
+        self.libEditor = gpWidget.LibEditor(self.mainUi)
         self.libEditor.show()
 
     def on_xTerm(self):

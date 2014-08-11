@@ -5,7 +5,7 @@ from functools import partial
 from lib.qt.scripts import procQt as pQt
 from appli.grapher.scripts import grapher as gp
 from lib.system.scripts import procFile as pFile
-from appli.grapher.scripts import widgets, graphTree, nodeEditor, cmds, gpCore
+from appli.grapher.scripts import gpWidget, graphTree, nodeEditor, gpCmds, gpCore
 
 
 grapherClass, grapherUiClass = uic.loadUiType(grapher.uiList['grapher'])
@@ -17,7 +17,7 @@ class GrapherUi(grapherClass, grapherUiClass, gpCore.FileCmds, gpCore.Style):
         self._lock = False
         self.grapher = gp.Grapher()
         self.menuStorage = {'studio': {}, 'prod': {}, 'users': {}}
-        self.cmds_menu = cmds.Menu(self)
+        self.cmds_menu = gpCmds.Menu(self)
         super(GrapherUi, self).__init__()
         self._setupUi()
         self.initUi()
@@ -73,11 +73,11 @@ class GrapherUi(grapherClass, grapherUiClass, gpCore.FileCmds, gpCore.Style):
 
     def _setupMain(self):
         #-- Comment --#
-        self.wgComment = widgets.Comment(self)
+        self.wgComment = gpWidget.Comment(self)
         self.vlComment.insertWidget(-1, self.wgComment)
         self.cbComment.clicked.connect(partial(self.rf_commentVis, self))
         #-- Variables --#
-        self.wgVariables = widgets.VarEditor(self, self)
+        self.wgVariables = gpWidget.VarEditor(self, self)
         self.vlVariables.insertWidget(-1, self.wgVariables)
         self.cbVariables.clicked.connect(partial(self.rf_variablesVis, self))
         #-- NodeEditor --#
