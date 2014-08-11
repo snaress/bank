@@ -21,17 +21,17 @@ class GraphTree(QtGui.QTreeWidget):
         self._setupMainUi()
         self._popUpMenu()
 
-    def __repr2__(self):
+    def __getDict__(self):
         treeDict = {'_order': []}
         allItems = pQt.getAllItems(self)
         for item in allItems:
-            nodeDict = item.__repr2__()
+            nodeDict = item.__getDict__()
             treeDict['_order'].append(nodeDict['nodeName'])
             treeDict[nodeDict['nodeName']] = nodeDict
         return treeDict
 
-    def __str__(self):
-        treeDict = self.__repr2__()
+    def __getStr__(self):
+        treeDict = self.__getDict__()
         text = ["#-- Graph Tree --#"]
         for node in treeDict['_order']:
             text.append("%s:" % node)
@@ -204,7 +204,7 @@ class GraphTree(QtGui.QTreeWidget):
             nodeType = selItems[0]._widget._data.nodeType
             self.miInstanceGraphNode.setVisible(True)
         else:
-            nodeType = selItems[0]._instanceFrom.__repr2__()['nodeType']
+            nodeType = selItems[0]._instanceFrom.__getDict__()['nodeType']
             self.miInstanceGraphNode.setVisible(False)
         if len(selItems) == 1 and nodeType == 'loop':
             self.miCleanCheckFiles1.setVisible(True)
@@ -246,7 +246,7 @@ class GraphTree(QtGui.QTreeWidget):
         selItems = self.selectedItems()
         if len(selItems) == 1:
             if selItems[0]._instanceFrom is None:
-                nodeDict = selItems[0].__repr2__()
+                nodeDict = selItems[0].__getDict__()
                 if nodeDict['nodeParent'] is not None:
                     nodeDict['nodeParent'] = self.getItemFromNodeName(nodeDict['nodeParent'])
                     nodeDict['nodeName'] = self._checkInstanceName("[i1]_%s" % nodeDict['nodeName'])
@@ -270,11 +270,11 @@ class GraphTree(QtGui.QTreeWidget):
         if len(selItems) == 1:
             #-- Store Info --#
             _parent = selItems[0].parent()
-            nodeDict = selItems[0].__repr2__()
+            nodeDict = selItems[0].__getDict__()
             children = selItems[0].getChildren()
             childDict = []
             for item in children:
-                childDict.append(item.__repr2__())
+                childDict.append(item.__getDict__())
             #-- Move Node --#
             if _parent is None:
                 reparentChild = self._moveTopItem(selItems, side, **nodeDict)
@@ -289,7 +289,7 @@ class GraphTree(QtGui.QTreeWidget):
             #-- Reselect Node --#
             nodesList = []
             for selItem in selItems:
-                nodesList.append(selItem.__repr2__()['nodeName'])
+                nodesList.append(selItem.__getDict__()['nodeName'])
             self._reselectNodes(nodesList)
             self.rf_graphColumns()
         else:
@@ -314,10 +314,7 @@ class GraphTree(QtGui.QTreeWidget):
                     self.mainUi._defaultErrorDialog(mess, self.mainUi)
             elif mode == 'branch':
                 if len(selItems) == 1:
-                    self.cpBuffer = {'mode': mode, 'nodeList': []}
-                    children = selItems[0].getChildren()
-                    for child in children:
-                        self.cpBuffer['nodeList'].append(child.__repr2__())
+                    self.on_copySelection(mode)
                     self.delGraphNodes(selItems)
                     self.rf_graphColumns()
                 else:
@@ -369,7 +366,7 @@ class GraphTree(QtGui.QTreeWidget):
         if not len(selItems) == 1:
             self.mainUi._defaultErrorDialog("!!! Warning: Select only one loop node !!!", self.mainUi)
         else:
-            checkFile =  "checkFile__%s" % selItems[0].__repr2__()['nodeLoop']['checkFile']
+            checkFile =  "checkFile__%s" % selItems[0].__getDict__()['nodeLoop']['checkFile']
             tmpPath = pFile.conformPath(self.grapher.tmpPath)
             if os.path.exists(tmpPath):
                 print "Clean check files ..."
@@ -432,8 +429,8 @@ class GraphTree(QtGui.QTreeWidget):
             @param selNode: (object) : QTreeWidgetItem to rename """
         result = self.renameDialog.result()['result_1']
         newNodeName = self._checkNodeName(result)
-        print "\n[grapherUi] : Renaming %s ---> %s" % (selNode.__repr2__()['nodeName'], newNodeName)
-        oldName = selNode._widget.__repr2__()['nodeName']
+        print "\n[grapherUi] : Renaming %s ---> %s" % (selNode.__getDict__()['nodeName'], newNodeName)
+        oldName = selNode._widget.__getDict__()['nodeName']
         selNode._widget.setGraphNodeName(newNodeName)
         self.renameDialog.close()
         #-- Refresh UI --#
@@ -444,8 +441,8 @@ class GraphTree(QtGui.QTreeWidget):
         allItems = pQt.getAllItems(self)
         for item in allItems:
             if item._instanceFrom is not None:
-                if item._instanceFrom.__repr2__()['nodeName'] == newNodeName:
-                    iName = item.__repr2__()['nodeName']
+                if item._instanceFrom.__getDict__()['nodeName'] == newNodeName:
+                    iName = item.__getDict__()['nodeName']
                     iNewName = "%s]_%s" % (iName.split(']')[0], newNodeName)
                     print "[grapherUi] : Renaming %s ---> %s" % (iName, iNewName)
                     item._widget.setGraphNodeName(iNewName)
@@ -459,7 +456,7 @@ class GraphTree(QtGui.QTreeWidget):
         else:
             allItems = pQt.getAllItems(self)
             for item in allItems:
-                if item._widget.__repr2__()['nodeName'] == nodeName:
+                if item._widget.__getDict__()['nodeName'] == nodeName:
                     return item
 
     def getAllInstance(self):
@@ -476,8 +473,8 @@ class GraphTree(QtGui.QTreeWidget):
         """ Get given instance dict
             @param instance: (object) : QTreeWidgetItem
             @return: (dict) : Instance dict """
-        instDict = instance.__repr2__()
-        refDict = instance._instanceFrom.__repr2__()
+        instDict = instance.__getDict__()
+        refDict = instance._instanceFrom.__getDict__()
         for k, v in instDict.iteritems():
             refDict[k] = v
         return refDict
@@ -509,7 +506,7 @@ class GraphTree(QtGui.QTreeWidget):
             indexes = []
             nodeExists = False
             for item in allItems:
-                treeNodeName = item._widget.__repr2__()['nodeName']
+                treeNodeName = item._widget.__getDict__()['nodeName']
                 if treeNodeName == tmpName:
                     nodeExists = True
                 if treeNodeName.startswith('%s_' % tmpBaseName):
@@ -527,7 +524,7 @@ class GraphTree(QtGui.QTreeWidget):
         allInstance = self.getAllInstance()
         indexList = []
         for instance in allInstance:
-            iName = instance.__repr2__()['nodeName']
+            iName = instance.__getDict__()['nodeName']
             if iName.endswith(']%s' % baseName):
                 index = iName.split(']')[0].replace('[', '')
                 indexList.append(index)
@@ -608,7 +605,7 @@ class GraphTree(QtGui.QTreeWidget):
         nodeDict['nodeParent'] = _parent
         for n in range(childCount):
             childItem = _parent.child(n)
-            if childItem.__repr2__()['nodeName'] == selItems[0].__repr2__()['nodeName']:
+            if childItem.__getDict__()['nodeName'] == selItems[0].__getDict__()['nodeName']:
                 currentIndex = n
                 break
         if side == 'up':
@@ -635,7 +632,7 @@ class GraphTree(QtGui.QTreeWidget):
         if mode == 'node':
             for n, item in enumerate(selItems):
                 if item._instanceFrom is None:
-                    txt.append("selNode_%s = %s" % ((n + 1), item.__repr2__()))
+                    txt.append("selNode_%s = %s" % ((n + 1), item.__getDict__()))
                 else:
                     txt.append("selNode_%s = %s" % ((n + 1), self.getInstanceDict(item)))
         elif mode == 'branch':
@@ -643,7 +640,7 @@ class GraphTree(QtGui.QTreeWidget):
                 children = selItems[0].getChildren()
                 for n, child in enumerate(children):
                     if child._instanceFrom is None:
-                        txt.append("selNode_%s = %s" % ((n + 1), child.__repr2__()))
+                        txt.append("selNode_%s = %s" % ((n + 1), child.__getDict__()))
                     else:
                         txt.append("selNode_%s = %s" % ((n + 1), self.getInstanceDict(child)))
             else:
@@ -682,20 +679,20 @@ class GraphTree(QtGui.QTreeWidget):
                 if nodeDict['instanceFrom'] is not None:
                     nodeDict['instanceFrom'] = self.getItemFromNodeName(nodeDict['instanceFrom'])
                 newNode = self.addGraphNode(**nodeDict)
-                convertedDict[nodeDict['nodeName']] = newNode.__repr2__()
+                convertedDict[nodeDict['nodeName']] = newNode.__getDict__()
             else:
                 _parent = self.getItemFromNodeName(convertedDict[nodeDict['nodeParent']]['nodeName'])
                 nodeDict['nodeParent'] = _parent
                 if nodeDict['instanceFrom'] is not None:
                     nodeDict['instanceFrom'] = self.getItemFromNodeName(nodeDict['instanceFrom'])
                 newNode = self.addGraphNode(**nodeDict)
-                convertedDict[nodeDict['nodeName']] = newNode.__repr2__()
+                convertedDict[nodeDict['nodeName']] = newNode.__getDict__()
 
     def _reselectNodes(self, nodes):
         """ Reselect given nodes
             @param nodes: (list) : List of node names """
         for item in pQt.getAllItems(self):
-            if item.__repr2__()['nodeName'] in nodes:
+            if item.__getDict__()['nodeName'] in nodes:
                 self.setItemSelected(item, True)
             else:
                 self.setItemSelected(item, False)
@@ -717,24 +714,24 @@ class GraphItem(QtGui.QTreeWidgetItem):
             self._widgetIndex = (self._parent._widgetIndex + 1)
         super(GraphItem, self).__init__()
 
-    def __repr2__(self):
-        itemDict = self._widget.__repr2__()
+    def __getDict__(self):
+        itemDict = self._widget.__getDict__()
         #-- Add Parent Item --#
         if self.parent() is None:
             itemDict['nodeParent'] = None
         else:
-            parentName = self.parent()._widget.__repr2__()['nodeName']
+            parentName = self.parent()._widget.__getDict__()['nodeName']
             itemDict['nodeParent'] = parentName
         #-- Add Instance Info --#
         if self._instanceFrom is not None:
-            itemDict['instanceFrom'] = self._instanceFrom.__repr2__()['nodeName']
+            itemDict['instanceFrom'] = self._instanceFrom.__getDict__()['nodeName']
         else:
             itemDict['instanceFrom'] = None
         return itemDict
 
-    def __str__(self):
+    def __getStr__(self):
         txt = []
-        for k, v in self.__repr2__().iteritems():
+        for k, v in self.__getDict__().iteritems():
             txt.append("%s = %s" % (k, v))
         return '\n'.join(txt)
 
@@ -803,18 +800,18 @@ class GraphNode(graphNodeClass, graphNodeUiClass, gpCore.Style):
         super(GraphNode, self).__init__()
         self._setupUi()
 
-    def __repr2__(self):
+    def __getDict__(self):
         nodeDict = {'nodeName': str(self.pbNode.text()),
                     'nodeEnabled': self.cbNode.isChecked(),
                     'nodeExpanded': self._item.isExpanded()}
         if self._data is not None:
-            for k, v in self._data.__repr2__().iteritems():
+            for k, v in self._data.__getDict__().iteritems():
                 nodeDict[k] = v
         return nodeDict
 
-    def __str__(self):
+    def __getStr__(self):
         txt = []
-        for k, v in self.__repr2__().iteritems():
+        for k, v in self.__getDict__().iteritems():
             txt.append("%s = %s" % (k, v))
         return '\n'.join(txt)
 
@@ -906,12 +903,12 @@ class GraphNodeData(object):
         self.nodeScript = {}
         self.nodeNotes = {}
 
-    def __repr2__(self):
+    def __getDict__(self):
         return self.__dict__
 
-    def __str__(self):
+    def __getStr__(self):
         txt = []
-        for k, v in self.__repr2__().iteritems():
+        for k, v in self.__getDict__().iteritems():
             if isinstance(v, str):
                 txt.append("%s = %r" % (k, v))
             else:

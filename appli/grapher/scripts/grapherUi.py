@@ -22,13 +22,13 @@ class GrapherUi(grapherClass, grapherUiClass, gpCore.FileCmds, gpCore.Style):
         self._setupUi()
         self.initUi()
 
-    def __str__(self):
+    def __getStr__(self):
         txt = ["\n", "========== GRAPHER UI ==========\n", "#-- Comment --#\n"]
-        txt.append(self.wgComment.__str__())
+        txt.append(self.wgComment.__getStr__())
         txt.append("\n")
-        txt.append(self.wgVariables.__str__())
+        txt.append(self.wgVariables.__getStr__())
         txt.append("\n")
-        txt.append(self.wgGraph.__str__())
+        txt.append(self.wgGraph.__getStr__())
         return ''.join(txt)
 
     def _setupUi(self):

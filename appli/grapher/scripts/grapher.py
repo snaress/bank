@@ -18,7 +18,7 @@ class Grapher(gpCore.FileCmds):
         self.variables = {}
         self.graphTree = {}
 
-    def __repr2__(self):
+    def __getDict__(self):
         txt = []
         for k, v in sorted(self.__dict__.iteritems()):
             if not k.startswith('_'):
@@ -28,7 +28,7 @@ class Grapher(gpCore.FileCmds):
                     txt.append("%s = %s" % (k, v))
         return '\n'.join(txt)
 
-    def __str__(self):
+    def __getStr__(self):
         txt = ["", "========== GRAPHER =========="]
         #-- General --#
         txt.append("#-- General --#")
@@ -71,7 +71,7 @@ class Grapher(gpCore.FileCmds):
         """ Update comment from mainUi
             @param mainUi: (object) : QMainWindow """
         print "[grapher] : #-- Update Comment From Ui --#"
-        txtDict = mainUi.wgComment.__repr2__()
+        txtDict = mainUi.wgComment.__getDict__()
         self.commentHtml = txtDict['commentHtml']
         self.commentTxt = txtDict['commentTxt']
 
@@ -79,13 +79,13 @@ class Grapher(gpCore.FileCmds):
         """ Update variables from mainUi
             @param mainUi: (object) : QMainWindow """
         print "[grapher] : #-- Update Variables From Ui --#"
-        self.variables = mainUi.wgVariables.__repr2__()
+        self.variables = mainUi.wgVariables.__getDict__()
 
     def ud_graphTreeFromUi(self, mainUi):
         """ Update graph tree from mainUi
             @param mainUi: (object) : QMainWindow """
         print "[grapher] : #-- Update Graph Tree From Ui --#"
-        self.graphTree = mainUi.wgGraph.__repr2__()
+        self.graphTree = mainUi.wgGraph.__getDict__()
 
     def execGraph(self):
         """ Execute graph """
@@ -95,12 +95,15 @@ class Grapher(gpCore.FileCmds):
             eg = ExecGraph(self)
             self.initGrapherPath(self._path, 'scripts', self._file)
             self.initGrapherPath(self._path, 'tmp', self._file)
-            exeFile = pFile.conformPath(os.path.join(self.tmpPath, 'test.py'))
+            pyFileName = "exec__%s__%s.py" % (pFile.getDate(), pFile.getTime())
+            exeFile = pFile.conformPath(os.path.join(self.tmpPath, pyFileName))
             #-- Init Grapher Files --#
             graphLoops = eg.graphNodesToFile()
             exeTxt = eg.execHeader(graphLoops)
             #-- Store Graph --#
             exeTxt.extend(eg.parseGraph(graphLoops))
+            #-- End Graph --#
+            exeTxt.extend(eg.execEnd())
             #-- Write & Launch --#
             pFile.writeFile(exeFile, '\n'.join(exeTxt))
             print "\n[grapher] : #-- Launch Graph File --#"
@@ -115,7 +118,7 @@ class Grapher(gpCore.FileCmds):
             if os.path.exists(self._path):
                 print "\n[grapher] : #-- Write Graph --#"
                 try:
-                    pFile.writeFile(self._absPath, self.__repr2__())
+                    pFile.writeFile(self._absPath, self.__getDict__())
                     print "Result: %s" % self._absPath
                 except:
                     raise IOError, "Result: Failed to write file %s" % self._absPath
@@ -273,6 +276,7 @@ class ExecGraph(object):
                'import os',
                'from lib.system.scripts import procFile as pFile',
                'from appli.grapher.scripts import gpCore',
+               'print "ExecGraph started on %s at %s" % (pFile.getDate(), pFile.getTime())',
                'print ""', 'print ""', 'print "#-- Import Grapher Var --#"']
         for gVar in self._getGrapherVar():
             txt.append(gVar)
@@ -282,6 +286,13 @@ class ExecGraph(object):
             txt.append(var)
             txt.append('print %r' % var)
         txt.extend(['print ""', 'print ""', 'print "#-- Exec Graph --#"'])
+        return txt
+
+    def execEnd(self):
+        """ Init script end """
+        txt = ['print ""', 'print ""', 'print "#" * 50',
+               'print "#-- Grapher End --#"',
+               'print "ExecGraph finished on %s at %s" % (pFile.getDate(), pFile.getTime())']
         return txt
 
     def parseGraph(self, graphLoops):
@@ -304,16 +315,21 @@ class ExecGraph(object):
                         nodeFile = os.path.join(self.grapher.scriptPath, '%s.py' % node)
                         nodeFile = pFile.conformPath(nodeFile)
                         tab = self._getTab(node, graphLoops)
-                        txt.extend(['%sprint ""' % tab, '%sprint ""' % tab,
+                        txt.extend(['%sprint ""' % tab, '%sprint ""' % tab, '%sprint ""' % tab,
                                     '%sprint "##### Exec Graph Node %s #####"' % (tab, node),
-                                    '%sprint "#-- Import Node Variables --#"' % tab])
+                                    '%sprint "ExecNode started on", pFile.getDate(), "at", pFile.getTime()' % tab,
+                                    '%sprint ""' % tab, '%sprint "#-- Import Node Variables --#"' % tab])
                         txt.extend(self._parseAllVars(tab, refName))
                         if self.graphTree[refName]['nodeType'] == 'loop':
                             txt.extend(self._parseLoop(tab, refName))
                         elif self.graphTree[refName]['nodeType'] == 'sysData':
                             txt.extend(self._parseSysData(tab, nodeFile))
+                            txt.extend(['%sprint ""' % tab,
+                                        '%sprint "ExecNode finished on", pFile.getDate(), "at", pFile.getTime()' % tab])
                         elif self.graphTree[refName]['nodeType'] == 'cmdData':
                             txt.extend(self._parseCmdData(tab, nodeFile, node, graphLoops))
+                            txt.extend(['%sprint ""' % tab,
+                                        '%sprint "ExecNode finished on", pFile.getDate(), "at", pFile.getTime()' % tab])
         return txt
 
     def _parseDisabled(self, disabledNodes, nodeName):
@@ -344,7 +360,7 @@ class ExecGraph(object):
             @param tab: (str) : Text tabulation (space)
             @param nodeName: (str) : Node name
             @return: (list) : Graph exec text """
-        loopList = ['%sprint "#-- Import Loop Params --#"' % tab]
+        loopList = ['%sprint ""' % tab, '%sprint "#-- Import Loop Params --#"' % tab]
         loopType = self.graphTree[nodeName]['nodeLoop']['type']
         loopIter = self.graphTree[nodeName]['nodeLoop']['iter']
         loopCheck = self.graphTree[nodeName]['nodeLoop']['checkFile']
@@ -381,7 +397,7 @@ class ExecGraph(object):
             @param tab: (str) : Text tabulation (space)
             @param nodeFile: (str) : Node script file
             @return: (list) : Graph exec text """
-        return ['%sprint "#-- Execute Node Script --#"' % tab,
+        return ['%sprint ""' % tab, '%sprint "#-- Execute Node Script --#"' % tab,
                 '%sexecfile("%s")' % (tab, nodeFile)]
 
     def _parseCmdData(self, tab, nodeFile, nodeName, graphLoops):
@@ -431,15 +447,6 @@ class ExecGraph(object):
                     nodeTxt.append("# %s variables #" % p)
                     varDict = self.grapher._varDictToStr(self.graphTree[p]['nodeVariables'][v])
                     nodeTxt.extend(varDict)
-        # if self.graphTree[nodeName]['nodeType'] == 'cmdData':
-        #     for loop in graphLoops.keys():
-        #         if nodeName in graphLoops[loop]:
-        #             nodeTxt.extend(['print "Loop node init: %s"' % loop,
-        #                             '_checkFile = "checkFile__%s"' % self.graphTree[loop]['nodeLoop']['checkFile'],
-        #                             '_checkPath = "%s/%s" % (GP_TMP, _checkFile)',
-        #                             '_checkPath = _checkPath+"."+%s+".py"' % self.graphTree[loop]['nodeLoop']['iter'],
-        #                             'print _checkPath',
-        #                             'execfile("%s") % _checkPath'])
         return nodeTxt
 
     def _getNodeVar(self, nodeName):
@@ -486,6 +493,7 @@ class ExecGraph(object):
 if __name__ == '__main__':
     print "Test Exec Graph"
     fileName = "G:/ddd/assets/chars/main/anglaigus/gp_anglaigus.py"
-    gp = Grapher()
-    gp.loadGraph(fileName)
-    gp.execGraph()
+    print os.path.dirname(fileName)
+    # gp = Grapher()
+    # gp.loadGraph(fileName)
+    # gp.execGraph()

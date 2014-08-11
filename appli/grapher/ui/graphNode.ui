@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>127</width>
+    <width>387</width>
     <height>20</height>
    </rect>
   </property>
@@ -22,6 +22,12 @@
    </property>
    <item row="0" column="2">
     <widget class="QPushButton" name="pbNode">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="maximumSize">
       <size>
        <width>16777215</width>
@@ -67,6 +73,12 @@
    </item>
    <item row="0" column="3">
     <widget class="QLabel" name="lChildIndicator">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="text">
       <string/>
      </property>

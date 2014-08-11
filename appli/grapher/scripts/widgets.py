@@ -18,12 +18,12 @@ class Comment(textEditor.TextEditor):
         self._setupWidget()
         self.rf_widgetVis()
 
-    def __repr2__(self):
+    def __getDict__(self):
         return {'commentHtml': str(self.teText.toHtml()),
                 'commentTxt': str(self.teText.toPlainText())}
 
-    def __str__(self):
-        return self.__repr2__()['commentTxt']
+    def __getStr__(self):
+        return self.__getDict__()['commentTxt']
 
     def _setupWidget(self):
         self.bClearText.setToolTip("Cancel Edition")
@@ -78,11 +78,11 @@ class ScriptEditor(scriptEditor.ScriptEditor):
         self.parent = parent
         super(ScriptEditor, self).__init__()
 
-    def __repr2__(self):
+    def __getDict__(self):
         return str(self._widget.toPlainText())
 
-    def __str__(self):
-        return self.__repr2__()
+    def __getStr__(self):
+        return self.__getDict__()
 
 
 varEditorClass, varEditorUiClass = uic.loadUiType(grapher.uiList['varEditor'])
@@ -98,7 +98,7 @@ class VarEditor(varEditorClass, varEditorUiClass):
         super(VarEditor, self).__init__()
         self._setupUi()
 
-    def __repr2__(self):
+    def __getDict__(self):
         items = pQt.getTopItems(self.twVariables)
         varDict = {}
         for n, item in enumerate(items):
@@ -106,10 +106,10 @@ class VarEditor(varEditorClass, varEditorUiClass):
             varDict['var%s' % padd] = self.getItemDict(item)
         return varDict
 
-    def __str__(self):
+    def __getStr__(self):
         text = ["#-- Variables --#"]
-        for var in sorted(self.__repr2__().keys()):
-            text.append("%s = %s" % (var, self.__repr2__()[var]))
+        for var in sorted(self.__getDict__().keys()):
+            text.append("%s = %s" % (var, self.__getDict__()[var]))
         return '\n'.join(text)
 
     def _setupUi(self):

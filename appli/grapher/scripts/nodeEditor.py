@@ -111,7 +111,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
 
     def rf_comment(self):
         """ Refresh nodeEditor comment """
-        nodeDict = self.graphNode.__repr2__()
+        nodeDict = self.graphNode.__getDict__()
         self.wgComment.resetComment()
         if self.currentVersion in nodeDict['nodeComment'].keys():
             if nodeDict['nodeComment'][self.currentVersion]['html'] == "":
@@ -234,7 +234,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         """ Update graphNode variables """
         data = self.graphNode._data
         data.nodeVariables[self.currentVersion] = {}
-        data.nodeVariables[self.currentVersion] = self.wgVariables.__repr2__()
+        data.nodeVariables[self.currentVersion] = self.wgVariables.__getDict__()
 
     def ud_loop(self):
         """ Update graphNode loop """
@@ -259,7 +259,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
     def ud_script(self):
         """ Update graphNode script """
         data = self.graphNode._data
-        data.nodeScript[self.currentVersion] = str(self.wgScript.__repr2__())
+        data.nodeScript[self.currentVersion] = str(self.wgScript.__getDict__())
 
     def ud_notes(self):
         """ Update graphNode notes """
@@ -273,7 +273,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
             @param graphNode: (object) : QTreeWidgetItem """
         self.graphNode = graphNode
         self.setVisible(True)
-        nodeDict = self.graphNode.__repr2__()
+        nodeDict = self.graphNode.__getDict__()
         self.leNodeName.setText(nodeDict['nodeName'])
         self.cbNodeType.setCurrentIndex(self.cbNodeType.findText(nodeDict['nodeType']))
         self.leVersionTitle.setText(nodeDict['versionTitle'][nodeDict['currentVersion']])
@@ -340,7 +340,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
 
     def on_externalizeScript(self):
         """ Open current script in external editor """
-        script = self.wgScript.__repr2__()
+        script = self.wgScript.__getDict__()
         nodeName = str(self.leNodeName.text())
         tmpFile = pFile.conformPath(os.path.join(self.grapher.tmpPath, "extern__%s.py" % nodeName))
         if self.mainUi.createExternScript(tmpFile, script):

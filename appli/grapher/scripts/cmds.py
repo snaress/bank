@@ -374,12 +374,12 @@ class Menu(object):
 
     def on_grapherRepr(self):
         """ Command launched when miGrapherRepr is clicked """
-        print self.grapher.__repr2__()
+        print self.grapher.__getDict__()
 
     def on_grapherStr(self):
         """ Command launched when miGrapherStr is clicked """
-        print self.grapher.__str__()
+        print self.grapher.__getStr__()
 
     def on_grapherUiStr(self):
         """ Command launched when miGrapherUiStr is clicked """
-        print self.mainUi.__str__()
+        print self.mainUi.__getStr__()
