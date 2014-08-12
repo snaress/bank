@@ -158,6 +158,23 @@ def dRange(start, stop, step, preci=3):
             iters.append(r)
     return iters
 
+def subProcessPrint(process, errorFilters, errorMessages):
+    """ Print subprocess.Popen stdout in real time
+        @param process: (object) : Subprocess
+        @param errorFilters: (list) : String error filters
+        @param errorMessages: (list) : Text error """
+    while True:
+        checkProc = True
+        for stdOutLine in iter(process.stdout.readline, ""):
+            for n, err in enumerate(errorFilters):
+                if err in stdOutLine:
+                    print "# PROCESS ERROR : %s" % errorMessages[n]
+                    checkProc = False
+            if checkProc:
+                sys.stdout.write(stdOutLine)
+        if process.poll() is not None:
+            break
+
 
 class ProgressBar(object):
     """ Create a progress bar
