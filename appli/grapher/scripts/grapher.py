@@ -273,7 +273,7 @@ class ExecGraph(object):
                'print "##### GRAPHER #####"',
                'print "###################"',
                'print ""', 'execfile("%s")' % grapher.envFile,
-               'import os',
+               'import os', 'import subprocess',
                'from lib.system.scripts import procFile as pFile',
                'from appli.grapher.scripts import gpCore',
                'print "ExecGraph started on %s at %s" % (pFile.getDate(), pFile.getTime())',
@@ -408,6 +408,8 @@ class ExecGraph(object):
             @param graphLoops: (dict) : Loop's children
             @return: (list) : Graph exec text """
         iterators = []
+        cmdDataErrors = ["Could not find maya.utils._guiExceptHook."]
+        cmdDataMessages = ["!!! CMD DATA SCRIPT ERROR !!!"]
         for loop in graphLoops:
             if nodeName in graphLoops[loop]:
                 iterators.append(self.graphTree[loop]['nodeLoop']['iter'])
@@ -417,7 +419,9 @@ class ExecGraph(object):
                 '%sGP_melFile = gpCore.FileCmds.createMelFromPy("%s", %s, iters)' % (tab, nodeFile, iterators),
                 '%sGP_nodeCmd = "%s".replace("$script", GP_melFile)' % (tab, self.graphTree[nodeName]['nodeCmd']),
                 '%sprint GP_nodeCmd.replace("%s", GP_PATH)' % (tab, self.grapher._path),
-                '%sprint ""' % tab, '%sos.system(GP_nodeCmd)' % tab]
+                '%sprint ""' % tab,
+                '%sproc = subprocess.Popen(GP_nodeCmd, stdout=subprocess.PIPE)' % tab,
+                '%spFile.subProcessPrint(proc, %s, %s)' % (tab, cmdDataErrors, cmdDataMessages)]
 
     def _getGrapherVar(self):
         """ Get internal grapher variables
