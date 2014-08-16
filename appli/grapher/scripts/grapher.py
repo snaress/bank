@@ -199,7 +199,6 @@ class Grapher(gpCore.FileCmds):
         items = []
         for node in self.graphTree['_order']:
             allParents = self.getAllParent(node)
-            print 'parents', allParents
             if nodeName in allParents:
                 if not node in items:
                     items.append(node)

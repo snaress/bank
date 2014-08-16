@@ -24,9 +24,14 @@
     <widget class="QPushButton" name="pbExecNode">
      <property name="maximumSize">
       <size>
-       <width>40</width>
+       <width>30</width>
        <height>18</height>
       </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
      </property>
      <property name="text">
       <string>Exec</string>
