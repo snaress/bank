@@ -181,10 +181,11 @@ class GraphTree(QtGui.QTreeWidget):
 
     def rf_graphColumns(self):
         """ Refresh graph columns size """
-        for column in range(self.columns):
-            self.resizeColumnToContents(column)
         for item in pQt.getAllItems(self):
             item._widget.rf_childIndicator()
+            item._widget.rf_execNode()
+        for column in range(self.columns):
+            self.resizeColumnToContents(column)
 
     def rf_graph(self):
         """ Refresh graph tree """
@@ -402,6 +403,7 @@ class GraphTree(QtGui.QTreeWidget):
         #-- Edit New QTreeWidgetItem --#
         nodeParams = self._checkNodeDict(**kwargs)
         newItem.setParams(**nodeParams)
+        newItem._execNode = nodeParams['execNode']
         if newItem._instanceFrom is not None:
             newItem._widget._data = None
         else:
@@ -548,6 +550,8 @@ class GraphTree(QtGui.QTreeWidget):
             kwargs['nodeType'] = 'modul'
         if not 'instanceFrom' in keyList:
             kwargs['instanceFrom'] = None
+        if not 'execNode' in kwargs:
+            kwargs['execNode'] = False
         if not 'currentVersion' in keyList:
             kwargs['currentVersion'] = '001'
         if not 'versionTitle' in keyList:
@@ -708,6 +712,7 @@ class GraphItem(QtGui.QTreeWidgetItem):
         self._parent = parent
         self._widget = GraphNode(self._tree, self)
         self._instanceFrom = None
+        self._execNode = False
         if self._parent is None:
             self._widgetIndex = 0
         else:
@@ -727,6 +732,8 @@ class GraphItem(QtGui.QTreeWidgetItem):
             itemDict['instanceFrom'] = self._instanceFrom.__getDict__()['nodeName']
         else:
             itemDict['instanceFrom'] = None
+        #-- Add ExecNode Info --#
+        itemDict['execNode'] = self._execNode
         return itemDict
 
     def __getStr__(self):
@@ -823,13 +830,18 @@ class GraphNode(graphNodeClass, graphNodeUiClass, gpCore.Style):
         click_handler = pQt.ClickHandler(singleClickCmd=self._singleClick,
                                          doubleClickCmd=self._doubleClick)
         self.pbNode.clicked.connect(click_handler)
+        self.pbExecNode.clicked.connect(self.on_execNode)
 
     def rf_childIndicator(self):
         """ Refresh children indicator """
         if self._item.childCount() > 0:
-            self.lChildIndicator.setText("F")
+            self.lChildIndicator.setText(" c ")
         else:
             self.lChildIndicator.setText("")
+
+    def rf_execNode(self):
+        """ Refresh execNode visibility"""
+        self.pbExecNode.setVisible(self._item._execNode)
 
     def on_expandNode(self):
         """ Expand or collapse item """
@@ -838,6 +850,10 @@ class GraphNode(graphNodeClass, graphNodeUiClass, gpCore.Style):
     def on_enableNode(self):
         """ Enable or disable graphNode """
         self.setGraphNodeEnabled(self.cbNode.isChecked())
+
+    def on_execNode(self):
+        """ Execute node """
+        self.mainUi.grapher.execNode(self._item.__getDict__()['nodeName'])
 
     def _singleClick(self):
         """ Connect graphNode to nodeEditor """
@@ -862,7 +878,10 @@ class GraphNode(graphNodeClass, graphNodeUiClass, gpCore.Style):
         """ Edit graphNode color """
         if self._item._instanceFrom is None:
             if self._data.nodeType is not None:
-                self.setStyleSheet(self.graphNodeBgc(self._data.nodeType))
+                if self._item._execNode:
+                    self.setStyleSheet(self.graphExecNodeBgc)
+                else:
+                    self.setStyleSheet(self.graphNodeBgc(self._data.nodeType))
         else:
             self.setStyleSheet(self.graphInstanceBgc)
 

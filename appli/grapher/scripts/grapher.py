@@ -112,6 +112,33 @@ class Grapher(gpCore.FileCmds):
         else:
             print "[grapher] : !!! ERROR: Save graph before exec !!!"
 
+    def execNode(self, nodeName):
+        """ Execude given graphNode """
+        if self._absPath is not None:
+            print "[grapher] : #-- Init Graph File --#"
+            branch = self.getAllParent(nodeName)
+            branch.reverse()
+            #-- Init Path --#
+            eg = ExecGraph(self)
+            self.initGrapherPath(self._path, 'scripts', self._file)
+            self.initGrapherPath(self._path, 'tmp', self._file)
+            pyFileName = "exec__%s__%s.py" % (pFile.getDate(), pFile.getTime())
+            exeFile = pFile.conformPath(os.path.join(self.tmpPath, pyFileName))
+            #-- Init Grapher Files --#
+            graphLoops = eg.graphNodesToFile()
+            exeTxt = eg.execHeader(graphLoops)
+            #-- Store Branch --#
+            exeTxt.extend(eg.parseBranch(branch))
+            #-- End Graph --#
+            exeTxt.extend(eg.execEnd())
+            #-- Write & Launch --#
+            pFile.writeFile(exeFile, '\n'.join(exeTxt))
+            print "\n[grapher] : #-- Launch Graph File --#"
+            print "\tLaunching %s" % exeFile
+            os.system('start /i python -i %s' % exeFile)
+        else:
+            print "[grapher] : !!! ERROR: Save graph before exec !!!"
+
     def writeToFile(self):
         """ Write grapher2 to file """
         if self._absPath is not None:
@@ -155,8 +182,12 @@ class Grapher(gpCore.FileCmds):
         def recurse(currentItem, depth):
             items.append(currentItem)
             if depth != 0:
-                if self.graphTree[currentItem]['nodeParent'] is not None:
-                    recurse(self.graphTree[currentItem]['nodeParent'], depth-1)
+                parentName = self.graphTree[currentItem]['nodeParent']
+                if parentName is not None:
+                    if isinstance(parentName, str):
+                        recurse(parentName, depth-1)
+                    else:
+                        recurse(parentName.__getDict__()['nodeName'], depth-1)
 
         recurse(nodeName, depth)
         return items
@@ -168,6 +199,7 @@ class Grapher(gpCore.FileCmds):
         items = []
         for node in self.graphTree['_order']:
             allParents = self.getAllParent(node)
+            print 'parents', allParents
             if nodeName in allParents:
                 if not node in items:
                     items.append(node)
@@ -311,7 +343,8 @@ class ExecGraph(object):
                         refName = node
                     else:
                         refName = self.graphTree[node]['instanceFrom']
-                    if not self.graphTree[refName]['nodeType'] == 'purData':
+                    #-- Skip purData and executable nodes --#
+                    if not self.graphTree[refName]['nodeType'] == 'purData' and self.graphTree[refName]['execNode'] is False:
                         nodeFile = os.path.join(self.grapher.scriptPath, '%s.py' % node)
                         nodeFile = pFile.conformPath(nodeFile)
                         tab = self._getTab(node, graphLoops)
@@ -330,6 +363,28 @@ class ExecGraph(object):
                             txt.extend(self._parseCmdData(tab, nodeFile, node, graphLoops))
                             txt.extend(['%sprint ""' % tab,
                                         '%sprint "ExecNode finished on", pFile.getDate(), "at", pFile.getTime()' % tab])
+        return txt
+
+    def parseBranch(self, nodes):
+        """ Parsing given branch
+            @param nodes: (list) : Branch nodes
+            @return: (list) : Graph node params """
+        print "\n[grapher] : #-- Parse branch ---#"
+        txt = []
+        for node in nodes:
+            nodeFile = os.path.join(self.grapher.scriptPath, '%s.py' % node)
+            nodeFile = pFile.conformPath(nodeFile)
+            txt.extend(['print ""', 'print ""', 'print ""',
+                        'print "##### Exec Graph Node %s #####"' % node,
+                        'print "ExecNode started on", pFile.getDate(), "at", pFile.getTime()',
+                        'print ""', 'print "#-- Import Node Variables --#"'])
+            txt.extend(self._parseAllVars("", node))
+            if self.graphTree[node]['nodeType'] == 'sysData':
+                txt.extend(self._parseSysData("", nodeFile))
+            elif self.graphTree[node]['nodeType'] == 'cmdData':
+                txt.extend(self._parseCmdData("", nodeFile, node, []))
+            txt.extend(['print ""',
+                        'print "ExecNode finished on", pFile.getDate(), "at", pFile.getTime()'])
         return txt
 
     def _parseDisabled(self, disabledNodes, nodeName):
@@ -496,8 +551,8 @@ class ExecGraph(object):
 
 if __name__ == '__main__':
     print "Test Exec Graph"
-    fileName = "G:/ddd/assets/chars/main/anglaigus/gp_anglaigus.py"
-    print os.path.dirname(fileName)
-    # gp = Grapher()
-    # gp.loadGraph(fileName)
-    # gp.execGraph()
+    fileName = "F:/devZone/leVoeu/shots/s0020/p0010/gp_s0020_p0010.py"
+    # fileName = "G:/ddd/assets/chars/main/anglaigus/gp_anglaigus.py"
+    gp = Grapher()
+    gp.loadGraph(fileName)
+    gp.execGraph()

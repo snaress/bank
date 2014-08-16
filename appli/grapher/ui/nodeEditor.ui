@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>573</width>
-    <height>796</height>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -273,6 +273,9 @@
       <enum>Qt::Vertical</enum>
      </property>
      <widget class="QFrame" name="flComment">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
       <layout class="QVBoxLayout" name="vlComment">
        <property name="spacing">
         <number>0</number>
@@ -300,16 +303,12 @@
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="Line" name="line">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
      <widget class="QFrame" name="flVariables">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
       <layout class="QVBoxLayout" name="vlVariables">
        <property name="spacing">
         <number>0</number>
@@ -334,10 +333,29 @@
          </property>
         </widget>
        </item>
+      </layout>
+     </widget>
+     <widget class="QFrame" name="flExecNode">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>25</height>
+       </size>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <layout class="QVBoxLayout" name="vlExecNode">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
        <item>
-        <widget class="Line" name="line_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+        <widget class="QCheckBox" name="cbExecNode">
+         <property name="text">
+          <string>Exec Node</string>
          </property>
         </widget>
        </item>
@@ -771,6 +789,15 @@
        </property>
        <item>
         <widget class="QFrame" name="qfCmd">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <property name="spacing">
            <number>0</number>
@@ -953,6 +980,9 @@
       </layout>
      </widget>
      <widget class="QFrame" name="flNotes">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <property name="spacing">
         <number>0</number>
@@ -982,13 +1012,6 @@
        </item>
        <item>
         <widget class="QTextEdit" name="teNotes"/>
-       </item>
-       <item>
-        <widget class="Line" name="line_3">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>
@@ -1067,6 +1090,13 @@
     </layout>
    </item>
   </layout>
+  <zorder>line_4</zorder>
+  <zorder>splitter</zorder>
+  <zorder>line_5</zorder>
+  <zorder>vsScript</zorder>
+  <zorder>cbExecNode</zorder>
+  <zorder>line_6</zorder>
+  <zorder>line_7</zorder>
  </widget>
  <resources/>
  <connections/>

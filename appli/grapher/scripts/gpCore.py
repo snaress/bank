@@ -244,6 +244,12 @@ class Style(object):
         return "background-color:Plum;"
 
     @property
+    def graphExecNodeBgc(self):
+        """ Graph execNode background color
+            @return: (str) : Background color """
+        return "background-color:Tomato;"
+
+    @property
     def nodeEditorScriptFont(self):
         """ Node editor script font params
             @return: (object) : Qfont """

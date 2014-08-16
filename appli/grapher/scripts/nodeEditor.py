@@ -79,11 +79,11 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.cbNodeVersion.clear()
         self.wgComment.resetComment()
         self.wgVariables.resetTree()
+        self.cbExecNode.setChecked(False)
         self.leCmd.clear()
         self.wgCmdInit.resetScript()
         self.wgScript.resetScript()
         self.teNotes.clear()
-        # self.setVisible(False)
 
     #========================================== REFRESH ==========================================#
 
@@ -94,7 +94,10 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
 
     def rf_nodeBgc(self):
         """ Refresh node background color """
-        self.graphNode.setStyleSheet(self.graphNode.graphNodeBgc(self.currentType))
+        if self.cbExecNode.isChecked():
+            self.graphNode.setStyleSheet(self.graphNode.graphExecNodeBgc)
+        else:
+            self.graphNode.setStyleSheet(self.graphNode.graphNodeBgc(self.currentType))
 
     def rf_versionTitle(self):
         """ Refresh node version title """
@@ -129,6 +132,17 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         else:
             self.wgVariables.twVariables.clear()
 
+    def rf_execNodeVis(self):
+        """ Refresh execNode visibility """
+        if self.currentType in ['sysData', 'cmdData']:
+            self.flExecNode.setVisible(True)
+        else:
+            self.flExecNode.setVisible(False)
+
+    def rf_execNode(self):
+        """ Refresh execNode state """
+        self.cbExecNode.setChecked(self.graphNode._item._execNode)
+
     def rf_scriptVis(self):
         """ Refresh node script visibility """
         if self.currentType in ['sysData', 'cmdData', 'purData']:
@@ -152,6 +166,9 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
             self.qfLoop.setVisible(False)
             self.qfScript.setVisible(False)
             self.qfScriptSpacer.setVisible(True)
+        if self.currentType not in ['sysData', 'cmdData']:
+            self.cbExecNode.setChecked(False)
+        self.rf_execNodeVis()
 
     def rf_loop(self):
         """ Refresh node Loop """
@@ -207,6 +224,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.rf_scriptVis()
         self.rf_comment()
         self.rf_variables()
+        self.rf_execNode()
         self.rf_loop()
         self.rf_cmd()
         self.rf_cmdInit()
@@ -235,6 +253,10 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         data = self.graphNode._data
         data.nodeVariables[self.currentVersion] = {}
         data.nodeVariables[self.currentVersion] = self.wgVariables.__getDict__()
+
+    def ud_execNode(self):
+        """ Update execNode state """
+        self.graphNode._item._execNode = self.cbExecNode.isChecked()
 
     def ud_loop(self):
         """ Update graphNode loop """
@@ -373,14 +395,17 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         print "[grapherUi] : Saving node %s" % str(self.leNodeName.text())
         self.ud_nodeType()
         self.ud_version()
-        self.rf_nodeBgc()
         self.ud_comment()
         self.ud_variables()
+        self.ud_execNode()
         self.ud_loop()
         self.ud_cmd()
         self.ud_cmdInit()
         self.ud_script()
         self.ud_notes()
+        self.rf_nodeBgc()
+        self.graphNode.rf_execNode()
+        self.graphNode._item._tree.rf_graphColumns()
 
     def on_cancel(self):
         """ Command launch when bCancel is clicked """
