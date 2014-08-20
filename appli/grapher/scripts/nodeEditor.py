@@ -154,18 +154,22 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
                 self.qfCmd.setVisible(True)
                 self.qfCmdInit.setVisible(True)
             else:
+                self.cbCmdInitVis.setChecked(False)
                 self.cbCmdInitVis.setVisible(False)
                 self.qfCmd.setVisible(False)
-                self.qfCmdInit.setVisible(False)
         elif self.currentType == 'loop':
             self.qfLoop.setVisible(True)
             self.qfScript.setVisible(False)
             self.qfScriptSpacer.setVisible(True)
+            self.cbCmdInitVis.setChecked(False)
+            self.cbCmdInitVis.setVisible(False)
             self.on_loopType()
         elif self.currentType == 'modul':
             self.qfLoop.setVisible(False)
             self.qfScript.setVisible(False)
             self.qfScriptSpacer.setVisible(True)
+            self.cbCmdInitVis.setChecked(False)
+            self.cbCmdInitVis.setVisible(False)
         if self.currentType not in ['sysData', 'cmdData']:
             self.cbExecNode.setChecked(False)
         self.rf_execNodeVis()
@@ -227,6 +231,7 @@ class NodeEditor(nodeEditorClass, nodeEditorUiClass):
         self.rf_execNode()
         self.rf_loop()
         self.rf_cmd()
+        self.rf_cmdInitVis()
         self.rf_cmdInit()
         self.rf_script()
         self.rf_notes()
