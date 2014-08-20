@@ -38,3 +38,19 @@ def camTrackToCamDisp(camTrackName, camDispName):
         return camDisp
     else:
         raise IOError, "!!! ERROR: Camera not valid !!!"
+
+def addCamImagePlane(camName, fileName, useSeq=False):
+    """ Add an image plane attached to the given camera
+        @param camName: (str) : Camera name
+        @param fileName: (str) : Image absolute path
+        @param useSeq: (bool) : Enable frame sequence
+        @return: (str) : ImagePlane node name """
+    ip = mc.createNode('imagePlane')
+    camShape = mc.listRelatives(camName, s=True, ni=True)[0]
+    mc.connectAttr("%s.message" % ip, "%s.imagePlane[0]" % camShape, f=True)
+    mc.setAttr("%s.displayOnlyIfCurrent" % ip, 1)
+    mc.setAttr("%s.lockedToCamera" % ip, 1)
+    mc.setAttr("%s.imageName" % ip, fileName, type="string")
+    if useSeq:
+        mc.setAttr("%s.useFrameExtension" % ip, 1)
+    return ip
