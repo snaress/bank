@@ -464,6 +464,7 @@ class ExecGraph(object):
         iterators = []
         cmdDataErrors = ["Could not find maya.utils._guiExceptHook."]
         cmdDataMessages = ["!!! CMD DATA SCRIPT ERROR !!!"]
+        myEnv = os.environ
         for loop in graphLoops:
             if nodeName in graphLoops[loop]:
                 iterators.append(self.graphTree[loop]['nodeLoop']['iter'])
@@ -474,7 +475,7 @@ class ExecGraph(object):
                 '%sGP_nodeCmd = "%s".replace("$script", GP_melFile)' % (tab, self.graphTree[nodeName]['nodeCmd']),
                 '%sprint GP_nodeCmd.replace("%s", GP_PATH)' % (tab, self.grapher._path),
                 '%sprint ""' % tab,
-                '%sproc = subprocess.Popen(GP_nodeCmd, stdout=subprocess.PIPE)' % tab,
+                '%sproc = subprocess.Popen(GP_nodeCmd, stdout=subprocess.PIPE, env=%s)' % (tab, myEnv),
                 '%spFile.subProcessPrint(proc, %s, %s)' % (tab, cmdDataErrors, cmdDataMessages)]
 
     def _getGrapherVar(self):
