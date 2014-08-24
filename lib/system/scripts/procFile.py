@@ -158,19 +158,23 @@ def dRange(start, stop, step, preci=3):
             iters.append(r)
     return iters
 
-def subProcessPrint(process, errorFilters, errorMessages):
+def subProcessPrint(process, errorFilters, errorMessages, force=False):
     """ Print subprocess.Popen stdout in real time
         @param process: (object) : Subprocess
         @param errorFilters: (list) : String error filters
-        @param errorMessages: (list) : Text error """
+        @param errorMessages: (list) : Text error
+        @param force: (bool) : Dont use filters if True """
     while True:
         checkProc = True
         for stdOutLine in iter(process.stdout.readline, ""):
-            for n, err in enumerate(errorFilters):
-                if err in stdOutLine:
-                    print "# PROCESS ERROR : %s" % errorMessages[n]
-                    checkProc = False
-            if checkProc:
+            if not force:
+                for n, err in enumerate(errorFilters):
+                    if err in stdOutLine:
+                        print "# PROCESS ERROR : %s" % errorMessages[n]
+                        checkProc = False
+                if checkProc:
+                    sys.stdout.write(stdOutLine)
+            else:
                 sys.stdout.write(stdOutLine)
         if process.poll() is not None:
             break
