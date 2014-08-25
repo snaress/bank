@@ -18,20 +18,27 @@ parser.add_option('-O', '--open', type='string', help="[file] Open maya scene.")
 parser.add_option('-I', '--import', action='append', default=[], help="[file] Import maya scenes.")
 parser.add_option('-C', '--camera', type='string', help="[str] Camera name.")
 
-grpVerboseHelp = "0=none, 1=fatal, 2=error, 3=warning, 4=info, 5=progress, 6=details"
-grpVerbose = optparse.OptionGroup(parser, 'Verbose', grpVerboseHelp)
+grpVerbose = optparse.OptionGroup(parser, 'Verbose',
+                                  "0=none, 1=fatal, 2=error, 3=warning, 4=info, 5=progress, 6=details")
 grpVerbose.add_option('-V', '--pluginVerbose', type='int', default=4,
                       help="[int] Set the plug-in message verbosity level [Default=%default].")
 grpVerbose.add_option('-v', '--renderVerbose', type='int', default=5,
                       help="[int] Set the mental ray message verbosity level [Default=%default].")
 parser.add_option_group(grpVerbose)
 
-grpOutput = optparse.OptionGroup(parser, 'Output', "Output file settings.")
+grpCamera = optparse.OptionGroup(parser, 'Camera', "Camera settings")
+grpCamera.add_option('--alphaChannel', type='int', help="[int] Enable alpha channel.")
+grpCamera.add_option('--depthChannel', type='int', help="[int] Enable depth channel.")
+parser.add_option_group(grpCamera)
+
+grpOutput = optparse.OptionGroup(parser, 'Output',
+                                 "Output file settings. If used, output.padding.format")
 grpOutput.add_option('-o', '--output', type='string',
                      help="[str] Image file name (without extension or padding).")
-grpOutput.add_option('-f', '--format', type='choice', choices=['png', 'jpg', 'dpx', 'exr'],
-                     help="[choices=['png', 'jpg', 'dpx', 'exr']] Image file extension ")
+grpOutput.add_option('-f', '--format', type='choice', choices=['png','jpg','tif','iff','tga','exr'],
+                     help="[choices=['png','jpg','tif','iff','tga','exr']] Image file extension.")
 grpOutput.add_option('-p', '--padding', type='int', help="[int] Frame padding.")
+grpOutput.add_option('--anim', type='int', help="[int] Enable images sequence")
 parser.add_option_group(grpOutput)
 
 
@@ -102,4 +109,4 @@ if __name__ == '__main__':
     from tools.maya.render.proc.scripts import procRender as pRender
     mr = pRender.MayaRender()
     mr.printOptions()
-    mr.initMayaRender()
+    mr.initMayaRenderer()
