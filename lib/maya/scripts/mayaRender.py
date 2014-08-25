@@ -7,6 +7,7 @@ usage = ''.join(["\nstandAlone Usage: \n", "\tpython mayaRender.py -E [engine] -
                  "\tmr.printOptions()\n", "\tmr.initMayaRender()"])
 parser = optparse.OptionParser(usage=usage)
 
+#-- Global Options --#
 parser.add_option('-E', '--engine', type='choice', default='mentalRay',
                   choices=['mr', 'mentalRay', 'ms', 'mayaSoftaware', 'mh', 'mayaHardware'],
                   help=''.join(["[str] Render engine type [choices=['mr', 'mentalRay', ",
@@ -17,7 +18,12 @@ parser.add_option('-P', '--project', type='string',
 parser.add_option('-O', '--open', type='string', help="[file] Open maya scene.")
 parser.add_option('-I', '--import', action='append', default=[], help="[file] Import maya scenes.")
 parser.add_option('-C', '--camera', type='string', help="[str] Camera name.")
+parser.add_option('-R', '--range', type='int', nargs=3,
+                  help="[int int int] Frame range (start, stop, step).")
+parser.add_option('-S', '--size', type='int', nargs=2, help="[int int] Frame size in pixel (x, y)")
+parser.add_option('--pixelAspect', type='int', help="[int] Pixel aspect")
 
+#-- Verbose Options --#
 grpVerbose = optparse.OptionGroup(parser, 'Verbose',
                                   "0=none, 1=fatal, 2=error, 3=warning, 4=info, 5=progress, 6=details")
 grpVerbose.add_option('-V', '--pluginVerbose', type='int', default=4,
@@ -26,11 +32,13 @@ grpVerbose.add_option('-v', '--renderVerbose', type='int', default=5,
                       help="[int] Set the mental ray message verbosity level [Default=%default].")
 parser.add_option_group(grpVerbose)
 
+#-- Camera Options --#
 grpCamera = optparse.OptionGroup(parser, 'Camera', "Camera settings")
 grpCamera.add_option('--alphaChannel', type='int', help="[int] Enable alpha channel.")
 grpCamera.add_option('--depthChannel', type='int', help="[int] Enable depth channel.")
 parser.add_option_group(grpCamera)
 
+#-- Output Options --#
 grpOutput = optparse.OptionGroup(parser, 'Output',
                                  "Output file settings. If used, output.padding.format")
 grpOutput.add_option('-o', '--output', type='string',
@@ -38,8 +46,29 @@ grpOutput.add_option('-o', '--output', type='string',
 grpOutput.add_option('-f', '--format', type='choice', choices=['png','jpg','tif','iff','tga','exr'],
                      help="[choices=['png','jpg','tif','iff','tga','exr']] Image file extension.")
 grpOutput.add_option('-p', '--padding', type='int', help="[int] Frame padding.")
-grpOutput.add_option('--anim', type='int', help="[int] Enable images sequence")
+grpOutput.add_option('--anim', type='int', help="[int] Enable images sequence.")
 parser.add_option_group(grpOutput)
+
+#-- Mental Ray Options --#
+grpMentalRay = optparse.OptionGroup(parser, 'Mental Ray', "Mental Ray specific options.")
+grpMentalRay.add_option('--samples', type='int', nargs=2,
+                        help="[int int] Mental Ray samples (minSamples, maxSamples).")
+grpMentalRay.add_option('--shadow', type='choice', choices=[0,1,2,3],
+                        help="[choice=[0,1,2,3]] Shadow method (0=None, 1=simple, 2=sorted, 3=segments).")
+grpMentalRay.add_option('--shadowMap', type='choice', choices=[0,1,2,3],
+                        help="[choice=[0,1,2,3]] Shadow map method (0=None, 1=regular, 2=openGL, 3=detail).")
+grpMentalRay.add_option('--shadowMapRebuild', type='choice', choices=[0,1,2],
+                        help=''.join(["[choice=[0,1,2]] Shadow map rebuild method ",
+                                      "(0=Reuse existing maps, 1=Rebuild all and overwrite, ",
+                                      "2=Rebuild all and merge)."]))
+grpMentalRay.add_option('--motionBlur', type='choice', choices=[0,1,2],
+                        help="[choices=[0,1,2]] MotionBlur (0=None, 1=NoDeformation, 2=Full).")
+grpMentalRay.add_option('--motionSteps', type='int', help="[int] Set motionBlur steps.")
+grpMentalRay.add_option('--motionContrast', type='float', help="[float] Set MotionBlur contrast.")
+grpMentalRay.add_option('--motionCoef', type='float', help="[float] Set MotionBlur by.")
+grpMentalRay.add_option('--shutter', type='float', help="[float] Set MotionBlur shutter.")
+grpMentalRay.add_option('--shutterDelay', type='float', help="[float] Set MotionBlur shutter delay.")
+parser.add_option_group(grpMentalRay)
 
 
 class RenderOptions():

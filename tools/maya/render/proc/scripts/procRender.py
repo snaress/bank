@@ -51,11 +51,98 @@ def initMrDefaultNodes():
 class MentalRay(object):
 
     def __init__(self):
-        pass
+        self._mrOptions = None
 
     def initMentalRay(self):
         loadMentalRay()
         initMrDefaultNodes()
+
+    def setMentalRayOptions(self, options):
+        self._mrOptions = options
+        self.mrLog("#-- Init Mental Ray Params --#")
+        self.setSamples()
+        self.setShadows()
+        self.setMotionBlur()
+
+    def setSamples(self):
+        """ Option: 'samples' = Set mentalRay samples """
+        if self._mrOptions['samples'] is None:
+            self.mrLog("\tUse current samples.")
+        else:
+            self.mrLog("\tOption 'samples' detected: %s" % str(self._mrOptions['samples']))
+            mc.setAttr("miDefaultOptions.minSamples", self._mrOptions['samples'][0])
+            mc.setAttr("miDefaultOptions.maxSamples", self._mrOptions['samples'][1])
+
+    def setShadows(self):
+        """ Option: 'shadows' = Set mentalRay shadows """
+        #-- Shadows --#
+        if self._mrOptions['shadow'] is None:
+            self.mrLog("\tUse current shadow.")
+        else:
+            self.mrLog("\tOption 'shadow' detected: %s" % self._mrOptions['shadow'])
+            mc.setAttr("miDefaultOptions.shadowMethod", self._mrOptions['shadow'])
+        #-- Shadow Maps --#
+        if self._mrOptions['shadowMap'] is None:
+            self.mrLog("\tUse current shadowMap.")
+        else:
+            self.mrLog("\tOption 'shadowMap' detected: %s" % self._mrOptions['shadowMap'])
+            mc.setAttr("miDefaultOptions.shadowMaps", self._mrOptions['shadowMap'])
+        #-- Shadow Maps Rebuild --#
+        if self._mrOptions['shadowMapRebuild'] is None:
+            self.mrLog("\tUse current shadowMapRebuild.")
+        else:
+            self.mrLog("\tOption 'shadowMapRebuild' detected: %s" % self._mrOptions['shadowMapRebuild'])
+            mc.setAttr("miDefaultOptions.rebuildShadowMaps", self._mrOptions['shadowMapRebuild'])
+
+    def setMotionBlur(self):
+        """ Option: 'motionBlur' = Enable mentalRay motionBlur """
+        #-- Motion Blur --#
+        if self._mrOptions['motionBlur'] is None:
+            self.mrLog("\tUse current motionBlur.")
+        else:
+            self.mrLog("\tOption 'motionBlur' detected: %s" % self._mrOptions['motionBlur'])
+            mc.setAttr("miDefaultOptions.motionBlur", self._mrOptions['motionBlur'])
+        #-- Motion Steps --#
+        if self._mrOptions['motionSteps'] is None:
+            self.mrLog("\tUse current motionSteps.")
+        else:
+            self.mrLog("\tOption 'motionSteps' detected: %s" % self._mrOptions['motionSteps'])
+            mc.setAttr("miDefaultOptions.motionSteps", self._mrOptions['motionSteps'])
+        #-- Motion Contrast --#
+        if self._mrOptions['motionContrast'] is None:
+            self.mrLog("\tUse current motionContrast.")
+        else:
+            self.mrLog("\tOption 'motionContrast' detected: %s" % self._mrOptions['motionContrast'])
+            mc.setAttr("miDefaultOptions.timeContrastR", self._mrOptions['motionContrast'])
+            mc.setAttr("miDefaultOptions.timeContrastG", self._mrOptions['motionContrast'])
+            mc.setAttr("miDefaultOptions.timeContrastB", self._mrOptions['motionContrast'])
+            mc.setAttr("miDefaultOptions.timeContrastA", self._mrOptions['motionContrast'])
+        #-- Motion Coef --#
+        if self._mrOptions['motionCoef'] is None:
+            self.mrLog("\tUse current motionCoef.")
+        else:
+            self.mrLog("\tOption 'motionCoef' detected: %s" % self._mrOptions['motionCoef'])
+            mc.setAttr("miDefaultOptions.motionBlurBy", self._mrOptions['motionCoef'])
+        #-- Shutter --#
+        if self._mrOptions['shutter'] is None:
+            self.mrLog("\tUse current shutter.")
+        else:
+            self.mrLog("\tOption 'shutter' detected: %s" % self._mrOptions['shutter'])
+            mc.setAttr("miDefaultOptions.shutter", self._mrOptions['shutter'])
+        #-- Shutter Delay --#
+        if self._mrOptions['shutterDelay'] is None:
+            self.mrLog("\tUse current shutterDelay.")
+        else:
+            self.mrLog("\tOption 'shutterDelay' detected: %s" % self._mrOptions['shutterDelay'])
+            mc.setAttr("miDefaultOptions.shutterDelay", self._mrOptions['shutterDelay'])
+
+    def mrLog(self, message, lvl=4):
+        """ Print message at given level
+            @param message: (str) : Text to print
+            @param lvl: (int) : Level (0-6) """
+        levels = ['None', 'Fatal', 'Error', 'Warning', 'Info', 'Progress', 'details']
+        if lvl <= self._mrOptions['pluginVerbose']:
+            print "[mr]|%s|%s" % (levels[lvl], message)
 
 
 class MayaRender(mRender.RenderOptions, MentalRay):
@@ -64,7 +151,7 @@ class MayaRender(mRender.RenderOptions, MentalRay):
         super(MayaRender, self).__init__()
 
     def initMayaScene(self):
-        """ Launch maya render with given options """
+        """ Init maya scene """
         self.log("#-- Init Maya Scene --#")
         #-- Load & Import --#
         if self.options['open'] is None and not self.options['import']:
@@ -76,29 +163,27 @@ class MayaRender(mRender.RenderOptions, MentalRay):
             if self.options['import']:
                 self.log("\tOption 'import' detected: %s" % self.options['import'])
                 self.importScenes()
-        #-- Project --#
-        if self.options['project'] is None:
-            self.log("\tUse current project.")
-        else:
-            self.log("\tOption 'project' detected: %s" % self.options['project'])
-            self.setProject()
-        #-- Camera --#
-        if self.options['camera'] is None:
-            self.log("Option '-C' or '--camera' is needed !!!", lvl=1)
-        else:
-            self.log("\tOption 'camera' detected: %s." % self.options['camera'])
-            self.setCamera()
+        #-- Param Globals --#
+        self.setProject()
+        self.setCamera()
+        self.setRange()
+        self.setSize()
+        self.setPixelAspect()
 
     def initMayaRenderer(self):
+        """ Init Maya Render """
         self.log("#-- Init Maya Renderer --#")
         self.setEngine()
         self.setOutput()
         if self.getOption('engine') in ['mr', 'mentalRay']:
-            self.log("#-- Init Mental Ray Params --#")
+            self.setMentalRayOptions(self.options)
         elif self.options('engine') in ['ms', 'mayaSoftware']:
             self.log("#-- Init Maya Software Params --#")
         elif self.options('engine') in ['mh', 'mayaHardware']:
             self.log("#-- Init Maya Hardware Params --#")
+
+    def render(self):
+        pass
 
     def openScene(self):
         """ Option: 'open' = Scene to load """
@@ -111,18 +196,53 @@ class MayaRender(mRender.RenderOptions, MentalRay):
 
     def setProject(self):
         """ Option: 'project' = Set maya project """
-        mc.workspace(self.options['project'], o=True)
-        mc.workspace(dir=self.options['project'])
+        if self.options['project'] is None:
+            self.log("\tUse current project.")
+        else:
+            self.log("\tOption 'project' detected: %s" % self.options['project'])
+            mc.workspace(self.options['project'], o=True)
+            mc.workspace(dir=self.options['project'])
 
     def setCamera(self):
         """ Option: 'camera' = Set camera renderable """
-        mc.setAttr("%s.renderable" % self.options['camera'], 1)
+        if self.options['camera'] is None:
+            self.log("Option '-C' or '--camera' is needed !!!", lvl=1)
+        else:
+            self.log("\tOption 'camera' detected: %s." % self.options['camera'])
+            mc.setAttr("%s.renderable" % self.options['camera'], 1)
         if self.options['alphaChannel'] is not None:
             self.log("\tOption 'alphaChannel' detected: %s." % self.options['alphaChannel'])
             mc.setAttr("%s.mask" % self.options['camera'], self.options['alphaChannel'])
         if self.options['depthChannel'] is not None:
             self.log("\tOption 'depthChannel' detected: %s." % self.options['depthChannel'])
             mc.setAttr("%s.depth" % self.options['camera'], self.options['depthChannel'])
+
+    def setRange(self):
+        """ Option: 'range' = Set maya frame range """
+        if self.options['range'] is None:
+            self.log("\tUse current frame range.")
+        else:
+            self.log("\tOption 'range' detected: %s" % str(self.options['range']))
+            mc.setAttr("defaultRenderGlobals.startFrame", self.options['range'][0])
+            mc.setAttr("defaultRenderGlobals.endFrame", self.options['range'][1])
+            mc.setAttr("defaultRenderGlobals.byFrameStep", self.options['range'][2])
+
+    def setSize(self):
+        """ Option: 'size' = Set frame size """
+        if self.options['size'] is None:
+            self.log("\tUse current frame size.")
+        else:
+            self.log("\tOption 'size' detected: %s" % str(self.options['size']))
+            mc.setAttr("defaultResolution.width", self.options['size'][0])
+            mc.setAttr("defaultResolution.height", self.options['size'][1])
+
+    def setPixelAspect(self):
+        """ Option: 'pixelAspect' = Set frame pixelAspect """
+        if self.options['pixelAspect'] is None:
+            self.log("\tUse current frame pixel aspect.")
+        else:
+            self.log("\tOption 'pixelAspect' detected: %s" % str(self.options['pixelAspect']))
+            mc.setAttr("defaultResolution.pixelAspect", self.options['pixelAspect'])
 
     def setEngine(self):
         """ Option: 'engine' = Set maya renderer """
@@ -189,125 +309,3 @@ class MayaRender(mRender.RenderOptions, MentalRay):
         levels = ['None', 'Fatal', 'Error', 'Warning', 'Info', 'Progress', 'details']
         if lvl <= self.options['pluginVerbose']:
             print "[mr]|%s|%s" % (levels[lvl], message)
-
-
-class MrRenderOld(object):
-
-    def __init__(self, **kwargs):
-        self.params = kwargs
-        self.mrParams = {}
-        self._initMrParams()
-
-    #============================================ INIT ============================================#
-
-    def _initMrParams(self):
-        """ Init mentalRay params """
-        self._paramFrameRange()
-        self._paramFrameSize()
-        self._paramSamples()
-        self._paramMotionBlur()
-
-    def _paramFrameRange(self):
-        """ Store frameRange param """
-        print "[MR]: Storing frameRange ..."
-        if 'frameRange' in self.params.keys():
-            print "\tFrameRange param detected."
-            self.mrParams['frameRange'] = self.params['frameRange']
-        else:
-            self.mrParams['frameRange'] = [1, 5, 1]
-        print "\tframeRange =", self.mrParams['frameRange']
-
-    def _paramFrameSize(self):
-        """ Store frameSize param """
-        print "[MR]: Storing frameSize ..."
-        if 'x' in self.params.keys():
-            print "\tFrameSize X param detected."
-            self.mrParams['x'] = self.params['x']
-        else:
-            self.mrParams['x'] = 960
-        if 'y' in self.params.keys():
-            print "\tFrameSize Y param detected."
-            self.mrParams['y'] = self.params['y']
-        else:
-            self.mrParams['y'] = 540
-        if 'pixelAspect' in self.params.keys():
-            print "\tPixelAspect param detected."
-            self.mrParams['pixelAspect'] = self.params['pixelAspect']
-        else:
-            self.mrParams['pixelAspect'] = 1
-        print "\tsizeX =", self.mrParams['x']
-        print "\tsizeY =", self.mrParams['y']
-        print "\tpixelAspect = ", self.mrParams['pixelAspect']
-
-    def _paramSamples(self):
-        """ Store samples param """
-        print "[MR]: Storing samples ..."
-        if 'samples' in self.params.keys():
-            print "\tSamples param detected."
-            self.mrParams['samples'] = self.params['samples']
-        else:
-            self.mrParams['samples'] = [-2, 0]
-        print "\tsamples =", self.mrParams['samples']
-
-    def _paramMotionBlur(self):
-        """ Store motionBlur param """
-        print "[MR]: Storing motionBlur ..."
-        if 'motionBlur' in self.params.keys():
-            print "\tMotionBlur param detected."
-            self.mrParams['motionBlur'] = self.params['motionBlur']
-            if 'motionSteps' in self.params.keys():
-                print "\tMotionSteps param detected."
-                self.mrParams['motionSteps'] = self.params['motionSteps']
-            else:
-                self.mrParams['motionSteps'] = 1
-            if 'motionContrast' in self.params.keys():
-                print "\tMotionContrast param detected."
-                self.mrParams['motionContrast'] = self.params['motionContrast']
-            else:
-                self.mrParams['motionContrast'] = [0.2, 0.2, 0.2, 0.2]
-            print "\tmotionBlur =", self.mrParams['motionBlur']
-            print "\tmotionSteps =", self.mrParams['motionSteps']
-            print "\tmotionContrast =", self.mrParams['motionContrast']
-        else:
-            self.mrParams['motionBlur'] = 0
-            print "\tmotionBlur =", self.mrParams['motionBlur']
-
-    #============================================ SET ============================================#
-
-    def setMrParams(self):
-        """ Set mentalRay params """
-        self.setFrameRange()
-        self.setFrameSize()
-        self.setSamples()
-        self.setMotionBlur()
-
-    def setFrameRange(self):
-        """ Set frameRange param """
-        print "[MR]: Set frameRange param ..."
-        mc.setAttr("defaultRenderGlobals.startFrame", self.mrParams['frameRange'][0])
-        mc.setAttr("defaultRenderGlobals.endFrame", self.mrParams['frameRange'][1])
-        mc.setAttr("defaultRenderGlobals.byFrameStep", self.mrParams['frameRange'][2])
-
-    def setFrameSize(self):
-        """ Set frameSize param """
-        print "[MR]: Set frameSize param ..."
-        mc.setAttr("defaultResolution.width", self.mrParams['x'])
-        mc.setAttr("defaultResolution.height", self.mrParams['y'])
-        mc.setAttr("defaultResolution.pixelAspect", self.mrParams['pixelAspect'])
-
-    def setSamples(self):
-        """ Set samples param """
-        print "[MR]: Set samples param ..."
-        mc.setAttr("miDefaultOptions.minSamples", self.mrParams['samples'][0])
-        mc.setAttr("miDefaultOptions.maxSamples", self.mrParams['samples'][1])
-
-    def setMotionBlur(self):
-        """ Set motionBlur param """
-        print "[MR]: Set motionBlur param ..."
-        mc.setAttr("miDefaultOptions.motionBlur", self.mrParams['motionBlur'])
-        if self.mrParams['motionBlur'] > 0:
-            mc.setAttr("miDefaultOptions.motionSteps", self.mrParams['motionSteps'])
-            mc.setAttr("miDefaultOptions.timeContrastR", self.mrParams['motionContrast'][0])
-            mc.setAttr("miDefaultOptions.timeContrastG", self.mrParams['motionContrast'][1])
-            mc.setAttr("miDefaultOptions.timeContrastB", self.mrParams['motionContrast'][2])
-            mc.setAttr("miDefaultOptions.timeContrastA", self.mrParams['motionContrast'][3])
