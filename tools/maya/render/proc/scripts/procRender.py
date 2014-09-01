@@ -136,6 +136,14 @@ class MentalRay(object):
             self.mrLog("\tOption 'shutterDelay' detected: %s" % self._mrOptions['shutterDelay'])
             mc.setAttr("miDefaultOptions.shutterDelay", self._mrOptions['shutterDelay'])
 
+    def launchMrRender(self):
+        """ Launch mentalRay rendering """
+        if self._mrOptions is not None:
+            mc.Mayatomr(r=True, cam=self._mrOptions['camera'], v=self._mrOptions['pluginVerbose'],
+                        rv=self._mrOptions['renderVerbose'])
+        else:
+            raise IOError, "[mr]:Error:Mental Ray options not set !!!"
+
     def mrLog(self, message, lvl=4):
         """ Print message at given level
             @param message: (str) : Text to print
@@ -177,13 +185,21 @@ class MayaRender(mRender.RenderOptions, MentalRay):
         self.setOutput()
         if self.getOption('engine') in ['mr', 'mentalRay']:
             self.setMentalRayOptions(self.options)
-        elif self.options('engine') in ['ms', 'mayaSoftware']:
+        elif self.getOption('engine') in ['ms', 'mayaSoftware']:
             self.log("#-- Init Maya Software Params --#")
-        elif self.options('engine') in ['mh', 'mayaHardware']:
+        elif self.getOption('engine') in ['mh', 'mayaHardware']:
             self.log("#-- Init Maya Hardware Params --#")
 
     def render(self):
-        pass
+        """ Execute render script and rendering """
+        if self.getOption('preRenderScript') is not None:
+            self.log("Execute pre render script: %s" % self.getOption('preRenderScript'))
+            execfile(self.getOption('preRenderScript'))
+        if self.getOption('engine') in ['mr', 'mentalRay']:
+            self.launchMrRender()
+        if self.getOption('postRenderScript') is not None:
+            self.log("Execute post render script: %s" % self.getOption('postRenderScript'))
+            execfile(self.getOption('postRenderScript'))
 
     def openScene(self):
         """ Option: 'open' = Scene to load """

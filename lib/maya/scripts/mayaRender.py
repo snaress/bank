@@ -70,6 +70,12 @@ grpMentalRay.add_option('--shutter', type='float', help="[float] Set MotionBlur 
 grpMentalRay.add_option('--shutterDelay', type='float', help="[float] Set MotionBlur shutter delay.")
 parser.add_option_group(grpMentalRay)
 
+#-- Script Options --#
+grpRenderScript = optparse.OptionGroup(parser, 'Render Script', "Pre render and post render scripts.")
+grpRenderScript.add_option('--preRenderScript', type='string', help="[file] Pre render script")
+grpRenderScript.add_option('--postRenderScript', type='string', help="[file] Post render script")
+parser.add_option_group(grpRenderScript)
+
 
 class RenderOptions():
     """ Class used for maya render settings and process launcher """
