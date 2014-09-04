@@ -11,10 +11,19 @@ class NkFile(object):
         self.graph = {'_order': []}
         self._parseFile()
 
-    def listNodes(self):
+    def listNodes(self, nodeType=None):
         """ List all nuke nodes
+            @param nodeType: (str) : Node type
             @return: (list) : List of nodes (str) """
-        return self.graph['_order']
+        if nodeType is None:
+            return self.graph['_order']
+        else:
+            nodes = []
+            for nodeName in self.graph['_order']:
+                node = self.getNode(nodeName)
+                if node.nodeType == nodeType:
+                    nodes.append(nodeName)
+            return nodes
 
     def getNode(self, nodeName):
         """ get nodeObject from nodeName
@@ -42,11 +51,9 @@ class NkFile(object):
         """ Write graph into given fileName
             @param fileName: (str) : Nuke file name absolute path
             @return: (bool) : True if succes, False if failed """
-        nodes = self.listNodes()
-        for nodeName in nodes:
+        for nodeName in self.listNodes():
             node = self.getNode(nodeName)
-            attrs = node.listAttrs()
-            for n, attr in enumerate(attrs):
+            for n, attr in enumerate(node.listAttrs()):
                 ind = node._index[n]
                 self.nkLines.pop(ind-1)
                 self.nkLines.insert(ind-1, " %s %s\n" % (attr, node.get(attr)))
@@ -161,16 +168,14 @@ if __name__ == '__main__':
     fileName = pFile.conformPath(os.path.join(toolPath, '_lib', 'nkFiles', 'framing.nk'))
 
     nk = NkFile(fileName)
-    nodes = nk.listNodes
-
     for node in nk.listNodes():
         n = nk.getNode(node)
         n.printAttrs()
 
-    # node = nk.getNode('Reformat1')
-    # node.set('box_width', 333)
-    # nk.setAttr('Reformat1', 'box_height', 111)
-    # node.printAttrs()
+    node = nk.getNode('Reformat1')
+    node.set('box_width', 333)
+    nk.setAttr('Reformat1', 'box_height', 111)
+    node.printAttrs()
 
     # fileName2 = pFile.conformPath(os.path.join(toolPath, '_lib', 'nkFiles', 'framing2.nk'))
     # nk.writeNkFile(fileName2)
