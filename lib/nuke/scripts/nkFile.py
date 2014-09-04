@@ -3,7 +3,13 @@ from lib.system.scripts import procFile as pFile
 
 class NkFile(object):
     """ Nuke file parser
-        @param nkFile: (str) : Nuke file absolute path """
+        @param nkFile: (str) : Nuke file absolute path
+        Usage:  nk = NkFile(fileName)
+                node = nk.getNode('Reformat1')
+                node.set('box_width', 333)
+                nk.setAttr('Reformat1', 'box_height', 111)
+                node.printAttrs()
+                nk.writeNkFile(fileName) """
 
     def __init__(self, nkFile):
         self.nkFile = nkFile
@@ -67,7 +73,7 @@ class NkFile(object):
 
     def _parseFile(self):
         """ Parse given nuke file """
-        print "[NkFile] | Info |Parsing file", self.nkFile
+        print "[NkFile] | Info | Parsing file", self.nkFile
         for n, line in enumerate(self.nkLines):
             if line.endswith(' {\n'):
                 nodeType = line.strip(' {\n')
@@ -159,23 +165,3 @@ class NkNode(object):
         """ Get node type
             @return: (str) : Node type """
         return getattr(self, '_nodeType')
-
-
-
-if __name__ == '__main__':
-    import os
-    toolPath = os.sep.join(os.path.normpath(os.path.dirname(__file__)).split(os.sep)[0:-1])
-    fileName = pFile.conformPath(os.path.join(toolPath, '_lib', 'nkFiles', 'framing.nk'))
-
-    nk = NkFile(fileName)
-    for node in nk.listNodes():
-        n = nk.getNode(node)
-        n.printAttrs()
-
-    node = nk.getNode('Reformat1')
-    node.set('box_width', 333)
-    nk.setAttr('Reformat1', 'box_height', 111)
-    node.printAttrs()
-
-    # fileName2 = pFile.conformPath(os.path.join(toolPath, '_lib', 'nkFiles', 'framing2.nk'))
-    # nk.writeNkFile(fileName2)

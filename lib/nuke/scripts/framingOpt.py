@@ -9,7 +9,13 @@ parser.add_option('--out', type='string', help="[str] Output image path.")
 parser.add_option('--sizeIn', type='int', nargs=2,
                   help="[int int] Input image width and height (pixel)")
 
-grpResize = optparse.OptionGroup(parser, 'Resize Options')
+grpFraming = optparse.OptionGroup(parser, '#-- Framing Options --#')
+grpFraming.add_option('-F', '--framing', action='store_true', default=False,
+                      help="Enable framing process (framing options needed)")
+grpFraming.add_option('--prod', type='string', default='No Name', help="[str] Prod alias or name")
+parser.add_option_group(grpFraming)
+
+grpResize = optparse.OptionGroup(parser, '#-- Resize Options --#')
 grpResize.add_option('--sizeOut', type='int', nargs=2,
                      help="[int int] Output image width and height (pixel)")
 parser.add_option_group(grpResize)
@@ -20,6 +26,29 @@ class FramingOptions(object):
     def __init__(self):
         self.args = None
         self.parser = parser
+
+    def help(self, file=None):
+        """ Print parser help
+            @param file: (str) : Write help to file (absolute path) """
+        print "\n#################### FRAMING HELP ####################"
+        self.parser.print_help(file=file)
+        print "######################################################\n"
+
+    def usage(self, file=None):
+        """ Print parser usage
+            @param file: (str) : Write usage to file (absolute path) """
+        print "\n#################### FRAMING USAGE ####################"
+        self.parser.print_usage(file=file)
+        print "#######################################################\n"
+
+    def setOptions(self, args):
+        """ Set parser arguments
+            @param args: (list) : MayaRender Arguments """
+        self.args = args
+
+    def resetOptions(self):
+        """ Reset parser arguments """
+        self.args = None
 
     @property
     def options(self):
