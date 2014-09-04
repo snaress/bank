@@ -11,7 +11,6 @@ class NkFile(object):
         self.graph = {'_order': []}
         self._parseFile()
 
-    @property
     def listNodes(self):
         """ List all nuke nodes
             @return: (list) : List of nodes (str) """
@@ -29,15 +28,43 @@ class NkFile(object):
             @param attr: (str) : Attribute name
             @return: (str) : Value """
         node = self.graph[nodeName]
-        return getattr(node, attr)
+        return node.get(attr)
+
+    def setAttr(self, nodeName, attr, val):
+        """ Set value of given node and attribute
+            @param nodeName: (str) : Node name
+            @param attr: (str) : Attribute name
+            @param val: (instance) : Attribute value """
+        node = self.graph[nodeName]
+        node.set(attr, val)
+
+    def writeNkFile(self, fileName):
+        """ Write graph into given fileName
+            @param fileName: (str) : Nuke file name absolute path
+            @return: (bool) : True if succes, False if failed """
+        nodes = self.listNodes()
+        for nodeName in nodes:
+            node = self.getNode(nodeName)
+            attrs = node.listAttrs()
+            for n, attr in enumerate(attrs):
+                ind = node._index[n]
+                self.nkLines.pop(ind-1)
+                self.nkLines.insert(ind-1, " %s %s\n" % (attr, node.get(attr)))
+        try:
+            pFile.writeFile(fileName, ''.join(self.nkLines))
+            print "[nkFile] | Info | Graph saved: %s" % fileName
+            return True
+        except:
+            print "[nkFile] | Error | Can not save graph: %s" % fileName
+            return False
 
     def _parseFile(self):
         """ Parse given nuke file """
-        print "[NkFile] | Parsing file", self.nkFile
+        print "[NkFile] | Info |Parsing file", self.nkFile
         for n, line in enumerate(self.nkLines):
             if line.endswith(' {\n'):
                 nodeType = line.strip(' {\n')
-                if not nodeType == 'Viewer':
+                if not nodeType in ['Viewer', 'Dot']:
                     attrDict = self._nodeToDict(n, nodeType)
                     if nodeType == 'Root':
                         self.graph['_order'].append('Root')
@@ -45,7 +72,7 @@ class NkFile(object):
                     else:
                         self.graph['_order'].append(attrDict['name'])
                         self.graph[attrDict['name']] = NkNode(**attrDict)
-        print "[NkFile] | Parsing Done"
+        print "[NkFile] | Info | Parsing Done"
 
     def _nodeToDict(self, n, nodeType):
         """ Convert text lines to dict
@@ -53,7 +80,7 @@ class NkFile(object):
             @param nodeType: (str) : Node type
             @return: (dict) : Node dict """
         inNode = True
-        attrDict = {'_order': [], 'nodeType': nodeType}
+        attrDict = {'_order': [], '_index': [], '_nodeType': nodeType}
         nn = n
         while inNode:
             nn += 1
@@ -61,8 +88,10 @@ class NkFile(object):
                 inNode = False
             else:
                 lineOpt = self.nkLines[nn].strip().split(' ')
-                attrDict['_order'].append(lineOpt[0])
-                attrDict[lineOpt[0]] = ' '.join(lineOpt[1:])
+                if not lineOpt[0] in ['xpos', 'ypos']:
+                    attrDict['_order'].append(lineOpt[0])
+                    attrDict['_index'].append(nn+1)
+                    attrDict[lineOpt[0]] = ' '.join(lineOpt[1:])
         return attrDict
 
 
@@ -74,6 +103,31 @@ class NkNode(object):
         for k, v in kwargs.iteritems():
             setattr(self, k, v)
 
+    def get(self, attr):
+        """ Get given attribute value
+            @param attr: (str) : Attribute name
+            @return: (str) : Attribute value """
+        if not attr in getattr(self, '_order'):
+            if self.nodeType == 'Root':
+                raise KeyError, "[NkFile] | Error | %r not found on 'Root'" % attr
+            else:
+                raise KeyError, "[NkFile] | Error | %r not found on %r" % (attr, getattr(self, 'name'))
+        else:
+            return getattr(self, attr)
+
+    def set(self, attr, val):
+        """ Set given attribute value
+            @param attr: (str) : Attribute name
+            @param val: (instance) : Attribute value
+            @return: (str) : Attribute value """
+        if not attr in getattr(self, '_order'):
+            if self.nodeType == 'Root':
+                raise KeyError, "[NkFile] | Error | %r not found on 'Root'" % attr
+            else:
+                raise KeyError, "[NkFile] | Error | %r not found on %r" % (attr, getattr(self, 'name'))
+        else:
+            setattr(self, attr, val)
+
     def listAttrs(self):
         """ List all node's attributes
             @return: (list) : Node attributes (str) """
@@ -82,10 +136,41 @@ class NkNode(object):
             attrs.append(attr)
         return attrs
 
+    def printAttrs(self):
+        """ Print node line index, attribute and value """
+        print "-" * 80
+        if self.nodeType == 'Root':
+            print "Node Name: Root"
+        else:
+            print "Node Name:", getattr(self, 'name'), "(%s)" % self.nodeType
+        for n, attr in enumerate(self.listAttrs()):
+            print "\t[%s] | %s = %s" % (getattr(self, '_index')[n], attr, getattr(self, attr))
+        print "-" * 80
+
+    @property
+    def nodeType(self):
+        """ Get node type
+            @return: (str) : Node type """
+        return getattr(self, '_nodeType')
+
+
 
 if __name__ == '__main__':
-    nk = NkFile("F:/rnd/workspace/bank/lib/nuke/_lib/nkFiles/resizeImage.nk")
-    print nk.listNodes
-    node = nk.getNode('Reformat1')
-    print node.listAttrs()
-    print nk.getAttr('Reformat1', 'box_width')
+    import os
+    toolPath = os.sep.join(os.path.normpath(os.path.dirname(__file__)).split(os.sep)[0:-1])
+    fileName = pFile.conformPath(os.path.join(toolPath, '_lib', 'nkFiles', 'framing.nk'))
+
+    nk = NkFile(fileName)
+    nodes = nk.listNodes
+
+    for node in nk.listNodes():
+        n = nk.getNode(node)
+        n.printAttrs()
+
+    # node = nk.getNode('Reformat1')
+    # node.set('box_width', 333)
+    # nk.setAttr('Reformat1', 'box_height', 111)
+    # node.printAttrs()
+
+    # fileName2 = pFile.conformPath(os.path.join(toolPath, '_lib', 'nkFiles', 'framing2.nk'))
+    # nk.writeNkFile(fileName2)

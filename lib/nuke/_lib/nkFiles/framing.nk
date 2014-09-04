@@ -1,32 +1,31 @@
-#! C:/Program Files (x86)/Nuke5.0v2/nuke5.0.exe -nx
+#! C:/Program Files (x86)/Nuke5.0v2/Nuke5.0.exe -nx
 version 5.0200
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="0" y="0" w="1680" h="870" screen="0">
+    <window x="-1688" y="-8" w="1696" h="1066" screen="1">
         <splitter orientation="1">
-            <split size="804"></split>
+            <split size="1063"></split>
             <splitter orientation="1">
                 <split size="40"></split>
                 <dock id="" hideTitles="1" activePageId="Toolbar.1">
                     <page id="Toolbar.1"></page>
                 </dock>
-                <split size="762"></split>
+                <split size="1021"></split>
                 <splitter orientation="2">
-                    <split size="402"></split>
+                    <split size="415"></split>
                     <dock id="" activePageId="Viewer.1">
                         <page id="Viewer.1"></page>
                     </dock>
-                    <split size="402"></split>
+                    <split size="585"></split>
                     <dock id="" activePageId="DAG.1">
                         <page id="DAG.1"></page>
                         <page id="Curve Editor.1"></page>
                     </dock>
                 </splitter>
             </splitter>
-            <split size="858"></split>
-            <dock id="" activePageId="Script Editor.1">
+            <split size="615"></split>
+            <dock id="" activePageId="Properties.1">
                 <page id="Properties.1"></page>
-                <page id="Script Editor.1"></page>
             </dock>
         </splitter>
     </window>
@@ -35,41 +34,152 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name F:/rnd/workspace/bank/lib/nuke/_lib/nkFiles/framing.nk
+ frame 311
+ first_frame 299
+ last_frame 662
+ lock_range true
  format "640 480 0 0 640 480 1 PC_Video"
  proxy_type scale
  proxy_format "640 480 0 0 640 480 1 PC_Video"
 }
 Read {
  inputs 0
- file G:/imageAbsPath.jpg
- format "1000 2000 0 0 1000 2000 1 "
+ file F:/devZone/leVoeu/shots/s0020/p0010/compo/tracking/s0020_p0010_verifTrack.%07d.png
+ format "1920 1080 0 0 1920 1080 1 HD"
+ first 299
+ last 662
  name Read1
- xpos -260
- ypos -58
+ xpos -810
+ ypos -130
+}
+set N25d7588 [stack 0]
+Rectangle {
+ replace true
+ area {0 0 1920 80}
+ color {0 0 0 1}
+ name bandeDn
+ xpos -920
+ ypos -34
+}
+Text {
+ message Name
+ Font 1
+ font C:/Windows/Fonts/arial.ttf
+ size 30
+ yjustify center
+ translate {30 40}
+ name txtFile
+ xpos -920
+ ypos 14
+}
+Text {
+ message "Frame: \[frame]"
+ Font 1
+ font C:/Windows/Fonts/arial.ttf
+ size 30
+ xjustify center
+ yjustify center
+ translate {960 40}
+ name txtFrame
+ xpos -920
+ ypos 62
+}
+Text {
+ message User
+ Font 1
+ font C:/Windows/Fonts/arial.ttf
+ size 30
+ xjustify right
+ yjustify center
+ translate {1890 40}
+ name txtUser
+ xpos -920
+ ypos 110
+}
+push $N25d7588
+Rectangle {
+ replace true
+ area {0 1000 1920 1080}
+ color {0 0 0 1}
+ name bandeUp
+ xpos -1030
+ ypos -34
+}
+Text {
+ message Title
+ Font 1
+ font C:/Windows/Fonts/arial.ttf
+ size 30
+ yjustify center
+ translate {30 1040}
+ name txtTitle
+ xpos -1030
+ ypos 14
+}
+Text {
+ message Prod
+ Font 1
+ font C:/Windows/Fonts/arial.ttf
+ size 30
+ xjustify center
+ yjustify center
+ translate {960 1040}
+ name txtProd
+ xpos -1030
+ ypos 62
+}
+Text {
+ message "Date: \[date %Y/%m/%d]"
+ Font 1
+ font C:/Windows/Fonts/Arial.ttf
+ size 30
+ xjustify right
+ yjustify center
+ translate {1890 1040}
+ name txtDate
+ xpos -1030
+ ypos 110
+}
+AddMix {
+ inputs 2
+ name joinBande
+ xpos -968
+ ypos 158
+}
+set N7e333b8 [stack 0]
+push $N7e333b8
+push $N25d7588
+Keymix {
+ inputs 3
+ mix 0.9
+ name addFraming
+ xpos -810
+ ypos 152
+ disable true
 }
 Reformat {
  type "to box"
- box_width 500
- box_height 250
+ box_width 333
+ box_height 111
  box_fixed true
  resize fit
  black_outside true
  name Reformat1
- xpos -150
- ypos -34
+ xpos -810
+ ypos 206
+ disable true
 }
-set N44ae0b8 [stack 0]
 Write {
  file G:/imageAbsPath.png
  views {main}
  file_type png
  name Write1
- xpos -40
- ypos -34
+ xpos -810
+ ypos 254
 }
-push $N44ae0b8
 Viewer {
+ frame 311
  name Viewer1
- xpos -67
- ypos 110
+ xpos -810
+ ypos 302
 }
