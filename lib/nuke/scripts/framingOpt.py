@@ -6,6 +6,10 @@ parser = optparse.OptionParser(usage=usage)
 
 parser.add_option('--in', type='string', help="[str] Input image path.")
 parser.add_option('--out', type='string', help="[str] Output image path.")
+parser.add_option('-f', '--frame', action='store_true', dest='range',
+                  help="Enable unique frame to render.")
+parser.add_option('-s', '--sequence', type='int', nargs=3, dest='range',
+                  help="[int int int] Frame range to render (start, stop, step).")
 parser.add_option('--sizeIn', type='int', nargs=2,
                   help="[int int] Input image width and height (pixel)")
 
