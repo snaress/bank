@@ -181,6 +181,9 @@ def subProcessPrint(process, errorFilters, errorMessages, force=False):
 
 
 class Logger(logging.Logger):
+    """ Print given message with log levels
+        @param title: (str) : Log title
+        @param level: (str) : Log level ('critical', 'error', 'warning', 'info', 'debug') """
 
     def __init__(self, title='LOG', level='info'):
         self._level = self._setLevel(level)
@@ -188,6 +191,8 @@ class Logger(logging.Logger):
         self.addHandler(self._setFormat())
 
     def _setFormat(self):
+        """ Set log format
+            @return: (object) : Log streamHandler """
         console = logging.StreamHandler()
         console.setLevel(self._level)
         formatter = logging.Formatter('[%(name)s] | %(levelname)s | %(message)s')
@@ -195,6 +200,10 @@ class Logger(logging.Logger):
         return console
 
     def _setLevel(self, lvl):
+        """ Set log level
+            @param lvl: (str) : Log level ('critical', 'error', 'warning', 'info', 'debug')
+            @return: (object) : Log level
+        """
         if lvl == 'critical':
             return logging.CRITICAL
         elif lvl == 'error':
