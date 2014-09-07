@@ -1,4 +1,4 @@
-import os, sys, math, time
+import os, sys, math, time, logging
 
 
 def conformPath(path):
@@ -178,6 +178,33 @@ def subProcessPrint(process, errorFilters, errorMessages, force=False):
                 sys.stdout.write(stdOutLine)
         if process.poll() is not None:
             break
+
+
+class Logger(logging.Logger):
+
+    def __init__(self, title='LOG', level='info'):
+        self._level = self._setLevel(level)
+        super(Logger, self).__init__(title, level=self._level)
+        self.addHandler(self._setFormat())
+
+    def _setFormat(self):
+        console = logging.StreamHandler()
+        console.setLevel(self._level)
+        formatter = logging.Formatter('[%(name)s] | %(levelname)s | %(message)s')
+        console.setFormatter(formatter)
+        return console
+
+    def _setLevel(self, lvl):
+        if lvl == 'critical':
+            return logging.CRITICAL
+        elif lvl == 'error':
+            return logging.ERROR
+        elif lvl == 'warning':
+            return logging.WARNING
+        elif lvl == 'info':
+            return logging.INFO
+        elif lvl == 'debug':
+            return logging.DEBUG
 
 
 class ProgressBar(object):
