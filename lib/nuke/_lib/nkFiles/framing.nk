@@ -12,11 +12,11 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                 </dock>
                 <split size="1021"></split>
                 <splitter orientation="2">
-                    <split size="415"></split>
+                    <split size="500"></split>
                     <dock id="" activePageId="Viewer.1">
                         <page id="Viewer.1"></page>
                     </dock>
-                    <split size="585"></split>
+                    <split size="500"></split>
                     <dock id="" activePageId="DAG.1">
                         <page id="DAG.1"></page>
                         <page id="Curve Editor.1"></page>
@@ -44,7 +44,7 @@ Root {
 }
 Read {
  inputs 0
- file F:/devZone/leVoeu/shots/s0020/p0010/compo/tracking/s0020_p0010_verifTrack.%07d.png
+ file G:/imageAbsPath.png
  format "1920 1080 0 0 1920 1080 1 HD"
  first 299
  last 662
@@ -52,14 +52,20 @@ Read {
  xpos -810
  ypos -130
 }
-set N25d7588 [stack 0]
+set N7b98ab8 [stack 0]
+Dot {
+ name Dot7
+ xpos -886
+ ypos -102
+}
+set Nf765168 [stack 0]
 Rectangle {
  replace true
  area {0 0 1920 80}
  color {0 0 0 1}
  name bandeDn
  xpos -920
- ypos -34
+ ypos -58
 }
 Text {
  message Name
@@ -70,7 +76,7 @@ Text {
  translate {30 40}
  name txtFile
  xpos -920
- ypos 14
+ ypos -10
 }
 Text {
  message "Frame: \[frame]"
@@ -82,7 +88,7 @@ Text {
  translate {960 40}
  name txtFrame
  xpos -920
- ypos 62
+ ypos 38
 }
 Text {
  message User
@@ -94,16 +100,21 @@ Text {
  translate {1890 40}
  name txtUser
  xpos -920
- ypos 110
+ ypos 86
 }
-push $N25d7588
+push $Nf765168
+Dot {
+ name Dot6
+ xpos -996
+ ypos -102
+}
 Rectangle {
  replace true
  area {0 1000 1920 1080}
  color {0 0 0 1}
  name bandeUp
  xpos -1030
- ypos -34
+ ypos -58
 }
 Text {
  message Title
@@ -114,7 +125,7 @@ Text {
  translate {30 1040}
  name txtTitle
  xpos -1030
- ypos 14
+ ypos -10
 }
 Text {
  message Prod
@@ -126,7 +137,7 @@ Text {
  translate {960 1040}
  name txtProd
  xpos -1030
- ypos 62
+ ypos 38
 }
 Text {
  message "Date: \[date %Y/%m/%d]"
@@ -138,23 +149,23 @@ Text {
  translate {1890 1040}
  name txtDate
  xpos -1030
- ypos 110
+ ypos 86
 }
 AddMix {
  inputs 2
  name joinBande
  xpos -968
- ypos 158
+ ypos 134
 }
-set N7e333b8 [stack 0]
-push $N7e333b8
-push $N25d7588
+set N7b00450 [stack 0]
+push $N7b00450
+push $N7b98ab8
 Keymix {
  inputs 3
  mix 0.9
  name addFraming
  xpos -810
- ypos 152
+ ypos 128
  disable true
 }
 Reformat {
@@ -164,22 +175,100 @@ Reformat {
  box_fixed true
  resize fit
  black_outside true
- name Reformat1
+ name resize
  xpos -810
- ypos 206
+ ypos 182
  disable true
 }
+set N7b00700 [stack 0]
+Dot {
+ name Dot1
+ xpos -776
+ ypos 234
+}
+set N7c260f0 [stack 0]
+Dot {
+ name Dot3
+ xpos -886
+ ypos 234
+}
+set N7c263a0 [stack 0]
+Dot {
+ name Dot2
+ xpos -996
+ ypos 234
+}
+Write {
+ file G:/imageAbsPath.jpg
+ views {main}
+ file_type jpeg
+ _jpeg_quality 1
+ name save_jpg
+ xpos -1030
+ ypos 278
+ disable true
+}
+push $N7c263a0
 Write {
  file G:/imageAbsPath.png
  views {main}
  file_type png
- name Write1
- xpos -810
- ypos 254
+ datatype "16 bit"
+ name save_png
+ xpos -920
+ ypos 278
+ disable true
 }
-Viewer {
- frame 311
- name Viewer1
+push $N7c260f0
+Dot {
+ name Dot4
+ xpos -666
+ ypos 234
+}
+set Nf3a4d10 [stack 0]
+Dot {
+ name Dot5
+ xpos -556
+ ypos 234
+}
+Write {
+ file G:/imageAbsPath.mov
+ views {main}
+ file_type mov
+ codec avc1
+ fps 25
+ quality High
+ name save_mov
+ xpos -590
+ ypos 278
+ disable true
+}
+push $Nf3a4d10
+Write {
+ file G:/imageAbsPath.exr
+ views {main}
+ file_type exr
+ datatype "32 bit float"
+ compression none
+ name save_exr
+ xpos -700
+ ypos 278
+ disable true
+}
+push $N7c260f0
+Write {
+ file G:/imageAbsPath.dpx
+ views {main}
+ file_type dpx
+ datatype "16 bit"
+ name save_dpx
  xpos -810
- ypos 302
+ ypos 278
+ disable true
+}
+push $N7b00700
+Viewer {
+ name Viewer1
+ xpos -590
+ ypos 182
 }

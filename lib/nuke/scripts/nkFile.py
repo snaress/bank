@@ -11,7 +11,8 @@ class NkFile(object):
                 node.printAttrs()
                 nk.writeNkFile(fileName) """
 
-    def __init__(self, nkFile):
+    def __init__(self, nkFile, lvl='info'):
+        self.log = pFile.Logger(title='NkFile', level=lvl)
         self.nkFile = nkFile
         self.nkLines = pFile.readFile(nkFile)
         self.graph = {'_order': []}
@@ -36,6 +37,37 @@ class NkFile(object):
             @param nodeName: (str) : Node name
             @return: (object) : Node """
         return self.graph[nodeName]
+
+    # def createAttr(self, nodeName, attr, val):
+    #     """ Create new attribute on node
+    #         @param nodeName: (str) : Node name
+    #         @param attr: (str) : Attribute name
+    #         @param val: (instance) : Attribute value """
+    #     if nodeName in self.listNodes():
+    #         node = self.getNode(nodeName)
+    #         node._order.append(attr)
+    #         node._index.append(max(node._index) + 1)
+    #         setattr(node, attr, val)
+    #         node.printAttrs()
+    #         self.nkLines.insert(max(node._index), "}\n")
+    #     else:
+    #         self.log.error("Node %r not found." % nodeName)
+    #         raise KeyError, "[NkFile] | Error | Node %r not found." % nodeName
+    #
+    # def deleteAttr(self, nodeName, attr):
+    #     """ Create new attribute on node
+    #         @param nodeName: (str) : Node name
+    #         @param attr: (str) : Attribute name """
+    #     if nodeName in self.listNodes():
+    #         node = self.getNode(nodeName)
+    #         ind = node._order.index(attr)
+    #         self.nkLines.pop(node._index[ind-1])
+    #         node._order.pop(ind)
+    #         node._index.pop(ind)
+    #         delattr(node, attr)
+    #     else:
+    #         self.log.error("Node %r not found." % nodeName)
+    #         raise KeyError, "[NkFile] | Error | Node %r not found." % nodeName
 
     def getAttr(self, nodeName, attr):
         """ Get value of given node and attribute
@@ -65,15 +97,15 @@ class NkFile(object):
                 self.nkLines.insert(ind-1, " %s %s\n" % (attr, node.get(attr)))
         try:
             pFile.writeFile(fileName, ''.join(self.nkLines))
-            print "[nkFile] | Info | Graph saved: %s" % fileName
+            self.log.info("Graph saved: %s" % fileName)
             return True
         except:
-            print "[nkFile] | Error | Can not save graph: %s" % fileName
+            self.log.error("Can not save graph: %s" % fileName)
             return False
 
     def _parseFile(self):
         """ Parse given nuke file """
-        print "[NkFile] | Info | Parsing file", self.nkFile
+        self.log.info("Parsing file %s ..." % self.nkFile)
         for n, line in enumerate(self.nkLines):
             if line.endswith(' {\n'):
                 nodeType = line.strip(' {\n')
@@ -85,7 +117,7 @@ class NkFile(object):
                     else:
                         self.graph['_order'].append(attrDict['name'])
                         self.graph[attrDict['name']] = NkNode(**attrDict)
-        print "[NkFile] | Info | Parsing Done"
+        self.log.info("Parsing Done.")
 
     def _nodeToDict(self, n, nodeType):
         """ Convert text lines to dict
@@ -101,10 +133,9 @@ class NkFile(object):
                 inNode = False
             else:
                 lineOpt = self.nkLines[nn].strip().split(' ')
-                if not lineOpt[0] in ['xpos', 'ypos']:
-                    attrDict['_order'].append(lineOpt[0])
-                    attrDict['_index'].append(nn+1)
-                    attrDict[lineOpt[0]] = ' '.join(lineOpt[1:])
+                attrDict['_order'].append(lineOpt[0])
+                attrDict['_index'].append(nn+1)
+                attrDict[lineOpt[0]] = ' '.join(lineOpt[1:])
         return attrDict
 
 
@@ -113,6 +144,7 @@ class NkNode(object):
         @param kwargs: Nuke node attributes and values """
 
     def __init__(self, **kwargs):
+        self.log = pFile.Logger(title='NkNode')
         for k, v in kwargs.iteritems():
             setattr(self, k, v)
 
@@ -122,9 +154,11 @@ class NkNode(object):
             @return: (str) : Attribute value """
         if not attr in getattr(self, '_order'):
             if self.nodeType == 'Root':
-                raise KeyError, "[NkFile] | Error | %r not found on 'Root'" % attr
+                self.log.error("%r not found on 'Root'" % attr)
+                raise AttributeError, "[NkNode] | Error | %r not found on 'Root'" % attr
             else:
-                raise KeyError, "[NkFile] | Error | %r not found on %r" % (attr, getattr(self, 'name'))
+                self.log.error("%r not found on %r" % (attr, getattr(self, 'name')))
+                raise AttributeError, "[NkNode] | Error | %r not found on %r" % (attr, getattr(self, 'name'))
         else:
             return getattr(self, attr)
 
@@ -135,19 +169,18 @@ class NkNode(object):
             @return: (str) : Attribute value """
         if not attr in getattr(self, '_order'):
             if self.nodeType == 'Root':
-                raise KeyError, "[NkFile] | Error | %r not found on 'Root'" % attr
+                self.log.error("%r not found on 'Root'" % attr)
+                raise AttributeError, "[NkNode] | Error | %r not found on 'Root'" % attr
             else:
-                raise KeyError, "[NkFile] | Error | %r not found on %r" % (attr, getattr(self, 'name'))
+                self.log.error("%r not found on %r" % (attr, getattr(self, 'name')))
+                raise AttributeError, "[NkNode] | Error | %r not found on %r" % (attr, getattr(self, 'name'))
         else:
             setattr(self, attr, val)
 
     def listAttrs(self):
         """ List all node's attributes
             @return: (list) : Node attributes (str) """
-        attrs = []
-        for attr in getattr(self, '_order'):
-            attrs.append(attr)
-        return attrs
+        return getattr(self, '_order')
 
     def printAttrs(self):
         """ Print node line index, attribute and value """
