@@ -1,6 +1,7 @@
 from lib.system.scripts import procFile as pFile
 
 
+
 class NkFile(object):
     """ Nuke file parser
         @param nkFile: (str) : Nuke file absolute path
