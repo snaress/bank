@@ -2,12 +2,18 @@ import os
 from lib.nuke.scripts import framingOpt, nkFile
 from lib.system.scripts import procFile as pFile
 
-
 toolPath = os.sep.join(os.path.normpath(os.path.dirname(__file__)).split(os.sep)[0:-1])
 nkFileName = pFile.conformPath(os.path.join(toolPath, '_lib', 'nkFiles', 'framing.nk'))
 
 
 class Framing(framingOpt.FramingOptions):
+    """ Framing class
+        @param args: (list) : Options list
+        @param lvl: (str) : Log level 'critical', 'error', 'warning', 'info', 'debug')
+        Usage: opts = ['--in', imaIn, '--out', imaOut, '-s', '300', '305', '1',
+                       '--sizeIn', '1920', '1080', '-F', '--title', '"CFX | cloth_dlv | v003"',
+                       '--prod', '"Le Voeu"', '--file', compSrc, '--sizeOut', '960', '540']
+               fr = Framing(opts, lvl='debug') """
 
     def __init__(self, args=None, lvl='info'):
         self.log = pFile.Logger(title='Framing', level=lvl)
@@ -271,16 +277,3 @@ class Framing(framingOpt.FramingOptions):
             @param size: (str) : Image size
             @return: (str) : Converted image size """
         return '"%s %s 0 0 %s %s 1 framing"' % (size[0], size[1], size[0], size[1])
-
-
-# if __name__ == '__main__':
-#     imaIn = "F:/devZone/leVoeu/shots/s0020/p0010/compo/tracking/s0020_p0010_verifTrack.0000300.png"
-#     imaOut = "F:/devZone/leVoeu/shots/s0020/p0010/compo/tracking/test.0000300.mov"
-#     compSrc = '"nuke/tracking/s0020_p0010_verifTrack.nk"'
-#     opts = ['--in', imaIn, '--out', imaOut, '-s', '300', '305', '1', '--sizeIn', '1920', '1080',
-#             '-F', '--title', '"CFX | cloth_dlv | v003"', '--prod', '"Le Voeu"', '--file', compSrc,
-#             '--sizeOut', '960', '540']
-#     fr = Framing(opts, lvl='debug')
-
-    # tmpFile = pFile.conformPath(os.path.join(toolPath, '_lib', 'nkFiles', 'framing2.nk'))
-    # fr.nuke.writeNkFile(tmpFile)

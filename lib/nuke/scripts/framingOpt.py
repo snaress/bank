@@ -101,7 +101,6 @@ class FramingOptions(object):
         print '#%s#\n' % ("-" * 36)
 
 
-
 if __name__ == '__main__':
     parser.parse_args()
     wsPath = "F:/rnd/workspace/bank"
@@ -110,4 +109,3 @@ if __name__ == '__main__':
         sys.path.insert(0, wsPath)
     from lib.nuke.scripts import framing
     f = framing.Framing()
-    f.printOptions()
