@@ -1,5 +1,5 @@
 import os
-from lib.maya.scripts import mayaEnv
+from lib.maya import mayaEnv
 
 
 #-- Packager Var --#
