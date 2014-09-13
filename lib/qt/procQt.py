@@ -144,6 +144,16 @@ def fileDialog(fdMode='open', fdFileMode='AnyFile', fdRoot=None, fdRoots=None,
         fd.accepted.connect(fdCmd)
     return fd
 
+def errorDialog(message, parent):
+    """ Launch default error dialog
+        @param message: (str or list): Message to print
+        @param parent: (object) : Parent ui """
+    errorDial = QtGui.QErrorMessage(parent)
+    if isinstance(message, list):
+        errorDial.showMessage('\n'.join(message))
+    else:
+        errorDial.showMessage(message)
+
 
 confirmDialogClass, confirmDialogUiClass = uic.loadUiType(qt.uiList['confirmDialog'])
 class ConfirmDialog(confirmDialogClass, confirmDialogUiClass):
