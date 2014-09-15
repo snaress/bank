@@ -12,8 +12,8 @@ designer = "C:\Python27\Lib\site-packages\PyQt4\designer.exe"
 
 my = "F:\rnd\workspace\bank\lib\env\alias.txt"
 aliasSync = python F:\rnd\workspace\bank\lib\env\aliasSync.py
-
-prodManager = python F:\rnd\workspace\bank\appli\prodManager\__exe__.py
+prodManager = python F:\rnd\workspace\bank\appli\prodManager\__exe__.py $*
 grapher = python F:\rnd\workspace\bank\appli\grapher\__exe__.py $*
-framing = python F:\rnd\workspace\bank\lib\nuke\scripts\framingOpt.py $*
-aliasHelp = type "F:\rnd\workspace\bank\lib\env\_lib\alias\alias.txt"
+framing = python F:\rnd\workspace\bank\lib\nuke\framingOpt.py $*
+
+aliasHelp = type "F:\rnd\workspace\bank\lib\env\alias.txt"
