@@ -7,7 +7,7 @@ if __name__ == '__main__':
 from lib.qt.ui import scriptEditorUI
 
 
-class ScriptEditor(QtGui.QMainWindow, scriptEditorUI.Ui_mwScriptEditor):
+class ScriptEditor(QtGui.QMainWindow, scriptEditorUI.Ui_MainWindow):
 
     def __init__(self):
         super(ScriptEditor, self).__init__()

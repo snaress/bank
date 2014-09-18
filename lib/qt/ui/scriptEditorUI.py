@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\lib\qt\ui\scriptEditor.ui'
 #
-# Created: Wed Sep 17 23:54:57 2014
+# Created: Thu Sep 18 04:31:02 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -23,28 +23,28 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
-class Ui_mwScriptEditor(object):
-    def setupUi(self, mwScriptEditor):
-        mwScriptEditor.setObjectName(_fromUtf8("mwScriptEditor"))
-        mwScriptEditor.resize(398, 216)
-        self.centralwidget = QtGui.QWidget(mwScriptEditor)
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName(_fromUtf8("MainWindow"))
+        MainWindow.resize(398, 216)
+        self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.glScriptEditor = QtGui.QGridLayout(self.centralwidget)
         self.glScriptEditor.setMargin(0)
         self.glScriptEditor.setSpacing(0)
         self.glScriptEditor.setObjectName(_fromUtf8("glScriptEditor"))
-        mwScriptEditor.setCentralWidget(self.centralwidget)
-        self.tbEdit = QtGui.QToolBar(mwScriptEditor)
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.tbEdit = QtGui.QToolBar(MainWindow)
         self.tbEdit.setObjectName(_fromUtf8("tbEdit"))
-        mwScriptEditor.addToolBar(QtCore.Qt.TopToolBarArea, self.tbEdit)
-        self.miAddTab = QtGui.QAction(mwScriptEditor)
+        MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.tbEdit)
+        self.miAddTab = QtGui.QAction(MainWindow)
         self.miAddTab.setObjectName(_fromUtf8("miAddTab"))
 
-        self.retranslateUi(mwScriptEditor)
-        QtCore.QMetaObject.connectSlotsByName(mwScriptEditor)
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def retranslateUi(self, mwScriptEditor):
-        mwScriptEditor.setWindowTitle(_translate("mwScriptEditor", "Script Editor", None))
-        self.tbEdit.setWindowTitle(_translate("mwScriptEditor", "toolBar", None))
-        self.miAddTab.setText(_translate("mwScriptEditor", "Add Tabulation", None))
+    def retranslateUi(self, MainWindow):
+        MainWindow.setWindowTitle(_translate("MainWindow", "Script Editor", None))
+        self.tbEdit.setWindowTitle(_translate("MainWindow", "toolBar", None))
+        self.miAddTab.setText(_translate("MainWindow", "Add Tabulation", None))
 

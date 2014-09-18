@@ -173,32 +173,6 @@ def getAllParent(QTreeWidgetItem, depth=-1):
     recurse(QTreeWidgetItem, depth)
     return items
 
-def rf_selTreeItemTextColor(twTree, columns=None, color1=None, color2=None, rgb1=None, rgb2=None):
-    """ Refresh selected QTreeWidgetItems font color
-        @param twTree: (object) : QTreeWidget
-        @param columns: (int or list) : Columns number
-        @param color1: (str) : Color key when item is selected
-        @param color2: (str) : Color key when item is not selected
-        @param rgb1: (tuple) : Rgb color when item is selected
-        @param rgb2: (tuple) : Rgb color when item is not selected """
-    #-- Get columns --#
-    columnList = []
-    if columns is None:
-        for n in range(twTree.columnCount()):
-            columnList.append(n)
-    elif isinstance(columns, int):
-        columnList = [columns]
-    elif isinstance(columns, list):
-        columnList = columns
-    #-- Edit TextColor --#
-    allItems = getAllItems(twTree)
-    for item in allItems:
-        for n in columnList:
-            if item.isSelected():
-                item.setTextColor(n, UiStyle().qtColor(color=color1, rgb=rgb1))
-            else:
-                item.setTextColor(n, UiStyle().qtColor(color=color2, rgb=rgb2))
-
 #=========================================== QComboBox ===========================================#
 
 def getComboBoxItems(QComboBox):
@@ -347,41 +321,45 @@ class PromptDialog(QtGui.QDialog, promptDialogUI.Ui_Dialog):
 
 #============================================ QStyle =============================================#
 
-class UiStyle(object):
+class Style(object):
 
-    _blackColor = (0, 0, 0)
-    _darkGreyColor = (62, 62, 62)
-    _darkGreyColor2 = (75, 75, 75)
-    _darkGreyColor3 = (85, 85, 85)
-    _lightGreyColor = (192, 192, 192)
-    _whiteColor = (255, 255, 255)
+    _styleDir = os.path.join(qt.toolPath, '_lib', 'style')
+    _qssDarkOrange = os.path.join(_styleDir, 'darkOrange.qss')
+    _qssDarkGrey = os.path.join(_styleDir, 'darkGrey.qss')
 
     def __init__(self):
         pass
 
-    def darkGreyWidget(self):
-        return "background-color: rgb%s; color: rgb%s" % (str(self._darkGreyColor),
-                                                          str(self._lightGreyColor))
+    def applyStyle(self, styleName='darkOrange'):
+        """ Apply given styleSheet
+            @param styleName: (str) : ['darkOrange', 'darkGrey']
+            @return: (str) : Style sheet """
+        styleList = ['darkOrange', 'darkGrey']
+        if not styleName in styleList:
+            raise KeyError, "Error: StyleName not found: %s. Should be in %s" % (styleName, styleList)
+        if styleName == 'darkOrange':
+            with open(self._qssDarkOrange) as qss:
+                return qss.read()
+        if styleName == 'darkGrey':
+            with open(self._qssDarkGrey) as qss:
+                return qss.read()
 
-    def darkGreyHeader(self):
-        return "QHeaderView::section {background-color: rgb%s; color: rgb%s}" % (str(self._darkGreyColor2),
-                                                                                 str(self._lightGreyColor))
+    def _hexToRgb(self, value):
+        """ Convert hex color value to rgb value
+            @param value: (str) : Hex color value
+            @return: (tuple) : Rgb color """
+        value = value.lstrip('#')
+        lv = len(value)
+        return tuple(int(value[i:i+lv/3], 16) for i in range(0, lv, lv/3))
 
-    def darkGreyTabs(self):
-        return "QTabBar::tab {background-color: rgb%s; color: rgb%s}; "  % (str(self._darkGreyColor2),
-                                                                            str(self._lightGreyColor))
+    def _rgbToHex(self, rgb):
+        """ Convert rgb value to hex color value
+            @param rgb: (tuple) : Rgb color
+            @return: (str) : Hex color value """
+        return '%02x%02x%02x' % rgb
 
-    def qtColor(self, color=None, rgb=None):
-        """ Return QColor object. If rgb is not None, color key will not be evaluated
-            @param color: (str) : Background color ('black', 'darkGrey', 'grey', 'lightGrey', white)
-            @param rgb: (tuple) : Background color (int, int, int)
-            @return: (object) : QColor """
-        if rgb is None:
-            colors = ['black', 'darkGrey', 'grey', 'lightGrey', 'white']
-            if color in colors:
-                col = getattr(self, '_%sColor' % color)
-                return QtGui.QColor(col[0], col[1], col[2])
-            else:
-                raise KeyError, "Unknown color: %s. Should be in %s" % (color, colors)
-        else:
-            return QtGui.QColor(rgb[0], rgb[1], rgb[2])
+
+if __name__ == '__main__':
+    st = Style()
+    print st._hexToRgb('#444444')
+    print st._rgbToHex((255, 160, 47))
