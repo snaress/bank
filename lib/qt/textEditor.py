@@ -1,12 +1,14 @@
 import os, sys
-from PyQt4 import QtGui, QtCore, uic
+from PyQt4 import QtGui, QtCore
 from lib import qt
 from lib.qt import procQt as pQt
 from lib.system import procFile as pFile
+if __name__ == '__main__':
+    pQt.CompileUi(uiFile=qt.uiList['textEditor'])
+from lib.qt.ui import textEditorUI
 
 
-textEditorClass, textEditorUiClass = uic.loadUiType(qt.uiList['textEditor'])
-class TextEditor(textEditorClass, textEditorUiClass):
+class TextEditor(QtGui.QMainWindow, textEditorUI.Ui_MainWindow):
 
     def __init__(self):
         super(TextEditor, self).__init__()

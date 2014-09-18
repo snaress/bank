@@ -1,6 +1,84 @@
+import os
 from lib import qt
-from PyQt4 import QtGui, QtCore, uic
+from PyQt4 import QtGui, QtCore
 
+
+#========================================== Compile Ui ===========================================#
+
+class CompileUi(object):
+    """ Convert uiFile to pyFile
+        @param uiFile: (str) : uiFile absolut path
+        @param pyFile: (str) : pyFile absolut path
+        @param uiDir: (str) : Path to list
+        @param pyUic: (str) : pyuic.bat absolut path """
+
+    def __init__(self, uiFile=None, pyFile=None, uiDir=None, pyUic=None):
+        print "\n#----- Compile UI -----#"
+        self.pyUic = pyUic
+        if self.pyUic is None:
+            self.pyUic = "C:/Python27/Lib/site-packages/PyQt4/pyuic4.bat"
+        self.uiFile = uiFile
+        self.pyFile = pyFile
+        self.uiDir = uiDir
+        self.uiToPy()
+
+    def uiToPy(self):
+        """ Check kwargs
+            @return: (list), (list) : uiFiles ansolut path, pyFiles absolut path """
+        if self.uiFile is None and self.pyFile is None and self.uiDir is None:
+            raise KeyError, "Error: All kwargs are empty !!!"
+        if self.uiFile is not None and self.pyFile is not None:
+            print "%s ---> %s" % (self.uiFile, self.pyFile)
+            if self.checkDate(self.uiFile, self.pyFile) in ['create', 'update']:
+                self.convert(self.uiFile, self.pyFile)
+        elif self.uiFile is not None and self.pyFile is None:
+            print "%s ---> %s" % (self.uiFile, self.uiFile.replace('.ui', 'UI.py'))
+            if self.checkDate(self.uiFile, self.uiFile.replace('.ui', 'UI.py')) in ['create', 'update']:
+                self.convert(self.uiFile, self.uiFile.replace('.ui', 'UI.py'))
+        elif self.uiDir is not None:
+            print "uiDir = %s" % self.uiDir
+            files = os.listdir(self.uiDir) or []
+            for f in files:
+                if f.endswith('.ui'):
+                    uiFile = os.path.join(self.uiDir, f)
+                    pyFile = os.path.join(self.uiDir, f.replace('.ui', 'UI.py'))
+                    print "\t %s ---> %s" % (uiFile, pyFile)
+                    if self.checkDate(uiFile, pyFile) in ['create', 'update']:
+                        self.convert(uiFile, pyFile)
+        else:
+            raise KeyError, "uiFile=%s, pyFile=%s, uiDir=%s" % (self.uiFile, self.pyFile, self.uiDir)
+
+    def checkDate(self, uiFile, pyFile):
+        """ Compare uiFile and pyFile modif date
+            @param uiFile: (str) : uiFile absolut path
+            @param pyFile: (str) : pyFile absolut path
+            return: (str) : 'create', 'update', 'ok' """
+        if pyFile is None:
+            print "%s \t ---> \t CREATE" % os.path.basename(pyFile)
+            return 'create'
+        else:
+            if not os.path.exists(pyFile):
+                print "%s \t ---> \t CREATE" % os.path.basename(pyFile)
+                return 'create'
+            else:
+                uiDate = os.path.getmtime(uiFile)
+                pyDate = os.path.getmtime(pyFile)
+                if uiDate > pyDate:
+                    print "%s \t ---> \t UPDATE" % os.path.basename(pyFile)
+                    return 'update'
+                else:
+                    print "%s \t ---> \t OK" % os.path.basename(pyFile)
+                    return 'ok'
+
+    def convert(self, uiFile, pyFile):
+        """ Convert uiFile into pyFile
+            @param uiFile: (str) : uiFile absolut path
+            @param pyFile: (str) : pyFile absolut path """
+        print "Converting %s to %s ..." % (os.path.basename(uiFile), os.path.basename(pyFile))
+        try:
+            os.system("%s %s > %s" % (self.pyUic, uiFile, pyFile))
+        except:
+            raise IOError, "Error: Can not convert %s" % pyFile
 
 #============================================ Action =============================================#
 
@@ -180,9 +258,10 @@ def errorDialog(message, parent):
     else:
         errorDial.showMessage(message)
 
-
-confirmDialogClass, confirmDialogUiClass = uic.loadUiType(qt.uiList['confirmDialog'])
-class ConfirmDialog(confirmDialogClass, confirmDialogUiClass):
+if __name__ == '__main__':
+    CompileUi(uiFile=qt.uiList['confirmDialog'])
+from lib.qt.ui import confirmDialogUI
+class ConfirmDialog(QtGui.QDialog, confirmDialogUI.Ui_Dialog):
     """ Confirm dialog popup
         @param message: (str) : Dialog texte
         @param buttons: (list) : Buttons list
@@ -223,9 +302,10 @@ class ConfirmDialog(confirmDialogClass, confirmDialogUiClass):
         newButton.clicked.connect(btnCmd)
         return newButton
 
-
-promptDialogClass, promptDialogUiClass = uic.loadUiType(qt.uiList['promptDialog'])
-class PromptDialog(promptDialogClass, promptDialogUiClass):
+if __name__ == '__main__':
+    CompileUi(uiFile=qt.uiList['promptDialog'])
+from lib.qt.ui import promptDialogUI
+class PromptDialog(QtGui.QDialog, promptDialogUI.Ui_Dialog):
     """ Prompt dialog popup
         @param message: (str) : Dialog texte
         @param acceptCmd: (object) : Accept command

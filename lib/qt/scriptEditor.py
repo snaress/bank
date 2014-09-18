@@ -1,10 +1,13 @@
 import os
 from lib import qt
-from PyQt4 import QtGui, QtCore, uic
+from lib.qt import procQt as pQt
+from PyQt4 import QtGui, QtCore
+if __name__ == '__main__':
+    pQt.CompileUi(uiFile=qt.uiList['scriptEditor'])
+from lib.qt.ui import scriptEditorUI
 
 
-scriptEditorClass, scriptEditorUiClass = uic.loadUiType(qt.uiList['scriptEditor'])
-class ScriptEditor(scriptEditorClass, scriptEditorUiClass):
+class ScriptEditor(QtGui.QMainWindow, scriptEditorUI.Ui_mwScriptEditor):
 
     def __init__(self):
         super(ScriptEditor, self).__init__()

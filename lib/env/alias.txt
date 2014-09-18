@@ -11,7 +11,10 @@ textPad = "C:\Program Files (x86)\TextPad 6\TextPad.exe"
 designer = "C:\Python27\Lib\site-packages\PyQt4\designer.exe"
 
 my = "F:\rnd\workspace\bank\lib\env\alias.txt"
+pyUic = C:\Python27\Lib\site-packages\PyQt4\pyuic4.bat $*
 aliasSync = python F:\rnd\workspace\bank\lib\env\aliasSync.py
+textEditor = python F:\rnd\workspace\bank\lib\qt\__exeTE__.py
+scriptEditor = python F:\rnd\workspace\bank\lib\qt\__exeSE__.py
 prodManager = python F:\rnd\workspace\bank\appli\prodManager\__exe__.py $*
 grapher = python F:\rnd\workspace\bank\appli\grapher\__exe__.py $*
 framing = python F:\rnd\workspace\bank\lib\nuke\framingOpt.py $*
