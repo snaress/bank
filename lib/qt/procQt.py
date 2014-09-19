@@ -1,6 +1,7 @@
 import os
 from lib import qt
 from PyQt4 import QtGui, QtCore
+from lib.system import procFile as pFile
 
 
 #========================================== Compile Ui ===========================================#
@@ -42,7 +43,7 @@ class CompileUi(object):
                 if f.endswith('.ui'):
                     uiFile = os.path.join(self.uiDir, f)
                     pyFile = os.path.join(self.uiDir, f.replace('.ui', 'UI.py'))
-                    print "\t %s ---> %s" % (uiFile, pyFile)
+                    print "%s ---> %s" % (uiFile, pyFile)
                     if self.checkDate(uiFile, pyFile) in ['create', 'update']:
                         self.convert(uiFile, pyFile)
         else:
@@ -74,7 +75,6 @@ class CompileUi(object):
         """ Convert uiFile into pyFile
             @param uiFile: (str) : uiFile absolut path
             @param pyFile: (str) : pyFile absolut path """
-        print "Converting %s to %s ..." % (os.path.basename(uiFile), os.path.basename(pyFile))
         try:
             os.system("%s %s > %s" % (self.pyUic, uiFile, pyFile))
         except:
@@ -337,12 +337,9 @@ class Style(object):
         styleList = ['darkOrange', 'darkGrey']
         if not styleName in styleList:
             raise KeyError, "Error: StyleName not found: %s. Should be in %s" % (styleName, styleList)
-        if styleName == 'darkOrange':
-            with open(self._qssDarkOrange) as qss:
-                return qss.read()
-        if styleName == 'darkGrey':
-            with open(self._qssDarkGrey) as qss:
-                return qss.read()
+        else:
+            qssFile = "_qss%s" % styleName.replace(styleName[0], styleName[0].capitalize())
+            return ''.join(pFile.readFile(getattr(self, "_qss%s" % qssFile)))
 
     def _hexToRgb(self, value):
         """ Convert hex color value to rgb value
@@ -357,9 +354,3 @@ class Style(object):
             @param rgb: (tuple) : Rgb color
             @return: (str) : Hex color value """
         return '%02x%02x%02x' % rgb
-
-
-if __name__ == '__main__':
-    st = Style()
-    print st._hexToRgb('#444444')
-    print st._rgbToHex((255, 160, 47))
