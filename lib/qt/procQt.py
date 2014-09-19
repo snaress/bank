@@ -339,7 +339,7 @@ class Style(object):
             raise KeyError, "Error: StyleName not found: %s. Should be in %s" % (styleName, styleList)
         else:
             qssFile = "_qss%s" % styleName.replace(styleName[0], styleName[0].capitalize())
-            return ''.join(pFile.readFile(getattr(self, "_qss%s" % qssFile)))
+            return ''.join(pFile.readFile(getattr(self, qssFile)))
 
     def _hexToRgb(self, value):
         """ Convert hex color value to rgb value
