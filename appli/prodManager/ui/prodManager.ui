@@ -139,11 +139,36 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuPref">
+    <property name="title">
+     <string>Pref</string>
+    </property>
+    <widget class="QMenu" name="menuStyle">
+     <property name="title">
+      <string>Style</string>
+     </property>
+     <addaction name="miDefaultStyle"/>
+     <addaction name="miDarkGreyStyle"/>
+     <addaction name="miDarkOrangeStyle"/>
+    </widget>
+    <addaction name="menuStyle"/>
+   </widget>
+   <addaction name="menuPref"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="miProdSettings">
+  <action name="miDefaultStyle">
    <property name="text">
-    <string>Settings</string>
+    <string>Default</string>
+   </property>
+  </action>
+  <action name="miDarkGreyStyle">
+   <property name="text">
+    <string>DarkGrey</string>
+   </property>
+  </action>
+  <action name="miDarkOrangeStyle">
+   <property name="text">
+    <string>DarkOrange</string>
    </property>
   </action>
  </widget>

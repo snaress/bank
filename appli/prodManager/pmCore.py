@@ -41,7 +41,7 @@ class Loader(object):
             else:
                 return "error__%s" % error
         #-- Create Prod --#
-        pathResult = self.createNewProdfolder(prodPath, prodAlias, prodName, raiseError=raiseError)
+        pathResult = self.createNewProdfolder(prodPath, raiseError=raiseError)
         if not isinstance(pathResult, bool):
             if raiseError:
                 raise IOError, "[pmCore] | ERROR | %s" % pathResult
@@ -58,7 +58,7 @@ class Loader(object):
                 return True
 
     @staticmethod
-    def createNewProdfolder(prodPath, prodAlias, prodName, raiseError=False):
+    def createNewProdfolder(prodPath, raiseError=False):
         """ Create New prod into dataBase
             @param prodPath: (str) : DataBase prod path
             @param prodAlias: (str) : Alias name
@@ -67,7 +67,6 @@ class Loader(object):
             @return: (str or bool) : Result """
         try:
             os.mkdir(prodPath)
-            print "New prod folder successfully created: %s--%s" % (prodAlias, prodName)
             return True
         except:
             error = "Can not create folder: %s" % prodPath
@@ -87,12 +86,10 @@ class Loader(object):
         txt = ["prodAlias = %r" % prodAlias, "prodName = %r" % prodName,
                "prodStartDate = '%s'" % pFile.getDate().replace('_', '/'),
                "prodStopDate = '%s'" % pFile.getDate().replace('_', '/'),
-               "prodWorkDir = None", "prodSteps = {'_order': []}",
-               "prodTasks = {'_order': []}", "prodTrees = []"]
+               "prodWorkDir = ''", "prodTasks = {'_order': []}", "prodTrees = {'_order': []}"]
         fileName = os.path.join(prodPath, "%s--%s.py" % (prodAlias, prodName))
         try:
             pFile.writeFile(fileName, '\n'.join(txt))
-            print "New prod file successfully created: %s--%s.py" % (prodAlias, prodName)
             return True
         except:
             error = "Can not create file: %s--%s.py" % (prodAlias, prodName)
@@ -110,7 +107,6 @@ class Loader(object):
         txt = "prodBookMarks = []\n"
         try:
             pFile.writeFile(fileName, txt)
-            print "New pref file successfully created: %s" % fileName
             return True
         except:
             error = "Can not create pref file: %s" % fileName

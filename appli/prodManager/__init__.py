@@ -1,4 +1,5 @@
 import os
+from lib.qt import procQt as pQt
 
 
 #-- Packager Var --#
@@ -11,23 +12,8 @@ toolPack = __package__
 user = os.environ.get('username')
 station = os.environ.get('computername')
 libPath = os.path.join(toolPath, '_lib')
+rootDisk = os.path.join("F:", os.sep)
 binPath = os.path.join('G:', os.sep, 'rndBin', 'prodManager')
-
-
-#-- UI Files --#
-uiL = os.listdir(os.path.join(toolPath, 'ui')) or []
-uiList = {}
-for ui in uiL:
-    if ui.endswith('.ui') and not ui.startswith('.'):
-        uiList[ui.replace('.ui', '')] = os.path.join(toolPath, 'ui', ui)
-
-
-#-- Ima Files --#
-imaL =  os.listdir(os.path.join(libPath, 'ima')) or []
-imaList = {}
-for ima in imaL:
-    if not ima.startswith('.') and os.path.isfile(os.path.join(libPath, 'ima', ima)):
-        imaList[ima] = os.path.join(libPath, 'ima', ima)
 
 
 #-- Show Info --#
@@ -39,10 +25,5 @@ print 'User : ', user
 print 'Station : ', station
 print 'Lib Path : ', libPath
 print 'Bin Path : ', binPath
-print '#%s#' % ('-'*(22+len(toolName)))
-for ui in sorted(uiList):
-    print '%s : %s' % (ui, uiList[ui])
-print '#%s#' % ('-'*(22+len(toolName)))
-for ima in sorted(imaList):
-    print '%s : %s' % (ima, imaList[ima])
+pQt.CompileUi(uiDir=os.path.join(toolPath, 'ui'))
 print '%s\n' % ('#'*(22+len(toolName)))

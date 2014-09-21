@@ -20,35 +20,60 @@
    <property name="spacing">
     <number>1</number>
    </property>
-   <item row="0" column="0">
-    <widget class="Line" name="line">
+   <item row="6" column="0">
+    <widget class="Line" name="line_4">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
-    <layout class="QHBoxLayout" name="hlProd">
+   <item row="5" column="0">
+    <layout class="QHBoxLayout" name="hlWorkDir">
+     <property name="spacing">
+      <number>2</number>
+     </property>
      <item>
-      <widget class="QLabel" name="lProd">
+      <widget class="QLabel" name="lWorkDir">
+       <property name="minimumSize">
+        <size>
+         <width>88</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>88</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="font">
         <font>
-         <pointsize>12</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
          <underline>true</underline>
         </font>
        </property>
        <property name="text">
-        <string>Project Name (Alias)</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <string>Project Work Dir:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="bCancelEdit">
+      <widget class="QLineEdit" name="leWorkDir">
+       <property name="minimumSize">
+        <size>
+         <width>400</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>280</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="bOpenWorkDir">
        <property name="maximumSize">
         <size>
          <width>40</width>
@@ -56,30 +81,27 @@
         </size>
        </property>
        <property name="text">
-        <string>Cancel</string>
+        <string>Open</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="bEditProd">
-       <property name="maximumSize">
+      <spacer name="horizontalSpacer_23">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
         </size>
        </property>
-       <property name="text">
-        <string>Edit</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
+      </spacer>
      </item>
     </layout>
    </item>
-   <item row="2" column="0">
-    <widget class="Line" name="line_2">
+   <item row="4" column="0">
+    <widget class="Line" name="line_3">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -237,60 +259,48 @@
      </item>
     </layout>
    </item>
-   <item row="4" column="0">
-    <widget class="Line" name="line_3">
+   <item row="2" column="0">
+    <widget class="Line" name="line_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
-   <item row="5" column="0">
-    <layout class="QHBoxLayout" name="hlWorkDir">
-     <property name="spacing">
-      <number>2</number>
-     </property>
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="hlProd">
      <item>
-      <widget class="QLabel" name="lWorkDir">
-       <property name="minimumSize">
-        <size>
-         <width>88</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>88</width>
-         <height>16777215</height>
-        </size>
-       </property>
+      <widget class="QLabel" name="lProd">
        <property name="font">
         <font>
+         <pointsize>12</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
          <underline>true</underline>
         </font>
        </property>
        <property name="text">
-        <string>Project Work Dir:</string>
+        <string>Project Name (Alias)</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="leWorkDir">
-       <property name="minimumSize">
-        <size>
-         <width>400</width>
-         <height>0</height>
-        </size>
-       </property>
+      <widget class="QPushButton" name="bCancelEdit">
        <property name="maximumSize">
         <size>
-         <width>280</width>
-         <height>16777215</height>
+         <width>50</width>
+         <height>20</height>
         </size>
+       </property>
+       <property name="text">
+        <string>Cancel</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="bOpenWorkDir">
+      <widget class="QPushButton" name="bEditProd">
        <property name="maximumSize">
         <size>
          <width>40</width>
@@ -298,33 +308,90 @@
         </size>
        </property>
        <property name="text">
-        <string>Open</string>
+        <string>Edit</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
-     <item>
-      <spacer name="horizontalSpacer_23">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
     </layout>
    </item>
-   <item row="6" column="0">
-    <widget class="Line" name="line_4">
+   <item row="0" column="0">
+    <widget class="Line" name="line">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
    <item row="7" column="0">
+    <widget class="QFrame" name="qfParams">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>150</height>
+      </size>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <layout class="QHBoxLayout" name="hlParams" stretch="0,0,0">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="margin">
+       <number>0</number>
+      </property>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>200</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>200</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>200</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="Line" name="line_5">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="14" column="0">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -337,13 +404,43 @@
      </property>
     </spacer>
    </item>
+   <item row="10" column="0">
+    <widget class="QFrame" name="qfTreeParams">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <layout class="QHBoxLayout" name="hlTreeParams">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="margin">
+       <number>0</number>
+      </property>
+      <item>
+       <spacer name="horizontalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
   </layout>
-  <zorder>verticalSpacer</zorder>
   <zorder>line_3</zorder>
   <zorder>line_4</zorder>
-  <zorder>layoutWidget</zorder>
   <zorder>line</zorder>
   <zorder>line_2</zorder>
+  <zorder>qfParams</zorder>
+  <zorder>line_5</zorder>
+  <zorder>verticalSpacer</zorder>
+  <zorder>qfTreeParams</zorder>
  </widget>
  <resources/>
  <connections/>
