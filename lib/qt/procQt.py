@@ -14,7 +14,7 @@ class CompileUi(object):
         @param pyUic: (str) : pyuic.bat absolut path """
 
     def __init__(self, uiFile=None, pyFile=None, uiDir=None, pyUic=None):
-        print "\n#----- Compile UI -----#"
+        print "#----- Compile UI -----#"
         self.pyUic = pyUic
         if self.pyUic is None:
             self.pyUic = "C:/Python27/Lib/site-packages/PyQt4/pyuic4.bat"
@@ -29,11 +29,9 @@ class CompileUi(object):
         if self.uiFile is None and self.pyFile is None and self.uiDir is None:
             raise KeyError, "Error: All kwargs are empty !!!"
         if self.uiFile is not None and self.pyFile is not None:
-            print "%s ---> %s" % (self.uiFile, self.pyFile)
             if self.checkDate(self.uiFile, self.pyFile) in ['create', 'update']:
                 self.convert(self.uiFile, self.pyFile)
         elif self.uiFile is not None and self.pyFile is None:
-            print "%s ---> %s" % (self.uiFile, self.uiFile.replace('.ui', 'UI.py'))
             if self.checkDate(self.uiFile, self.uiFile.replace('.ui', 'UI.py')) in ['create', 'update']:
                 self.convert(self.uiFile, self.uiFile.replace('.ui', 'UI.py'))
         elif self.uiDir is not None:
@@ -43,7 +41,6 @@ class CompileUi(object):
                 if f.endswith('.ui'):
                     uiFile = os.path.join(self.uiDir, f)
                     pyFile = os.path.join(self.uiDir, f.replace('.ui', 'UI.py'))
-                    print "%s ---> %s" % (uiFile, pyFile)
                     if self.checkDate(uiFile, pyFile) in ['create', 'update']:
                         self.convert(uiFile, pyFile)
         else:
@@ -173,6 +170,50 @@ def getAllParent(QTreeWidgetItem, depth=-1):
     recurse(QTreeWidgetItem, depth)
     return items
 
+def moveSelItems(twTree, item, side):
+    """ Move Selected items
+        @param twTree: (object) : QTreeWidget
+        @param side: (str) : 'up' or 'down'
+        @return: (list) : Moved QTreeWidgetItems """
+    movedItem = None
+    #-- Move Child Item --#
+    if item.parent() is not None:
+        ind = item.parent().indexOfChild(item)
+        if side == 'up':
+            if ind > 0:
+                movedItem = item.parent().takeChild(ind)
+                item.parent().insertChild(ind-1, movedItem)
+        elif side == 'down':
+            N = item.parent().childCount()
+            if ind < N-1:
+                movedItem = item.parent().takeChild(ind)
+                item.parent().insertChild(ind+1, movedItem)
+    #-- Move Top Items --#
+    else:
+        ind = twTree.indexOfTopLevelItem(item)
+        if side == 'up':
+            if ind > 0:
+                movedItem = twTree.takeTopLevelItem(ind)
+                twTree.insertTopLevelItem(ind-1, movedItem)
+        elif side == 'down':
+            N = twTree.topLevelItemCount()
+            if ind < N-1:
+                movedItem = twTree.takeTopLevelItem(ind)
+                twTree.insertTopLevelItem(ind+1, movedItem)
+    return movedItem
+
+def delSelItems(twTree):
+    """ Remove selected QTreeWidgetItems from given QTreeWidget
+        @param twTree: (object) : QTreeWidget """
+    selItems = twTree.selectedItems()
+    for item in selItems:
+        if item.parent() is None:
+            ind = twTree.indexOfTopLevelItem(item)
+            twTree.takeTopLevelItem(ind)
+        else:
+            ind = item.parent().indexOfChild(item)
+            item.parent().takeChild(ind)
+
 #=========================================== QComboBox ===========================================#
 
 def getComboBoxItems(QComboBox):
@@ -232,6 +273,7 @@ def errorDialog(message, parent):
     else:
         errorDial.showMessage(message)
 
+
 if __name__ == '__main__':
     CompileUi(uiFile=qt.uiList['confirmDialog'])
 from lib.qt.ui import confirmDialogUI
@@ -275,6 +317,7 @@ class ConfirmDialog(QtGui.QDialog, confirmDialogUI.Ui_Dialog):
         newButton.setText(label)
         newButton.clicked.connect(btnCmd)
         return newButton
+
 
 if __name__ == '__main__':
     CompileUi(uiFile=qt.uiList['promptDialog'])
@@ -326,6 +369,7 @@ class Style(object):
     _styleDir = os.path.join(qt.toolPath, '_lib', 'style')
     _qssDarkOrange = os.path.join(_styleDir, 'darkOrange.qss')
     _qssDarkGrey = os.path.join(_styleDir, 'darkGrey.qss')
+    _qssRedGrey = os.path.join(_styleDir, 'redGrey.qss')
 
     def __init__(self):
         pass
@@ -334,14 +378,15 @@ class Style(object):
         """ Apply given styleSheet
             @param styleName: (str) : ['darkOrange', 'darkGrey']
             @return: (str) : Style sheet """
-        styleList = ['darkOrange', 'darkGrey']
+        styleList = ['darkOrange', 'darkGrey', 'redGrey']
         if not styleName in styleList:
             raise KeyError, "Error: StyleName not found: %s. Should be in %s" % (styleName, styleList)
         else:
-            qssFile = "_qss%s" % styleName.replace(styleName[0], styleName[0].capitalize())
+            qssFile = "_qss%s%s" % (styleName[0].upper(), styleName[1:])
             return ''.join(pFile.readFile(getattr(self, qssFile)))
 
-    def _hexToRgb(self, value):
+    @staticmethod
+    def _hexToRgb(value):
         """ Convert hex color value to rgb value
             @param value: (str) : Hex color value
             @return: (tuple) : Rgb color """
@@ -349,7 +394,8 @@ class Style(object):
         lv = len(value)
         return tuple(int(value[i:i+lv/3], 16) for i in range(0, lv, lv/3))
 
-    def _rgbToHex(self, rgb):
+    @staticmethod
+    def _rgbToHex(rgb):
         """ Convert rgb value to hex color value
             @param rgb: (tuple) : Rgb color
             @return: (str) : Hex color value """

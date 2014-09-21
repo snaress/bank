@@ -269,7 +269,7 @@ QPlainTextEdit
 QHeaderView::section
 {
     background-color: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #616161, stop: 0.5 #505050, stop: 0.6 #434343, stop: 1 #656565);
-    color: white;
+    color: #b1b1b1;
     padding-left: 4px;
     border: 1px solid #6c6c6c;
 }
@@ -399,8 +399,6 @@ QTabBar::tab:selected
 
 QTabBar::tab:!selected:hover
 {
-    /*border-top: 2px solid #ffaa00;
-    padding-bottom: 3px;*/
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     background-color: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 1 #212121, stop: 0.4 #343434, stop: 0.2 #343434, stop: 0.1 #ffaa00);
@@ -424,8 +422,8 @@ QCheckBox::indicator
     color: #b1b1b1;
     background-color: #323232;
     border: 1px solid #b1b1b1;
-    width: 9px;
-    height: 9px;
+    width: 16px;
+    height: 16px;
 }
 
 QRadioButton::indicator
@@ -440,7 +438,7 @@ QRadioButton::indicator:hover, QCheckBox::indicator:hover
 
 QCheckBox::indicator:checked
 {
-    image:url(_lib/ima/checkbox.png);
+    background-color: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 1.0, stop: 0.25 #ffaa00, stop: 0.3 #323232);
 }
 
 QCheckBox::indicator:disabled, QRadioButton::indicator:disabled
