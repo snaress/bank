@@ -146,7 +146,7 @@ QComboBox::drop-down
 
 QComboBox::down-arrow
 {
-    image: url(_lib/ima/down_arrow.png);
+    image: url(F:/rnd/workspace/bank/lib/qt/_lib/ima/down_arrow.png);
 }
 
 QGroupBox:focus
@@ -324,7 +324,7 @@ QMainWindow::separator:hover
 QToolBar::handle
 {
     spacing: 3px; /* spacing between items in the tool bar */
-    background: url(_lib/ima/handle.png);
+    background: url(F:/rnd/workspace/bank/lib/qt/_lib/ima/handle.png);
 }
 
 QMenu::separator
@@ -438,8 +438,7 @@ QRadioButton::indicator:hover, QCheckBox::indicator:hover
 
 QCheckBox::indicator:checked
 {
-    background-color: qradialgradient(cx: 0.5, cy: 0.5, fx: 0.5, fy: 0.5, radius: 1.0, stop: 0.25 #8e8e8e, stop: 0.3 #323232);
-    /*image:url(_lib/ima/checkbox.png);*/
+    image:url(F:/rnd/workspace/bank/lib/qt/_lib/ima/checkbox.png);
 }
 
 QCheckBox::indicator:disabled, QRadioButton::indicator:disabled
