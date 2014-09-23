@@ -2,7 +2,7 @@ from appli import prodManager
 from functools import partial
 from PyQt4 import QtGui, QtCore
 from lib.qt import procQt as pQt
-from appli.prodManager.ui import tabProjectUI, wgtProdTaskUI, wgtProdStepUI, wgtProdTreeUI
+from appli.prodManager.ui import tabProjectUI, wgtProdTreeUI
 
 
 class ProjectTab(QtGui.QWidget, tabProjectUI.Ui_projectTab):
@@ -20,7 +20,7 @@ class ProjectTab(QtGui.QWidget, tabProjectUI.Ui_projectTab):
     def _setupUi(self):
         """ Setup project tabWidget """
         self.setupUi(self)
-        self.log.debug("#-- Setup Tab Project --#")
+        self.log.info("#-- Setup Tab Project --#")
         self.bEditProd.clicked.connect(self.on_editProjectTab)
         self.bCancelEdit.clicked.connect(self.on_cancelProjectTab)
         self.bOpenWorkDir.clicked.connect(self.on_openWorkDir)
@@ -28,10 +28,16 @@ class ProjectTab(QtGui.QWidget, tabProjectUI.Ui_projectTab):
         self.hlParams.insertWidget(1, self.wgTrees)
         self.wgTask = ProdTask(self.mainUi, self)
         self.hlParams.insertWidget(3, self.wgTask)
+        self.wgTree = ProdTree(self.mainUi, self)
+        self.hlTreeParams.insertWidget(0, self.wgTree)
+        self.wgStep = ProdStep(self.mainUi, self)
+        self.hlTreeParams.insertWidget(1, self.wgStep)
+        self.wgAttr = ProdAttributes(self.mainUi, self)
+        self.hlTreeParams.insertWidget(2, self.wgAttr)
 
     def _refresh(self):
         """ Init project tabWidget """
-        self.log.debug("#-- Refresh Tab Project --#")
+        self.log.info("#-- Refresh Tab Project --#")
         self.rf_title()
         self.rf_date()
         self.rf_workDir()
@@ -50,7 +56,7 @@ class ProjectTab(QtGui.QWidget, tabProjectUI.Ui_projectTab):
     def rf_tabVis(self, state=False):
         """ Refresh project tab ui visibility
             @param state: (bool) : Visibility state """
-        self.log.debug("#-- Refresh Tab Project Visibility --#")
+        self.log.info("#-- Refresh Tab Project Visibility --#")
         #-- Init Project Label --#
         self.bCancelEdit.setVisible(state)
         #-- Init Project Date --#
@@ -64,6 +70,9 @@ class ProjectTab(QtGui.QWidget, tabProjectUI.Ui_projectTab):
         #-- Init Project Widgets --#
         self.wgTrees.rf_widgetVisibility(state=state)
         self.wgTask.rf_widgetVisibility(state=state)
+        self.wgTree.rf_widgetVisibility(state=state)
+        self.wgStep.rf_widgetVisibility(state=state)
+        self.wgAttr.rf_widgetVisibility(state=state)
 
     def rf_title(self):
         """ Refresh project title """
@@ -125,119 +134,43 @@ class ProjectTab(QtGui.QWidget, tabProjectUI.Ui_projectTab):
             self.leWorkDir.setText(str(selPath[0]))
 
 
-class ProdTrees(QtGui.QWidget, wgtProdTreeUI.Ui_prodTree):
-    """ Project trees widget
-        @param mainUi: (object) : QMainWindow
-        @param parent: (object) : Parent QWidget """
+class DefaultProdTree(QtGui.QWidget, wgtProdTreeUI.Ui_prodTree):
+    """ Default tree widget used in tabProject """
 
-    def __init__(self, mainUi, parent):
-        self.mainUi = mainUi
-        self.pm = self.mainUi.pm
-        self.log = self.mainUi.log
-        self._parent = parent
-        super(ProdTrees, self).__init__()
-        self._setupUi()
-
-    def __getDict__(self):
-        """ Get prodTask params writtable dict
-            @return: (dict) : ProdTask params """
-        treeDict = {'_order': []}
-        for item in pQt.getTopItems(self.twTrees):
-            treeDict['_order'].append(item.treeName)
-            treeDict[item.treeName] = {'steps': [], 'attr': {'_order': []}}
-        return treeDict
-
-    def _setupUi(self):
-        """ Setup widget """
-        self.log.debug("Setup prod trees widget ...")
+    def __init__(self):
+        super(DefaultProdTree, self).__init__()
         self.setupUi(self)
-        self.bAddItem.setText("Add Tree")
-        self.bAddItem.clicked.connect(self.on_addTree)
-        self.bDelItem.setText("Del Tree")
-        self.bDelItem.clicked.connect(self.on_delTree)
-        self.bItemUp.clicked.connect(partial(self.on_moveTree, 'up'))
-        self.bItemDn.clicked.connect(partial(self.on_moveTree, 'down'))
-        self.twTrees.setHeaderLabels(["Project Trees"])
-        self.twTrees.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
-
-    def _refresh(self):
-        """ Refresh trees QTreeWidget """
-        self.log.debug("Refreshing prodTrees widget ...")
-        self.twTrees.clear()
-        for tree in self.pm.prodTrees['_order']:
-            self._addTree(treeName=tree)
 
     def rf_widgetVisibility(self, state=False):
         """ Refresh widget visibility
             @param state: (bool) : Visibility state """
-        self.log.debug("Refreshing prodTree visibility ...")
         self.bAddItem.setEnabled(state)
         self.bDelItem.setEnabled(state)
         self.bItemUp.setEnabled(state)
         self.bItemDn.setEnabled(state)
 
-    def on_addTree(self):
-        """ Command launch when 'Add Tree' QPushButton is clicked """
-        self.log.debug("#-- New Tree --#")
-        mess = "New Tree: Enter tree name (ex: assets or shots)"
-        self.addTreeDialog = pQt.PromptDialog(mess, partial(self._addTree, treeName=None))
-        self.addTreeDialog.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
-        self.addTreeDialog.exec_()
+    def on_delItem(self):
+        """ Command launch when 'Del Item' QPushButton is clicked """
+        pQt.delSelItems(self.twTree)
 
-    def on_delTree(self):
-        """ Command launch when 'Del Tree' QPushButton is clicked """
-        self.log.debug("#-- Delete Tree --#")
-        pQt.delSelItems(self.twTrees)
-
-    def on_moveTree(self, side):
+    def on_moveItem(self, side):
         """ Command launch when 'up' or 'down' QPushButton is clicked
             @param side: (str) : 'up' or 'down' """
-        self.log.debug("#-- Move Tree --#")
-        selItems = self.twTrees.selectedItems() or []
-        trees = []
+        selItems = self.twTree.selectedItems() or []
+        items = []
+        movedItems = []
         for item in selItems:
-            trees.append(item.treeName)
-            movedItem = pQt.moveSelItems(self.twTrees, item, side)
-            if movedItem is not None:
-                self.log.debug("\t Move %s %r" % (side, item.treeName))
-        for item in pQt.getTopItems(self.twTrees):
-            if item.treeName in trees:
+            items.append(str(item.text(0)))
+            movedItems.append(pQt.moveSelItems(self.twTree, item, side))
+        for item in pQt.getTopItems(self.twTree):
+            if str(item.text(0)) in items:
                 item.setSelected(True)
             else:
                 item.setSelected(False)
-
-    def getTreeList(self):
-        """ Get tree list from widget
-            @return: (list) : Tree list """
-        return self.__getDict__()['_order']
-
-    def _addTree(self, treeName=None):
-        """ Add new tree to QTreeWidget
-            @param treeName: (str) : Tree Name """
-        if treeName is None:
-            newTree = self.addTreeDialog.result()['result_1']
-        else:
-            newTree = treeName
-        if not newTree in self.getTreeList():
-            self.log.debug("\t Adding tree %r ..." % newTree)
-            if treeName is None:
-                self.addTreeDialog.close()
-            newItem = self._newTreeItem(newTree)
-            self.twTrees.addTopLevelItem(newItem)
-        else:
-            pQt.errorDialog("Tree %r already exists !!!" % newTree, self.addTreeDialog)
-
-    def _newTreeItem(self, treeName):
-        """ Create new tree QTreeWidgetItem
-            @param treeName: (str) : Tree Name
-            @return: (object) : New QTreeWidgetItem """
-        newItem = QtGui.QTreeWidgetItem()
-        newItem.setText(0, treeName)
-        newItem.treeName = treeName
-        return newItem
+        return movedItems
 
 
-class ProdTask(QtGui.QWidget, wgtProdTaskUI.Ui_prodTask):
+class ProdTask(DefaultProdTree):
     """ Project task widget
         @param mainUi: (object) : QMainWindow
         @param parent: (object) : Parent QWidget """
@@ -254,27 +187,30 @@ class ProdTask(QtGui.QWidget, wgtProdTaskUI.Ui_prodTask):
         """ Get prodTask params writtable dict
             @return: (dict) : ProdTask params """
         taskDict = {'_order': []}
-        for item in pQt.getTopItems(self.twTasks):
+        for item in pQt.getTopItems(self.twTree):
             taskDict['_order'].append(item.taskName)
             taskDict[item.taskName] = {'color': item.taskColor, 'stat': item._wgStat.isChecked()}
         return taskDict
 
     def _setupUi(self):
         """ Setup widget """
-        self.log.debug("Setup prod task widget ...")
-        self.setupUi(self)
-        self.bAddTask.clicked.connect(self.on_addTask)
-        self.bDelTask.clicked.connect(self.on_delTask)
-        self.bTaskUp.clicked.connect(partial(self.on_moveTask, 'up'))
-        self.bTaskDn.clicked.connect(partial(self.on_moveTask, 'down'))
-        self.twTasks.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
-        self.twTasks.header().setResizeMode(1, QtGui.QHeaderView.ResizeToContents)
-        self.twTasks.header().setResizeMode(2, QtGui.QHeaderView.ResizeToContents)
+        self.log.debug("\t Setup prodTask widget ...")
+        self.bAddItem.setText("Add Task")
+        self.bAddItem.clicked.connect(self.on_addTask)
+        self.bDelItem.setText("Del Task")
+        self.bDelItem.clicked.connect(self.on_delItem)
+        self.bItemUp.clicked.connect(partial(self.on_moveItem, 'up'))
+        self.bItemDn.clicked.connect(partial(self.on_moveItem, 'down'))
+        self.twTree.setColumnCount(3)
+        self.twTree.setHeaderLabels(['Task', 'Color', 'Stat'])
+        self.twTree.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+        self.twTree.header().setResizeMode(1, QtGui.QHeaderView.ResizeToContents)
+        self.twTree.header().setResizeMode(2, QtGui.QHeaderView.ResizeToContents)
 
     def _refresh(self):
         """ Refresh tasks QTreeWidget """
         self.log.debug("Refreshing prodTask widget ...")
-        self.twTasks.clear()
+        self.twTree.clear()
         for task in self.pm.prodTasks['_order']:
             self._addTask(taskName=task, taskColor=self.pm.prodTasks[task]['color'],
                           taskStat=self.pm.prodTasks[task]['stat'])
@@ -282,12 +218,9 @@ class ProdTask(QtGui.QWidget, wgtProdTaskUI.Ui_prodTask):
     def rf_widgetVisibility(self, state=False):
         """ Refresh widget visibility
             @param state: (bool) : Visibility state """
-        self.log.debug("Refreshing prodTask visibility ...")
-        self.bAddTask.setEnabled(state)
-        self.bDelTask.setEnabled(state)
-        self.bTaskUp.setEnabled(state)
-        self.bTaskDn.setEnabled(state)
-        for item in pQt.getTopItems(self.twTasks):
+        self.log.debug("\t Refreshing prodTask visibility ...")
+        super(ProdTask, self).rf_widgetVisibility(state=state)
+        for item in pQt.getTopItems(self.twTree):
             item._wgColor.setEnabled(state)
             item._wgStat.setEnabled(state)
 
@@ -299,33 +232,25 @@ class ProdTask(QtGui.QWidget, wgtProdTaskUI.Ui_prodTask):
         self.addTaskDialog.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
         self.addTaskDialog.exec_()
 
-    def on_delTask(self):
+    def on_delItem(self):
         """ Command launch when 'Del Task' QPushButton is clicked """
         self.log.debug("#-- Delete Task --#")
-        pQt.delSelItems(self.twTasks)
+        super(ProdTask, self).on_delItem()
 
-    def on_moveTask(self, side):
+    def on_moveItem(self, side):
         """ Command launch when 'up' or 'down' QPushButton is clicked
             @param side: (str) : 'up' or 'down' """
         self.log.debug("#-- Move Task --#")
-        selItems = self.twTasks.selectedItems() or []
-        tasks = []
-        for item in selItems:
-            tasks.append(item.taskName)
-            taskColor = item.taskColor
-            taskStat = item._wgStat.isChecked()
-            movedItem = pQt.moveSelItems(self.twTasks, item, side)
-            if movedItem is not None:
+        treeDict = self.__getDict__()
+        movedItems = super(ProdTask, self).on_moveItem(side=side)
+        for item in movedItems:
+            if item is not None:
                 self.log.debug("\t Move %s %r" % (side, item.taskName))
-                movedItem._wgColor = self._newTaskColor(movedItem, taskColor)
-                movedItem._wgStat = self._newTaskStat(taskStat)
-                self.twTasks.setItemWidget(movedItem, 1, movedItem._wgColor)
-                self.twTasks.setItemWidget(movedItem, 2, movedItem._wgStat)
-        for item in pQt.getTopItems(self.twTasks):
-            if item.taskName in tasks:
-                item.setSelected(True)
-            else:
-                item.setSelected(False)
+                item._wgColor = self._newTaskColor(item, item.taskColor)
+                # noinspection PyTypeChecker
+                item._wgStat = self._newTaskStat(treeDict[item.taskName]['stat'])
+                self.twTree.setItemWidget(item, 1, item._wgColor)
+                self.twTree.setItemWidget(item, 2, item._wgStat)
 
     def on_taskColor(self, item):
         """ Command launch when 'colorChoice' QPushButton is clicked
@@ -350,20 +275,20 @@ class ProdTask(QtGui.QWidget, wgtProdTaskUI.Ui_prodTask):
             @param taskName: (str) : Task Name
             @param taskColor: (tuple) : Rgb color
             @param taskStat: (bool) : Task count in stats """
+        fromDialog = False
         if taskName is None:
-            newTask = self.addTaskDialog.result()['result_1']
-        else:
-            newTask = taskName
-        if not newTask in self.getTaskList():
-            self.log.debug("\t Adding task %r ..." % newTask)
-            if taskName is None:
+            fromDialog = True
+            taskName = self.addTaskDialog.result()['result_1']
+        if not taskName in self.getTaskList():
+            self.log.debug("\t Adding task %r ..." % taskName)
+            if fromDialog:
                 self.addTaskDialog.close()
-            newItem = self._newTaskItem(newTask, taskColor=taskColor, taskStat=taskStat)
-            self.twTasks.addTopLevelItem(newItem)
-            self.twTasks.setItemWidget(newItem, 1, newItem._wgColor)
-            self.twTasks.setItemWidget(newItem, 2, newItem._wgStat)
+            newItem = self._newTaskItem(taskName, taskColor=taskColor, taskStat=taskStat)
+            self.twTree.addTopLevelItem(newItem)
+            self.twTree.setItemWidget(newItem, 1, newItem._wgColor)
+            self.twTree.setItemWidget(newItem, 2, newItem._wgStat)
         else:
-            pQt.errorDialog("Task %r already exists !!!" % newTask, self.addTaskDialog)
+            pQt.errorDialog("Task %r already exists !!!" % taskName, self.addTaskDialog)
 
     def _newTaskItem(self, taskName, taskColor=None, taskStat=None):
         """ Create new task QTreeWidgetItem
@@ -396,7 +321,8 @@ class ProdTask(QtGui.QWidget, wgtProdTaskUI.Ui_prodTask):
             newColor.setStyleSheet("background:rgb(%s, %s, %s)" % (taskColor[0], taskColor[1], taskColor[2]))
         return newColor
 
-    def _newTaskStat(self, taskStat):
+    @staticmethod
+    def _newTaskStat(taskStat):
         """ New task stat QCheckBox
             @param taskStat: (bool) : Task count in stats
             @return: (object) : New task stat QCheckBox """
@@ -409,7 +335,121 @@ class ProdTask(QtGui.QWidget, wgtProdTaskUI.Ui_prodTask):
         return newStat
 
 
-class ProdStep(QtGui.QWidget, wgtProdStepUI.Ui_stepTree):
+class ProdTrees(DefaultProdTree):
+    """ Project trees widget
+        @param mainUi: (object) : QMainWindow
+        @param parent: (object) : Parent QWidget """
+
+    def __init__(self, mainUi, parent):
+        self.mainUi = mainUi
+        self.pm = self.mainUi.pm
+        self.log = self.mainUi.log
+        self._parent = parent
+        super(ProdTrees, self).__init__()
+        self._setupUi()
+
+    def __getDict__(self):
+        """ Get prodTask params writtable dict
+            @return: (dict) : ProdTask params """
+        treeDict = {'_order': []}
+        for item in pQt.getTopItems(self.twTree):
+            treeDict['_order'].append(item.treeName)
+            treeDict[item.treeName] = item.treeDict
+        return treeDict
+
+    # noinspection PyUnresolvedReferences
+    def _setupUi(self):
+        """ Setup widget """
+        self.log.debug("\t Setup prodTrees widget ...")
+        self.bAddItem.setText("Add Tree")
+        self.bAddItem.clicked.connect(self.on_addTree)
+        self.bDelItem.setText("Del Tree")
+        self.bDelItem.clicked.connect(self.on_delItem)
+        self.bItemUp.clicked.connect(partial(self.on_moveItem, 'up'))
+        self.bItemDn.clicked.connect(partial(self.on_moveItem, 'down'))
+        self.twTree.setColumnCount(1)
+        self.twTree.setHeaderLabels(["Project Trees"])
+        self.twTree.header().setStretchLastSection(True)
+        self.twTree.itemClicked.connect(self.on_treeItem)
+
+    def _refresh(self):
+        """ Refresh trees QTreeWidget """
+        self.log.debug("Refreshing prodTrees widget ...")
+        self.twTree.clear()
+        for tree in self.pm.prodTrees['_order']:
+            self._addTree(treeName=tree, treeDict=self.pm.prodTrees[tree])
+
+    def rf_widgetVisibility(self, state=False):
+        """ Refresh widget visibility
+            @param state: (bool) : Visibility state """
+        self.log.debug("\t Refreshing prodTrees visibility ...")
+        super(ProdTrees, self).rf_widgetVisibility(state=state)
+
+    def on_addTree(self):
+        """ Command launch when 'Add Tree' QPushButton is clicked """
+        self.log.debug("#-- New Tree --#")
+        mess = "New Tree: Enter tree name (ex: assets or shots)"
+        self.addTreeDialog = pQt.PromptDialog(mess, partial(self._addTree, treeName=None,
+                                                                           treeDict=None))
+        self.addTreeDialog.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
+        self.addTreeDialog.exec_()
+
+    def on_delItem(self):
+        """ Command launch when 'Del Tree' QPushButton is clicked """
+        self.log.debug("#-- Delete Tree --#")
+        super(ProdTrees, self).on_delItem()
+
+    def on_moveItem(self, side):
+        """ Command launch when 'up' or 'down' QPushButton is clicked
+            @param side: (str) : 'up' or 'down' """
+        self.log.debug("#-- Move Tree --#")
+        movedItems = super(ProdTrees, self).on_moveItem(side=side)
+        for item in movedItems:
+            self.log.debug("\t Move %r %s" % (str(item.text(0)), side))
+
+    def on_treeItem(self):
+        """ refresh selected tree params """
+        self._parent.wgStep._refresh()
+        self._parent.wgAttr._refresh()
+        self._parent.wgAttr.rf_widgetVisibility(self._parent.bEditProd.isChecked())
+
+    def getTreeList(self):
+        """ Get tree list from widget
+            @return: (list) : Tree list """
+        return self.__getDict__()['_order']
+
+    def _addTree(self, treeName=None, treeDict=None):
+        """ Add new tree to QTreeWidget
+            @param treeName: (str) : Tree Name """
+        fromDialog = False
+        if treeName is None:
+            fromDialog = True
+            treeName = self.addTreeDialog.result()['result_1']
+        if not treeName in self.getTreeList():
+            self.log.debug("\t Adding tree %r ..." % treeName)
+            if fromDialog:
+                self.addTreeDialog.close()
+            if treeDict is None:
+                treeDict = {'tree': {'_order': []}, 'steps': [], 'attr': {'_order': []}}
+            newItem = self._newTreeItem(treeName, treeDict)
+            self.twTree.addTopLevelItem(newItem)
+        else:
+            pQt.errorDialog("Tree %r already exists !!!" % treeName, self.addTreeDialog)
+
+    @staticmethod
+    def _newTreeItem(treeName, treeDict):
+        """ Create new tree QTreeWidgetItem
+            @param treeName: (str) : Tree Name
+            @param treeDict: (str) : Tree dict
+            @return: (object) : New QTreeWidgetItem """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setText(0, treeName)
+        newItem.treeName = treeName
+        newItem.treeDict = treeDict
+        return newItem
+
+
+class ProdStep(DefaultProdTree):
     """ Project step widget
         @param mainUi: (object) : QMainWindow
         @param parent: (object) : Parent QWidget """
@@ -422,7 +462,295 @@ class ProdStep(QtGui.QWidget, wgtProdStepUI.Ui_stepTree):
         super(ProdStep, self).__init__()
         self._setupUi()
 
+    def __getDict__(self):
+        """ Get prodStep params writtable list
+            @return: (list) : ProdStep params """
+        steps = []
+        for item in pQt.getTopItems(self.twTree):
+            steps.append(item.stepName)
+        return steps
+
     def _setupUi(self):
         """ Setup widget """
-        self.log.debug("Setup prod step widget ...")
-        self.setupUi(self)
+        self.log.debug("\t Setup prodStep widget ...")
+        self.bAddItem.setText("Add Step")
+        self.bAddItem.clicked.connect(self.on_addStep)
+        self.bDelItem.setText("Del Step")
+        self.bDelItem.clicked.connect(self.on_delItem)
+        self.bItemUp.clicked.connect(partial(self.on_moveItem, 'up'))
+        self.bItemDn.clicked.connect(partial(self.on_moveItem, 'down'))
+        self.twTree.setColumnCount(1)
+        self.twTree.setHeaderLabels(["Tree Steps"])
+        self.twTree.header().setStretchLastSection(True)
+
+    def _refresh(self):
+        """ Refresh trees QTreeWidget """
+        selTreeItems = self._parent.wgTrees.twTree.selectedItems()
+        self.log.debug("Refreshing prodTrees widget ...")
+        self.twTree.clear()
+        if selTreeItems:
+            for step in selTreeItems[0].treeDict['steps']:
+                self._addStep(stepName=step)
+
+    def rf_widgetVisibility(self, state=False):
+        """ Refresh widget visibility
+            @param state: (bool) : Visibility state """
+        self.log.debug("\t Refreshing prodStep visibility ...")
+        super(ProdStep, self).rf_widgetVisibility(state=state)
+
+    def on_addStep(self):
+        """ Command launch when 'Add Step' QPushButton is clicked """
+        self.log.debug("#-- New Step --#")
+        selTreeItems = self._parent.wgTrees.twTree.selectedItems()
+        if selTreeItems:
+            mess = "New Step: Enter step name"
+            self.addStepDialog = pQt.PromptDialog(mess, partial(self._addStep, stepName=None))
+            self.addStepDialog.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
+            self.addStepDialog.exec_()
+        else:
+            pQt.errorDialog("Select a tree before adding steps", self._parent)
+
+    def on_delItem(self):
+        """ Command launch when 'Del Tree' QPushButton is clicked """
+        self.log.debug("#-- Delete Tree --#")
+        super(ProdStep, self).on_delItem()
+        self.storeParams()
+
+    def on_moveItem(self, side):
+        """ Command launch when 'up' or 'down' QPushButton is clicked
+            @param side: (str) : 'up' or 'down' """
+        self.log.debug("#-- Move Tree --#")
+        movedItems = super(ProdStep, self).on_moveItem(side=side)
+        for item in movedItems:
+            if item is not None:
+                self.log.debug("\t Move %r %s" % (str(item.text(0)), side))
+        self.storeParams()
+
+    def storeParams(self):
+        """ Store step params """
+        self.log.debug("#-- Store Step Params --#")
+        selTreeItems = self._parent.wgTrees.twTree.selectedItems()
+        if selTreeItems:
+            treeItem = selTreeItems[0]
+            treeItem.treeDict['steps'] = self.__getDict__()
+
+    def _addStep(self, stepName=None):
+        """ Add new step to QTreeWidget
+            @param stepName: (str) : Step Name """
+        fromDialog = False
+        if stepName is None:
+            fromDialog = True
+            stepName = self.addStepDialog.result()['result_1']
+        if not stepName in self.__getDict__():
+            self.log.debug("\t Adding step %r ..." % stepName)
+            newItem = self._newStepItem(stepName)
+            self.twTree.addTopLevelItem(newItem)
+            if fromDialog:
+                self.addStepDialog.close()
+                self.storeParams()
+        else:
+            pQt.errorDialog("Step %r already exists !!!" % stepName, self.addStepDialog)
+
+    @staticmethod
+    def _newStepItem(stepName):
+        """ Create new step QTreeWidgetItem
+            @param stepName: (str) : Step Name
+            @return: (object) : New QTreeWidgetItem """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setText(0, stepName)
+        newItem.stepName = stepName
+        return newItem
+
+
+class ProdAttributes(DefaultProdTree):
+    """ Project attributes widget
+        @param mainUi: (object) : QMainWindow
+        @param parent: (object) : Parent QWidget """
+
+    def __init__(self, mainUi, parent):
+        self.mainUi = mainUi
+        self.pm = self.mainUi.pm
+        self.log = self.mainUi.log
+        self._parent = parent
+        super(ProdAttributes, self).__init__()
+        self._setupUi()
+
+    def __getDict__(self):
+        """ Get prodAttr params writtable dict
+            @return: (dict) : ProdAttr params """
+        attrDict = {'_order': []}
+        for item in pQt.getTopItems(self.twTree):
+            attrDict['_order'].append(item.attrName)
+            attrDict[item.attrName] = str(item._wgType.currentText())
+        return attrDict
+
+    def _setupUi(self):
+        """ Setup widget """
+        self.log.debug("\t Setup prodAttr widget ...")
+        self.bAddItem.setText("Add Attr")
+        self.bAddItem.clicked.connect(self.on_addAttr)
+        self.bDelItem.setText("Del Attr")
+        self.bDelItem.clicked.connect(self.on_delItem)
+        self.bItemUp.clicked.connect(partial(self.on_moveItem, 'up'))
+        self.bItemDn.clicked.connect(partial(self.on_moveItem, 'down'))
+        self.twTree.setColumnCount(2)
+        self.twTree.setHeaderLabels(['Label', 'Type'])
+        self.twTree.header().setStretchLastSection(True)
+        self.twTree.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+
+    def _refresh(self):
+        """ Refresh attributes QTreeWidget """
+        selTreeItems = self._parent.wgTrees.twTree.selectedItems()
+        self.log.debug("Refreshing prodTrees widget ...")
+        self.twTree.clear()
+        if selTreeItems:
+            for attr in selTreeItems[0].treeDict['attr']['_order']:
+                self._addAttr(attrName=attr, attrType=selTreeItems[0].treeDict['attr'][attr])
+
+    def rf_widgetVisibility(self, state=False):
+        """ Refresh widget visibility
+            @param state: (bool) : Visibility state """
+        self.log.debug("\t Refreshing prodAttr visibility ...")
+        super(ProdAttributes, self).rf_widgetVisibility(state=state)
+        for item in pQt.getTopItems(self.twTree):
+            item._wgType.setEnabled(state)
+
+    def on_addAttr(self):
+        """ Command launch when 'Add Attr' QPushButton is clicked """
+        self.log.debug("#-- New Attribute --#")
+        selTreeItems = self._parent.wgTrees.twTree.selectedItems()
+        if selTreeItems:
+            mess = "New Attribute: Enter label"
+            self.addAttrDialog = pQt.PromptDialog(mess, partial(self._addAttr, attrName=None))
+            self.addAttrDialog.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
+            self.addAttrDialog.exec_()
+        else:
+            pQt.errorDialog("Select a tree before adding steps", self._parent)
+
+    def on_delItem(self):
+        """ Command launch when 'Del Tree' QPushButton is clicked """
+        self.log.debug("#-- Delete Attribute --#")
+        super(ProdAttributes, self).on_delItem()
+        self.storeParams()
+
+    def on_moveItem(self, side):
+        """ Command launch when 'up' or 'down' QPushButton is clicked
+            @param side: (str) : 'up' or 'down' """
+        self.log.debug("#-- Move Attr --#")
+        treeDict = self.__getDict__()
+        movedItems = super(ProdAttributes, self).on_moveItem(side=side)
+        for item in movedItems:
+            if item is not None:
+                self.log.debug("\t Move %s %r" % (side, item.attrName))
+                item._wgType = self._newAttrType(treeDict[item.attrName])
+                self.twTree.setItemWidget(item, 1, item._wgType)
+        self.storeParams()
+
+    def storeParams(self):
+        """ Store attribute params """
+        self.log.debug("#-- Store Attr Params --#")
+        selTreeItems = self._parent.wgTrees.twTree.selectedItems()
+        if selTreeItems:
+            treeItem = selTreeItems[0]
+            treeItem.treeDict['attr'] = self.__getDict__()
+
+    def _addAttr(self, attrName=None, attrType=None):
+        """ Add new attribute to QTreeWidget
+            @param attrName: (str) : Attribute Label
+            @param attrType: (str) : Attribute type ('str', 'int' or 'float') """
+        fromDialog = False
+        if attrName is None:
+            fromDialog = True
+            attrName = self.addAttrDialog.result()['result_1']
+            attrType = 'str'
+        if not attrName in self.__getDict__()['_order']:
+            self.log.debug("\t Adding attribute %r: %s ..." % (attrName, attrType))
+            newItem = self._newAttrItem(attrName, attrType)
+            self.twTree.addTopLevelItem(newItem)
+            self.twTree.setItemWidget(newItem, 1, newItem._wgType)
+            if fromDialog:
+                self.addAttrDialog.close()
+                self.storeParams()
+        else:
+            pQt.errorDialog("Attribute %r already exists !!!" % attrName, self.addAttrDialog)
+
+    def _newAttrItem(self, attrName, attrType):
+        """ Create new attribute QTreeWidgetItem
+            @param attrName: (str) : Attribute Name
+            @param attrType: (str) : Attribute type ('str', 'int' or 'float')
+            @return: (object) : New QTreeWidgetItem """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setText(0, attrName)
+        newItem.attrName = attrName
+        newItem._wgType = self._newAttrType(attrType)
+        return newItem
+
+    # noinspection PyUnresolvedReferences
+    def _newAttrType(self, attrType):
+        """ Create new attribute type QComboBox
+            @param attrType: (str) : Attribute type ('str', 'int' or 'float')
+            @return: (object) : New QComboBox """
+        newType = QtGui.QComboBox()
+        newType.addItems(['str', 'int', 'float'])
+        newType.setCurrentIndex(newType.findText(attrType))
+        newType.currentIndexChanged.connect(self.storeParams)
+        return newType
+
+
+class ProdTree(DefaultProdTree):
+    """ Project tree widget
+        @param mainUi: (object) : QMainWindow
+        @param parent: (object) : Parent QWidget """
+
+    def __init__(self, mainUi, parent):
+        self.mainUi = mainUi
+        self.pm = self.mainUi.pm
+        self.log = self.mainUi.log
+        self._parent = parent
+        super(ProdTree, self).__init__()
+        self._setupUi()
+
+    def _setupUi(self):
+        """ Setup widget """
+        self.log.debug("\t Setup prodTree widget ...")
+        self.bAddItem.setText("Add Node")
+        self.bDelItem.setText("Del Node")
+        self.bItemUp.setVisible(False)
+        self.bItemDn.setVisible(False)
+        self.twTree.setColumnCount(1)
+        self.twTree.setHeaderLabels(["Project Tree"])
+        self.twTree.setSortingEnabled(True)
+        self.twTree.header().setStretchLastSection(True)
+        self.twTree.header().setSortIndicator(0, QtCore.Qt.AscendingOrder)
+        self.twTree.setSelectionMode(QtGui.QTreeWidget.ExtendedSelection)
+
+    def rf_widgetVisibility(self, state=False):
+        """ Refresh widget visibility
+            @param state: (bool) : Visibility state """
+        self.log.debug("\t Refreshing prodTree visibility ...")
+        super(ProdTree, self).rf_widgetVisibility(state=state)
+
+    def on_addNode(self, nodeType):
+        self.log.debug("#-- New Tree Node --#")
+        selTreeItems = self._parent.wgTrees.twTree.selectedItems()
+        if selTreeItems:
+            if nodeType == 'ctnr':
+                mess = "New Container: Enter Name"
+            else:
+                mess = "New ShotNode: Enter name"
+            self.addNodeDialog = pQt.PromptDialog(mess, partial(self._addNode, 'ctnr',
+                                                                nodeName=None, parent=None))
+            self.addNodeDialog.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
+            self.addNodeDialog.exec_()
+        else:
+            pQt.errorDialog("Select a tree before adding node", self._parent)
+
+    def _addNode(self, nodeType, nodeName=None, parent=None):
+        print 'toto'
+
+    def _newItem(self, itemType, itemName):
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setText(0, itemName)
+        newItem.nodeType = itemType
+        newItem.nodeName = itemName
+        return newItem

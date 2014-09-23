@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\prodManager\ui\wgtProdTree.ui'
 #
-# Created: Sun Sep 21 03:04:42 2014
+# Created: Sun Sep 21 15:12:51 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -69,14 +69,17 @@ class Ui_prodTree(object):
         spacerItem2 = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.vlTreeBtns.addItem(spacerItem2)
         self.gridLayout.addWidget(self.qfBtns, 0, 0, 1, 1)
-        self.twTrees = QtGui.QTreeWidget(prodTree)
-        self.twTrees.setMinimumSize(QtCore.QSize(0, 0))
-        self.twTrees.setMaximumSize(QtCore.QSize(16777215, 16777215))
-        self.twTrees.setAlternatingRowColors(False)
-        self.twTrees.setIndentation(2)
-        self.twTrees.setObjectName(_fromUtf8("twTrees"))
-        self.twTrees.headerItem().setTextAlignment(0, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter|QtCore.Qt.AlignCenter)
-        self.gridLayout.addWidget(self.twTrees, 0, 1, 1, 1)
+        self.twTree = QtGui.QTreeWidget(prodTree)
+        self.twTree.setMinimumSize(QtCore.QSize(0, 0))
+        self.twTree.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.twTree.setAlternatingRowColors(False)
+        self.twTree.setIndentation(2)
+        self.twTree.setObjectName(_fromUtf8("twTree"))
+        self.twTree.headerItem().setTextAlignment(0, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter|QtCore.Qt.AlignCenter)
+        self.twTree.headerItem().setTextAlignment(1, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter|QtCore.Qt.AlignCenter)
+        self.twTree.headerItem().setTextAlignment(2, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter|QtCore.Qt.AlignCenter)
+        self.twTree.header().setStretchLastSection(False)
+        self.gridLayout.addWidget(self.twTree, 0, 1, 1, 1)
 
         self.retranslateUi(prodTree)
         QtCore.QMetaObject.connectSlotsByName(prodTree)
@@ -87,5 +90,7 @@ class Ui_prodTree(object):
         self.bDelItem.setText(_translate("prodTree", "Del Item", None))
         self.bItemUp.setText(_translate("prodTree", "Up", None))
         self.bItemDn.setText(_translate("prodTree", "Down", None))
-        self.twTrees.headerItem().setText(0, _translate("prodTree", "Tree Title", None))
+        self.twTree.headerItem().setText(0, _translate("prodTree", "Header1", None))
+        self.twTree.headerItem().setText(1, _translate("prodTree", "Header2", None))
+        self.twTree.headerItem().setText(2, _translate("prodTree", "Header3", None))
 

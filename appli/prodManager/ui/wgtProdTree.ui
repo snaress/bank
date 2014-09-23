@@ -148,7 +148,7 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QTreeWidget" name="twTrees">
+    <widget class="QTreeWidget" name="twTree">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -167,9 +167,28 @@
      <property name="indentation">
       <number>2</number>
      </property>
+     <attribute name="headerStretchLastSection">
+      <bool>false</bool>
+     </attribute>
      <column>
       <property name="text">
-       <string>Tree Title</string>
+       <string>Header1</string>
+      </property>
+      <property name="textAlignment">
+       <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Header2</string>
+      </property>
+      <property name="textAlignment">
+       <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Header3</string>
       </property>
       <property name="textAlignment">
        <set>AlignHCenter|AlignVCenter|AlignCenter</set>

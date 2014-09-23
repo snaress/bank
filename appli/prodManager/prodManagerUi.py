@@ -29,7 +29,7 @@ class ProdLoaderUi(QtGui.QMainWindow, prodLoaderUI.Ui_prodLoader, pmCore.Loader,
     # noinspection PyUnresolvedReferences
     def _setupUi(self):
         """ Setup Loader mainUi """
-        self.log.debug("#-- Setup Ui --#")
+        self.log.info("#-- Setup Loader Ui --#")
         self.setStyleSheet(self.applyStyle(styleName='darkGrey'))
         self.bCreate.clicked.connect(self.on_createNewProd)
         #-- All Prods --#
@@ -191,7 +191,7 @@ class ProdManagerUi(QtGui.QMainWindow, prodManagerUI.Ui_prodManager, pQt.Style):
     # noinspection PyUnresolvedReferences
     def _setupUi(self):
         """ Setup prodManager mainUi """
-        self.log.debug("#-- Setup Main Ui --#")
+        self.log.info("#-- Setup Main Ui --#")
         self.setupUi(self)
         self.setWindowTitle("ProdManager: %s" % self.pm._prodId)
         self.setStyleSheet(self.applyStyle(styleName=self._currentStyle))
