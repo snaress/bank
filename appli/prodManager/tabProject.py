@@ -2,7 +2,7 @@ from appli import prodManager
 from functools import partial
 from PyQt4 import QtGui, QtCore
 from lib.qt import procQt as pQt
-from appli.prodManager.ui import tabProjectUI, wgtProdTreeUI
+from appli.prodManager.ui import tabProjectUI, wgtProdTreeUI, dialShotNodeUI
 
 
 class ProjectTab(QtGui.QWidget, tabProjectUI.Ui_projectTab):
@@ -29,11 +29,11 @@ class ProjectTab(QtGui.QWidget, tabProjectUI.Ui_projectTab):
         self.wgTask = ProdTask(self.mainUi, self)
         self.hlParams.insertWidget(3, self.wgTask)
         self.wgTree = ProdTree(self.mainUi, self)
-        self.hlTreeParams.insertWidget(0, self.wgTree)
+        self.vlProdTree.insertWidget(0, self.wgTree)
         self.wgStep = ProdStep(self.mainUi, self)
-        self.hlTreeParams.insertWidget(1, self.wgStep)
+        self.vlProdStep.insertWidget(0, self.wgStep)
         self.wgAttr = ProdAttributes(self.mainUi, self)
-        self.hlTreeParams.insertWidget(2, self.wgAttr)
+        self.vlProdAttr.insertWidget(0, self.wgAttr)
 
     def _refresh(self):
         """ Init project tabWidget """
@@ -486,7 +486,7 @@ class ProdStep(DefaultProdTree):
     def _refresh(self):
         """ Refresh trees QTreeWidget """
         selTreeItems = self._parent.wgTrees.twTree.selectedItems()
-        self.log.debug("Refreshing prodTrees widget ...")
+        self.log.debug("Refreshing prodStep widget ...")
         self.twTree.clear()
         if selTreeItems:
             for step in selTreeItems[0].treeDict['steps']:
@@ -714,6 +714,7 @@ class ProdTree(DefaultProdTree):
         """ Setup widget """
         self.log.debug("\t Setup prodTree widget ...")
         self.bAddItem.setText("Add Node")
+        self.bAddItem.clicked.connect(self.on_addNode)
         self.bDelItem.setText("Del Node")
         self.bItemUp.setVisible(False)
         self.bItemDn.setVisible(False)
@@ -730,16 +731,12 @@ class ProdTree(DefaultProdTree):
         self.log.debug("\t Refreshing prodTree visibility ...")
         super(ProdTree, self).rf_widgetVisibility(state=state)
 
-    def on_addNode(self, nodeType):
+    def on_addNode(self):
+        """ Command launch when 'Add Node' QPushButton is clicked """
         self.log.debug("#-- New Tree Node --#")
         selTreeItems = self._parent.wgTrees.twTree.selectedItems()
         if selTreeItems:
-            if nodeType == 'ctnr':
-                mess = "New Container: Enter Name"
-            else:
-                mess = "New ShotNode: Enter name"
-            self.addNodeDialog = pQt.PromptDialog(mess, partial(self._addNode, 'ctnr',
-                                                                nodeName=None, parent=None))
+            self.addNodeDialog = EditProdTree()
             self.addNodeDialog.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
             self.addNodeDialog.exec_()
         else:
@@ -754,3 +751,35 @@ class ProdTree(DefaultProdTree):
         newItem.nodeType = itemType
         newItem.nodeName = itemName
         return newItem
+
+
+class EditProdTree(QtGui.QDialog, dialShotNodeUI.Ui_editProdTree):
+
+    def __init__(self):
+        super(EditProdTree, self).__init__()
+        self._setupUi()
+        self.rf_nameCvtnVis()
+        self.rf_methodeVis()
+
+    def _setupUi(self):
+        """ Setup dialog """
+        self.setupUi(self)
+        self.rbContainer.clicked.connect(self.rf_nameCvtnVis)
+        self.rbShotNode.clicked.connect(self.rf_nameCvtnVis)
+        self.rbUnique.clicked.connect(self.rf_methodeVis)
+        self.rbMulti.clicked.connect(self.rf_methodeVis)
+        self.bCancel.clicked.connect(self.close)
+
+    def rf_nameCvtnVis(self):
+        """ Refresh name convention visibility """
+        self.lNameCvtn.setVisible(self.rbShotNode.isChecked())
+        self.cbNameCvtn.setVisible(self.rbShotNode.isChecked())
+        if self.rbShotNode.isChecked():
+            self.lMessage.setText("Enter New ShotNode Name")
+        else:
+            self.lMessage.setText("Enter New Container Name")
+
+    def rf_methodeVis(self):
+        """ Refresh methode visibility """
+        self.fUnique.setVisible(self.rbUnique.isChecked())
+        self.fMulti.setVisible(self.rbMulti.isChecked())
