@@ -5,7 +5,7 @@ from PyQt4 import QtGui, QtCore
 from lib.qt import procQt as pQt
 from lib.system import procFile as pFile
 from appli.prodManager import prodManager as pm
-from appli.prodManager import pmCore, tabProject
+from appli.prodManager import pmCore, tabProject, treeProject
 from appli.prodManager.ui import prodLoaderUI, prodManagerUI
 
 
@@ -199,6 +199,9 @@ class ProdManagerUi(QtGui.QMainWindow, prodManagerUI.Ui_prodManager, pQt.Style):
         self.miDefaultStyle.triggered.connect(partial(self.on_style, 'default'))
         self.miDarkGreyStyle.triggered.connect(partial(self.on_style, 'darkGrey'))
         self.miDarkOrangeStyle.triggered.connect(partial(self.on_style, 'darkOrange'))
+        #-- Left Zone --#
+        self.wgTree = treeProject.ProjectTree(self)
+        self.vlLeftZone.insertWidget(-1, self.wgTree)
         #-- Tabs --#
         self.wgProject = tabProject.ProjectTab(self)
         self.glTabProject.addWidget(self.wgProject)

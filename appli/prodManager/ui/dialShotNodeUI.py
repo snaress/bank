@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\prodManager\ui\dialShotNode.ui'
 #
-# Created: Thu Sep 25 04:32:47 2014
+# Created: Fri Sep 26 16:23:30 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -193,9 +193,9 @@ class Ui_editProdTree(object):
         self.bCreate = QtGui.QPushButton(editProdTree)
         self.bCreate.setObjectName(_fromUtf8("bCreate"))
         self.hlButtons.addWidget(self.bCreate)
-        self.bCancel = QtGui.QPushButton(editProdTree)
-        self.bCancel.setObjectName(_fromUtf8("bCancel"))
-        self.hlButtons.addWidget(self.bCancel)
+        self.bClose = QtGui.QPushButton(editProdTree)
+        self.bClose.setObjectName(_fromUtf8("bClose"))
+        self.hlButtons.addWidget(self.bClose)
         self.gridLayout_2.addLayout(self.hlButtons, 10, 0, 1, 1)
         self.fUnique = QtGui.QFrame(editProdTree)
         self.fUnique.setFrameShape(QtGui.QFrame.StyledPanel)
@@ -233,6 +233,6 @@ class Ui_editProdTree(object):
         self.lSuffixe.setText(_translate("editProdTree", " : Suffixe", None))
         self.lPrefixe.setText(_translate("editProdTree", "Prefixe : ", None))
         self.bCreate.setText(_translate("editProdTree", "Create", None))
-        self.bCancel.setText(_translate("editProdTree", "Cancel", None))
+        self.bClose.setText(_translate("editProdTree", "Close", None))
         self.lNodeName.setText(_translate("editProdTree", "New Node Name: ", None))
 

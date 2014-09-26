@@ -26,7 +26,7 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QFrame" name="qfLeft">
+      <widget class="QFrame" name="qfLeftZone">
        <property name="minimumSize">
         <size>
          <width>300</width>
@@ -42,7 +42,7 @@
        <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="vlLeftZone">
         <property name="spacing">
          <number>0</number>
         </property>
@@ -54,6 +54,12 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
+            <height>200</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
             <height>200</height>
            </size>
           </property>
@@ -76,30 +82,6 @@
            <enum>Qt::Horizontal</enum>
           </property>
          </widget>
-        </item>
-        <item>
-         <widget class="QFrame" name="hfTree">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <property name="spacing">
-            <number>0</number>
-           </property>
-           <property name="margin">
-            <number>0</number>
-           </property>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QTreeView" name="twTree"/>
         </item>
        </layout>
       </widget>

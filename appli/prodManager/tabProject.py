@@ -409,6 +409,7 @@ class ProdTrees(DefaultProdTree):
 
     def on_treeItem(self):
         """ refresh selected tree params """
+        self._parent.wgTree._refresh()
         self._parent.wgStep._refresh()
         self._parent.wgAttr._refresh()
         self._parent.wgAttr.rf_widgetVisibility(self._parent.bEditProd.isChecked())
@@ -531,8 +532,7 @@ class ProdStep(DefaultProdTree):
         self.log.debug("#-- Store Step Params --#")
         selTreeItems = self._parent.wgTrees.twTree.selectedItems()
         if selTreeItems:
-            treeItem = selTreeItems[0]
-            treeItem.treeDict['steps'] = self.__getDict__()
+            selTreeItems[0].treeDict['steps'] = self.__getDict__()
 
     def _addStep(self, stepName=None):
         """ Add new step to QTreeWidget
@@ -651,8 +651,7 @@ class ProdAttributes(DefaultProdTree):
         self.log.debug("#-- Store Attr Params --#")
         selTreeItems = self._parent.wgTrees.twTree.selectedItems()
         if selTreeItems:
-            treeItem = selTreeItems[0]
-            treeItem.treeDict['attr'] = self.__getDict__()
+            selTreeItems[0].treeDict['attr'] = self.__getDict__()
 
     def _addAttr(self, attrName=None, attrType=None):
         """ Add new attribute to QTreeWidget
@@ -710,20 +709,45 @@ class ProdTree(DefaultProdTree):
         super(ProdTree, self).__init__()
         self._setupUi()
 
+    def __getDict__(self):
+        """ Get prodTree params writtable dict
+            @return: (dict) : prodTree params """
+        attrDict = {'_order': []}
+        for item in pQt.getAllItems(self.twTree):
+            root = self._getItemTreePath(item)
+            attrDict['_order'].append(root)
+            attrDict[root] = item.__dict__
+        return attrDict
+
     def _setupUi(self):
         """ Setup widget """
         self.log.debug("\t Setup prodTree widget ...")
         self.bAddItem.setText("Add Node")
         self.bAddItem.clicked.connect(self.on_addNode)
         self.bDelItem.setText("Del Node")
+        self.bDelItem.clicked.connect(self.on_delItem)
         self.bItemUp.setVisible(False)
         self.bItemDn.setVisible(False)
         self.twTree.setColumnCount(1)
+        self.twTree.setIndentation(12)
         self.twTree.setHeaderLabels(["Project Tree"])
-        self.twTree.setSortingEnabled(True)
         self.twTree.header().setStretchLastSection(True)
-        self.twTree.header().setSortIndicator(0, QtCore.Qt.AscendingOrder)
         self.twTree.setSelectionMode(QtGui.QTreeWidget.ExtendedSelection)
+
+    def _refresh(self):
+        """ Refresh attributes QTreeWidget """
+        selTreeItems = self._parent.wgTrees.twTree.selectedItems()
+        self.log.debug("Refreshing prodTree widget ...")
+        self.twTree.clear()
+        if selTreeItems:
+            tDict = selTreeItems[0].treeDict['tree']
+            for node in tDict['_order']:
+                if len(node.split('/')) > 1:
+                    parent = self._getItemFromTreePath('/'.join(node.split('/')[:-1]))
+                else:
+                    parent=None
+                self._addNode(tDict[node]['nodeType'], tDict[node]['nodeLabel'],
+                              tDict[node]['nodeName'], parent=parent)
 
     def rf_widgetVisibility(self, state=False):
         """ Refresh widget visibility
@@ -736,26 +760,95 @@ class ProdTree(DefaultProdTree):
         self.log.debug("#-- New Tree Node --#")
         selTreeItems = self._parent.wgTrees.twTree.selectedItems()
         if selTreeItems:
-            self.addNodeDialog = EditProdTree()
+            self.addNodeDialog = EditProdTree(self.mainUi, self)
             self.addNodeDialog.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
             self.addNodeDialog.exec_()
         else:
             pQt.errorDialog("Select a tree before adding node", self._parent)
 
-    def _addNode(self, nodeType, nodeName=None, parent=None):
-        print 'toto'
+    def storeParams(self):
+        """ Store prodTree params """
+        self.log.debug("#-- Store Prod Tree Params --#")
+        selTreeItems = self._parent.wgTrees.twTree.selectedItems()
+        if selTreeItems:
+            selTreeItems[0].treeDict['tree'] = self.__getDict__()
 
-    def _newItem(self, itemType, itemName):
+    def _addNode(self, nodeType, nodeLabel, nodeName, parent=None):
+        """ Check new node validity and create it
+            @param nodeType: (str) : New node type ('container' or 'shotNode')
+            @param nodeLabel: (str) : New node label (display name)
+            @param nodeName: (str) : New node name (id name)
+            @param parent: (object) : Node parent QTreeWidgetItem """
+        newItem = self._newItem(nodeType, nodeLabel, nodeName)
+        if parent is None:
+            self.log.debug("\t Adding topItem %r ..." % nodeName)
+            self.twTree.addTopLevelItem(newItem)
+        else:
+            self.log.debug("\t Adding childItem %r ..." % nodeName)
+            parent.addChild(newItem)
+        self.twTree.sortItems(0, QtCore.Qt.AscendingOrder)
+        try:
+            self.addNodeDialog.close()
+        except:
+            pass
+
+    def on_delItem(self):
+        """ Command launch when 'Del Tree' QPushButton is clicked """
+        self.log.debug("#-- Delete Tree --#")
+        super(ProdTree, self).on_delItem()
+
+    @staticmethod
+    def _newItem(itemType, itemLabel, itemName):
+        """ Create new prodTree QTreeWidgetItem
+            @param itemType: (str) : New node type ('container' or 'shotNode')
+            @param itemLabel: (str) : New node label (display name)
+            @param itemName: (str) : New node name (id name)
+            @return: (object) : New QTreeWidgetItem """
         newItem = QtGui.QTreeWidgetItem()
-        newItem.setText(0, itemName)
+        newItem.setText(0, itemLabel)
+        if itemType == 'shotNode':
+            newItem.setTextColor(0, QtGui.QColor(125, 255, 255))
         newItem.nodeType = itemType
+        newItem.nodeLabel = itemLabel
         newItem.nodeName = itemName
         return newItem
 
+    @staticmethod
+    def _getItemTreePath(item):
+        """ Get given QTreeWidgetItem tree path
+            @param item: (object) : QTreeWidgetItem
+            @return: (str) : Item tree path """
+        if item.parent() is None:
+            root = item.nodeLabel
+        else:
+            root = ""
+            parents = pQt.getAllParent(item)
+            parents.reverse()
+            for n, p in enumerate(parents[:-1]):
+                if n == 0:
+                    root = p.nodeLabel
+                else:
+                    root = "%s/%s" % (root, p.nodeLabel)
+            root = "%s/%s" % (root, item.nodeLabel)
+        return root
+
+    def _getItemFromTreePath(self, treePath):
+        """ Get item from given tree path
+            @param treePath: (str) : Tree path
+            @return: (object) : QTreeWidgetItem """
+        for item in pQt.getAllItems(self.twTree):
+            if self._getItemTreePath(item) == treePath:
+                return item
+
 
 class EditProdTree(QtGui.QDialog, dialShotNodeUI.Ui_editProdTree):
+    """ Dialog used for data base creation and edition
+        @param ui: (object) : ProdTree QTreeWidget """
 
-    def __init__(self):
+    def __init__(self, mainUi, ui):
+        self.mainUi = mainUi
+        self.log = self.mainUi.log
+        self.ui = ui
         super(EditProdTree, self).__init__()
         self._setupUi()
         self.rf_nameCvtnVis()
@@ -768,7 +861,8 @@ class EditProdTree(QtGui.QDialog, dialShotNodeUI.Ui_editProdTree):
         self.rbShotNode.clicked.connect(self.rf_nameCvtnVis)
         self.rbUnique.clicked.connect(self.rf_methodeVis)
         self.rbMulti.clicked.connect(self.rf_methodeVis)
-        self.bCancel.clicked.connect(self.close)
+        self.bCreate.clicked.connect(self.on_create)
+        self.bClose.clicked.connect(self.close)
 
     def rf_nameCvtnVis(self):
         """ Refresh name convention visibility """
@@ -783,3 +877,68 @@ class EditProdTree(QtGui.QDialog, dialShotNodeUI.Ui_editProdTree):
         """ Refresh methode visibility """
         self.fUnique.setVisible(self.rbUnique.isChecked())
         self.fMulti.setVisible(self.rbMulti.isChecked())
+
+    def on_create(self):
+        """ Command launch when 'Create' QPushButton is clicked """
+        selItems = self.ui.twTree.selectedItems()
+        nodeType, nameCvtn, newNodes = self._getUiParams()
+        if not selItems:
+            for newNode in newNodes:
+                if self._checkNodeName(newNode):
+                    self.ui._addNode(nodeType, newNode, newNode)
+        else:
+            for item in selItems:
+                for newNode in newNodes:
+                    if nameCvtn is None or nameCvtn == 'Asset':
+                        self.ui._addNode(nodeType, newNode, newNode, parent=item)
+                    else:
+                        nodeName = "%s_%s" % (item.nodeLabel, newNode)
+                        self.ui._addNode(nodeType, newNode, nodeName, parent=item)
+        self.ui.storeParams()
+
+    def _getUiParams(self):
+        """ Get dialog params
+            @return: (str, str, list) : NodeType, NameConvention, newNodes list """
+        if self.rbContainer.isChecked():
+            nodeType = 'container'
+            nameCvtn = None
+        else:
+            nodeType = 'shotNode'
+            nameCvtn = self.cbNameCvtn.currentText()
+        newNodes = []
+        if self.rbUnique.isChecked():
+            newNodes.append(str(self.leNodeName.text()))
+        else:
+            for n in range(self.sbStart.value(), self.sbStop.value() + 1, self.sbStep.value()):
+                newNodes.append("%s%s%s" % (str(self.lePrefixe.text()),
+                                            str(n).zfill(self.sbPadding.value()),
+                                            str(self.leSuffixe.text())))
+        return nodeType, nameCvtn, newNodes
+
+    def _checkNodeName(self, nodeName, nodeType=None, parent=None):
+        """ Check if nodeName already exists in tree
+            @param nodeName: (str) : Node name
+            @param nodeType: (str) : Node type ('container' or 'shotNode')
+            @param parent: (object) : Node parent QTreeWidgetItem
+            @return: (bool) : True if nodeName doesn't exists,
+                              False if nodeName already exists """
+        error = "Check new node name: %r already exists !!!" % nodeName
+        if parent is None:
+             topItems = pQt.getTopItems(self.ui.twTree)
+             for topItem in topItems:
+                 if topItem.nodeName == nodeName:
+                     self.log.debug(error)
+                     return False
+        else:
+            for n in range(parent.childCount()):
+                if nodeType == 'container':
+                    if nodeName == parent.child(n).nodeName:
+                        self.log.debug(error)
+                        return False
+                elif nodeType == 'shotNode':
+                    allItems = pQt.getAllItems(self.ui.twTree)
+                    for item in allItems:
+                        if item.nodeType == nodeType and item.nodeName == nodeName:
+                            self.log.debug(error)
+                            return False
+        return True
