@@ -745,7 +745,7 @@ class ProdTree(DefaultProdTree):
                 if len(node.split('/')) > 1:
                     parent = self._getItemFromTreePath('/'.join(node.split('/')[:-1]))
                 else:
-                    parent=None
+                    parent = None
                 self._addNode(tDict[node]['nodeType'], tDict[node]['nodeLabel'],
                               tDict[node]['nodeName'], parent=parent)
 
