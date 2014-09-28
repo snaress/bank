@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\prodManager\ui\dialShotNode.ui'
 #
-# Created: Fri Sep 26 16:23:30 2014
+# Created: Sat Sep 27 12:56:01 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -214,6 +214,19 @@ class Ui_editProdTree(object):
 
         self.retranslateUi(editProdTree)
         QtCore.QMetaObject.connectSlotsByName(editProdTree)
+        editProdTree.setTabOrder(self.rbContainer, self.rbShotNode)
+        editProdTree.setTabOrder(self.rbShotNode, self.cbNameCvtn)
+        editProdTree.setTabOrder(self.cbNameCvtn, self.rbUnique)
+        editProdTree.setTabOrder(self.rbUnique, self.rbMulti)
+        editProdTree.setTabOrder(self.rbMulti, self.leNodeName)
+        editProdTree.setTabOrder(self.leNodeName, self.sbStart)
+        editProdTree.setTabOrder(self.sbStart, self.sbStop)
+        editProdTree.setTabOrder(self.sbStop, self.sbStep)
+        editProdTree.setTabOrder(self.sbStep, self.sbPadding)
+        editProdTree.setTabOrder(self.sbPadding, self.lePrefixe)
+        editProdTree.setTabOrder(self.lePrefixe, self.leSuffixe)
+        editProdTree.setTabOrder(self.leSuffixe, self.bCreate)
+        editProdTree.setTabOrder(self.bCreate, self.bClose)
 
     def retranslateUi(self, editProdTree):
         editProdTree.setWindowTitle(_translate("editProdTree", "Dialog", None))

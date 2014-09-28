@@ -408,6 +408,22 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>rbContainer</tabstop>
+  <tabstop>rbShotNode</tabstop>
+  <tabstop>cbNameCvtn</tabstop>
+  <tabstop>rbUnique</tabstop>
+  <tabstop>rbMulti</tabstop>
+  <tabstop>leNodeName</tabstop>
+  <tabstop>sbStart</tabstop>
+  <tabstop>sbStop</tabstop>
+  <tabstop>sbStep</tabstop>
+  <tabstop>sbPadding</tabstop>
+  <tabstop>lePrefixe</tabstop>
+  <tabstop>leSuffixe</tabstop>
+  <tabstop>bCreate</tabstop>
+  <tabstop>bClose</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
  <buttongroups>

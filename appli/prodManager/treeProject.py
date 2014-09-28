@@ -39,6 +39,14 @@ class ProjectTree(QtGui.QWidget, wgtMainTreeUI.Ui_mainTree):
             self.hlTreeSwitch.insertWidget(-1, newButton)
         self.hlTreeSwitch.itemAt(0).widget().setChecked(True)
 
+    def getSelMode(self):
+        """ Get selected display mode
+            @return: (str) : Selected tree display mode """
+        if self.rbTreeMode.isChecked():
+            return 'treeMode'
+        elif self.rbStepMode.isChecked():
+            return 'stepMode'
+
     def getSelTree(self):
         """ Get selected tree
             @return: (str) : Selected tree name """
@@ -57,6 +65,8 @@ class ProjectTree(QtGui.QWidget, wgtMainTreeUI.Ui_mainTree):
 
 
 class Tree(QtGui.QTreeWidget):
+    """ QTreeWidget used by ProjectTree
+        @param parent: (object) : Parent QWidget """
 
     def __init__(self, parent):
         self._parent = parent
@@ -66,31 +76,70 @@ class Tree(QtGui.QTreeWidget):
         super(Tree, self).__init__()
         self._setupUi()
 
+    # noinspection PyUnresolvedReferences
     def _setupUi(self):
         """ Setup projectTree QTreeWidget """
         self.log.debug("\t Setup mainTree widget ...")
         self.header().setVisible(False)
+        self.itemClicked.connect(self.on_treeNode)
 
     def rf_tree(self):
         """ Refresh mainTree """
         self.clear()
         treeDict = self.pm.prodTrees[self._parent.getSelTree()]
-        if self._parent.rbTreeMode.isChecked():
+        if self._parent.getSelMode() == 'treeMode':
             self.log.debug("\t Refreshing main tree (Tree Mode) ...")
+            self.rf_treeMode(treeDict)
+        elif self._parent.getSelMode() == 'stepMode':
+            self.log.debug("\t Refreshing main tree (Step Mode) ...")
+            self.rf_stepMode(treeDict)
+
+    def rf_treeMode(self, treeDict):
+        """ Refresh main tree with treeMode listing
+            @param treeDict: (dict) : Tree dict """
+        for node in treeDict['tree']['_order']:
+            newItem = TreeNode(**treeDict['tree'][node])
+            if len(node.split('/')) == 1:
+                self.addTopLevelItem(newItem)
+            else:
+                parent = self._getItemFromTreePath('/'.join(node.split('/')[:-1]))
+                parent.addChild(newItem)
+            if getattr(newItem, 'nodeType') == 'shotNode':
+                for step in treeDict['steps']:
+                    newStep = TreeNode(nodeType='step', nodeLabel=step, nodeName=step)
+                    newItem.addChild(newStep)
+
+    def rf_stepMode(self, treeDict):
+        """ Refresh main tree with stepMode listing
+            @param treeDict: (dict) : Tree dict """
+        for step in treeDict['steps']:
+            newStep = TreeNode(nodeType='step', nodeLabel=step, nodeName=step)
+            self.addTopLevelItem(newStep)
             for node in treeDict['tree']['_order']:
-                print treeDict['tree'][node]
                 newItem = TreeNode(**treeDict['tree'][node])
                 if len(node.split('/')) == 1:
-                    self.addTopLevelItem(newItem)
+                    newStep.addChild(newItem)
                 else:
-                    parent = self._getItemFromTreePath('/'.join(node.split('/')[:-1]))
+                    rootPath = "%s/%s" % (step, '/'.join(node.split('/')[:-1]))
+                    parent = self._getItemFromTreePath(rootPath)
                     parent.addChild(newItem)
-                if newItem.nodeType == 'shotNode':
-                    for step in treeDict['steps']:
-                        newStep = TreeNode(nodeLabel=step)
-                        newItem.addChild(newStep)
-        else:
-            self.log.debug("\t Refreshing main tree (Step Mode) ...")
+
+    def on_treeNode(self):
+        """ Command launch when shotNode is clicked """
+        if self.mainUi.getSelTab() == 'Shots':
+            self.mainUi.wgShots._refresh()
+
+    def addTopLevelItem(self, QTreeWidgetItem):
+        super(Tree, self).addTopLevelItem(QTreeWidgetItem)
+
+    def addTopLevelItems(self, list_of_QTreeWidgetItem):
+        super(Tree, self).addTopLevelItems(list_of_QTreeWidgetItem)
+
+    def insertTopLevelItem(self, p_int, QTreeWidgetItem):
+        super(Tree, self).insertTopLevelItem(p_int, QTreeWidgetItem)
+
+    def insertTopLevelItems(self, p_int, list_of_QTreeWidgetItem):
+        super(Tree, self).insertTopLevelItems(p_int, list_of_QTreeWidgetItem)
 
     @staticmethod
     def _getItemTreePath(item):
@@ -126,4 +175,23 @@ class TreeNode(QtGui.QTreeWidgetItem):
         for k, v in kwargs.iteritems():
             setattr(self, k, v)
         super(TreeNode, self).__init__()
+        self._setupUi()
+
+    def _setupUi(self):
+        """ Setup treeNode QTreeWidgetItem """
         self.setText(0, getattr(self, 'nodeLabel'))
+        if hasattr(self, 'nodeType'):
+            if getattr(self, 'nodeType') == 'shotNode':
+                self.setTextColor(0, QtGui.QColor(125, 255, 255))
+
+    def addChild(self, QTreeWidgetItem):
+        super(TreeNode, self).addChild(QTreeWidgetItem)
+
+    def addChildren(self, list_of_QTreeWidgetItem):
+        super(TreeNode, self).addChildren(list_of_QTreeWidgetItem)
+
+    def insertChild(self, p_int, QTreeWidgetItem):
+        super(TreeNode, self).insertChild(p_int, QTreeWidgetItem)
+
+    def insertChildren(self, p_int, list_of_QTreeWidgetItem):
+        super(TreeNode, self).insertChildren(p_int, list_of_QTreeWidgetItem)

@@ -36,7 +36,7 @@ class ProjectTab(QtGui.QWidget, tabProjectUI.Ui_projectTab):
         self.vlProdAttr.insertWidget(0, self.wgAttr)
 
     def _refresh(self):
-        """ Init project tabWidget """
+        """ Refresh project tabWidget """
         self.log.info("#-- Refresh Tab Project --#")
         self.rf_title()
         self.rf_date()

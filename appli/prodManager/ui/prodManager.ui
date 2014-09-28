@@ -106,6 +106,14 @@
         <attribute name="title">
          <string>Shots</string>
         </attribute>
+        <layout class="QGridLayout" name="glTabShots">
+         <property name="margin">
+          <number>2</number>
+         </property>
+         <property name="spacing">
+          <number>1</number>
+         </property>
+        </layout>
        </widget>
       </widget>
      </widget>

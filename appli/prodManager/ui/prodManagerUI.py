@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\prodManager\ui\prodManager.ui'
 #
-# Created: Sat Sep 27 00:12:48 2014
+# Created: Sat Sep 27 13:38:10 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -71,6 +71,10 @@ class Ui_prodManager(object):
         self.tabManager.addTab(self.tabProject, _fromUtf8(""))
         self.tabShots = QtGui.QWidget()
         self.tabShots.setObjectName(_fromUtf8("tabShots"))
+        self.glTabShots = QtGui.QGridLayout(self.tabShots)
+        self.glTabShots.setMargin(2)
+        self.glTabShots.setSpacing(1)
+        self.glTabShots.setObjectName(_fromUtf8("glTabShots"))
         self.tabManager.addTab(self.tabShots, _fromUtf8(""))
         self.gridLayout.addWidget(self.splitter, 0, 0, 1, 1)
         prodManager.setCentralWidget(self.centralwidget)

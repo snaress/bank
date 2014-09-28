@@ -5,7 +5,7 @@ from PyQt4 import QtGui, QtCore
 from lib.qt import procQt as pQt
 from lib.system import procFile as pFile
 from appli.prodManager import prodManager as pm
-from appli.prodManager import pmCore, tabProject, treeProject
+from appli.prodManager import pmCore, tabProject, tabShots, treeProject
 from appli.prodManager.ui import prodLoaderUI, prodManagerUI
 
 
@@ -205,6 +205,9 @@ class ProdManagerUi(QtGui.QMainWindow, prodManagerUI.Ui_prodManager, pQt.Style):
         #-- Tabs --#
         self.wgProject = tabProject.ProjectTab(self)
         self.glTabProject.addWidget(self.wgProject)
+        self.wgShots = tabShots.ShotsTab(self)
+        self.glTabShots.addWidget(self.wgShots)
+        self.tabManager.currentChanged.connect(self.wgTree.twTree.on_treeNode)
 
     def on_style(self, style):
         """ Pref style menu items command. switch style
@@ -216,6 +219,11 @@ class ProdManagerUi(QtGui.QMainWindow, prodManagerUI.Ui_prodManager, pQt.Style):
             self.setStyleSheet(self.applyStyle(styleName=style))
         self._currentStyle = style
         self.log.debug("Apply style: %s" % style)
+
+    def getSelTab(self):
+        """ Get selected tab
+            @return: (str) : Selected tab text """
+        return self.tabManager.tabText(self.tabManager.currentIndex())
 
 
 def launch(uiType='loader', prodId=None, logLvl='info'):
