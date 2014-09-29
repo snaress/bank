@@ -61,8 +61,6 @@ class Loader(object):
     def createNewProdfolder(prodPath, raiseError=False):
         """ Create New prod into dataBase
             @param prodPath: (str) : DataBase prod path
-            @param prodAlias: (str) : Alias name
-            @param prodName: (str) : Prod name
             @param raiseError: (bool) : Raise error if True, Return error if False
             @return: (str or bool) : Result """
         try:
@@ -75,18 +73,19 @@ class Loader(object):
             else:
                 return "error__%s" % error
 
-    @staticmethod
-    def createNewProdFile(prodPath, prodAlias, prodName, raiseError=False):
+    def createNewProdFile(self, prodPath, prodAlias, prodName, raiseError=False):
         """ Create New prod into dataBase
             @param prodPath: (str) : DataBase prod path
             @param prodAlias: (str) : Alias name
             @param prodName: (str) : Prod name
             @param raiseError: (bool) : Raise error if True, Return error if False
             @return: (str or bool) : Result """
+        treeDict = {'steps': [], 'tree': {'_order': []}, 'attr': {'_order': []}}
         txt = ["prodAlias = %r" % prodAlias, "prodName = %r" % prodName,
                "prodStartDate = '%s'" % pFile.getDate().replace('_', '/'),
                "prodStopDate = '%s'" % pFile.getDate().replace('_', '/'),
-               "prodWorkDir = ''", "prodTasks = {'_order': []}", "prodTrees = {'_order': []}"]
+               "prodWorkDir = ''", "prodTasks = %s" % self.defaultTasks(),
+               "prodTrees = {'_order': ['asset', 'shot'], 'asset': %s, 'shot': %s}" % (treeDict, treeDict)]
         fileName = os.path.join(prodPath, "%s--%s.py" % (prodAlias, prodName))
         try:
             pFile.writeFile(fileName, '\n'.join(txt))
@@ -114,3 +113,17 @@ class Loader(object):
                 raise IOError, "[pmCore] | ERROR | %s" % error
             else:
                 return "error__%s" % error
+
+    @staticmethod
+    def defaultTasks():
+        return {'_order': ['Out', 'StandBy', 'ToDo', 'Retake', 'InProgress', 'Warning',
+                           'WaitApproval', 'ToReview', 'Final'],
+                'Out': {'color': (0, 0, 0), 'stat': False},
+                'StandBy': {'color': (229, 229, 229), 'stat': True},
+                'ToDo': {'color': (155, 232, 232), 'stat': True},
+                'Retake': {'color': (255, 170, 0), 'stat': True},
+                'InProgress': {'color': (255, 255, 0), 'stat': True},
+                'Warning': {'color': (255, 0, 0), 'stat': True},
+                'WaitApproval': {'color': (255, 85, 255), 'stat': True},
+                'ToReview': {'color': (85, 85, 255), 'stat': True},
+                'Final':{'color': (85, 255, 0), 'stat': True}}

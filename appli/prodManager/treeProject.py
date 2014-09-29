@@ -23,21 +23,12 @@ class ProjectTree(QtGui.QWidget, wgtMainTreeUI.Ui_mainTree):
         self.vlTree.insertWidget(-1, self.twTree)
         self.rbTreeMode.clicked.connect(self.twTree.rf_tree)
         self.rbStepMode.clicked.connect(self.twTree.rf_tree)
+        self.rbAsset.clicked.connect(self.twTree.rf_tree)
+        self.rbShot.clicked.connect(self.twTree.rf_tree)
 
     def _refresh(self):
         self.log.info("#-- Refresh Tree Project --#")
-        self.rf_treeSwitch()
         self.twTree.rf_tree()
-
-    def rf_treeSwitch(self):
-        """ Refresh mainTree switch """
-        self.log.debug("\t Refreshing tree switch ...")
-        for n in range(self.hlTreeSwitch.count()):
-            self.hlTreeSwitch.takeAt(0)
-        for tree in self.pm.prodTrees['_order']:
-            newButton = self._newRadioButton(tree)
-            self.hlTreeSwitch.insertWidget(-1, newButton)
-        self.hlTreeSwitch.itemAt(0).widget().setChecked(True)
 
     def getSelMode(self):
         """ Get selected display mode
@@ -50,9 +41,10 @@ class ProjectTree(QtGui.QWidget, wgtMainTreeUI.Ui_mainTree):
     def getSelTree(self):
         """ Get selected tree
             @return: (str) : Selected tree name """
-        for n in range(self.hlTreeSwitch.count()):
-            if self.hlTreeSwitch.itemAt(n).widget().isChecked():
-                return str(self.hlTreeSwitch.itemAt(n).widget().text())
+        if self.rbAsset.isChecked():
+            return 'asset'
+        elif self.rbShot.isChecked():
+            return 'shot'
 
     def _newRadioButton(self, treeName):
         """ Create new QRadioButton
@@ -86,13 +78,14 @@ class Tree(QtGui.QTreeWidget):
     def rf_tree(self):
         """ Refresh mainTree """
         self.clear()
-        treeDict = self.pm.prodTrees[self._parent.getSelTree()]
-        if self._parent.getSelMode() == 'treeMode':
-            self.log.debug("\t Refreshing main tree (Tree Mode) ...")
-            self.rf_treeMode(treeDict)
-        elif self._parent.getSelMode() == 'stepMode':
-            self.log.debug("\t Refreshing main tree (Step Mode) ...")
-            self.rf_stepMode(treeDict)
+        if self._parent.getSelTree() is not None:
+            treeDict = self.pm.prodTrees[self._parent.getSelTree()]
+            if self._parent.getSelMode() == 'treeMode':
+                self.log.debug("\t Refreshing main tree (Tree Mode) ...")
+                self.rf_treeMode(treeDict)
+            elif self._parent.getSelMode() == 'stepMode':
+                self.log.debug("\t Refreshing main tree (Step Mode) ...")
+                self.rf_stepMode(treeDict)
 
     def rf_treeMode(self, treeDict):
         """ Refresh main tree with treeMode listing

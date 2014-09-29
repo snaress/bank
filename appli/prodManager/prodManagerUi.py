@@ -243,5 +243,5 @@ def launch(uiType='loader', prodId=None, logLvl='info'):
 
 
 if __name__ == '__main__':
-    # launch(logLvl='info')
-    launch(uiType='manager', prodId='lv--Le_Voeu', logLvl='debug')
+    launch(logLvl='info')
+    # launch(uiType='manager', prodId='lv--Le_Voeu', logLvl='debug')

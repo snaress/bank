@@ -57,7 +57,6 @@ class ProjectTab(QtGui.QWidget, tabProjectUI.Ui_projectTab):
         """ Refresh project tab ui visibility
             @param state: (bool) : Visibility state """
         self.log.info("#-- Refresh Tab Project Visibility --#")
-        #-- Init Project Label --#
         self.bCancelEdit.setVisible(state)
         #-- Init Project Date --#
         self.deStart.setReadOnly(not state)
@@ -361,14 +360,12 @@ class ProdTrees(DefaultProdTree):
     def _setupUi(self):
         """ Setup widget """
         self.log.debug("\t Setup prodTrees widget ...")
-        self.bAddItem.setText("Add Tree")
-        self.bAddItem.clicked.connect(self.on_addTree)
-        self.bDelItem.setText("Del Tree")
-        self.bDelItem.clicked.connect(self.on_delItem)
-        self.bItemUp.clicked.connect(partial(self.on_moveItem, 'up'))
-        self.bItemDn.clicked.connect(partial(self.on_moveItem, 'down'))
+        self.bAddItem.setVisible(False)
+        self.bDelItem.setVisible(False)
+        self.bItemUp.setVisible(False)
+        self.bItemDn.setVisible(False)
         self.twTree.setColumnCount(1)
-        self.twTree.setHeaderLabels(["Project Trees"])
+        self.twTree.setHeaderLabels(["Tree Type"])
         self.twTree.header().setStretchLastSection(True)
         self.twTree.itemClicked.connect(self.on_treeItem)
 
@@ -384,28 +381,6 @@ class ProdTrees(DefaultProdTree):
             @param state: (bool) : Visibility state """
         self.log.debug("\t Refreshing prodTrees visibility ...")
         super(ProdTrees, self).rf_widgetVisibility(state=state)
-
-    def on_addTree(self):
-        """ Command launch when 'Add Tree' QPushButton is clicked """
-        self.log.debug("#-- New Tree --#")
-        mess = "New Tree: Enter tree name (ex: assets or shots)"
-        self.addTreeDialog = pQt.PromptDialog(mess, partial(self._addTree, treeName=None,
-                                                                           treeDict=None))
-        self.addTreeDialog.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
-        self.addTreeDialog.exec_()
-
-    def on_delItem(self):
-        """ Command launch when 'Del Tree' QPushButton is clicked """
-        self.log.debug("#-- Delete Tree --#")
-        super(ProdTrees, self).on_delItem()
-
-    def on_moveItem(self, side):
-        """ Command launch when 'up' or 'down' QPushButton is clicked
-            @param side: (str) : 'up' or 'down' """
-        self.log.debug("#-- Move Tree --#")
-        movedItems = super(ProdTrees, self).on_moveItem(side=side)
-        for item in movedItems:
-            self.log.debug("\t Move %r %s" % (str(item.text(0)), side))
 
     def on_treeItem(self):
         """ refresh selected tree params """
