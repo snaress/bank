@@ -12,6 +12,7 @@ class ProdManager(object):
         self.log = pFile.Logger(title="PM", level=logLvl)
         self._prodId = prodId
         self._prodPath = os.path.join(prodManager.binPath, 'prod')
+        self._treePath = None
         self._prodFile = None
         if self._prodId is not None:
             self.loadProd()
@@ -46,6 +47,7 @@ class ProdManager(object):
             prodId = self._prodId
         self.log.info("Loading project %r ..." % prodId)
         self._prodId = prodId
+        self._treePath = os.path.join(self._prodPath, self._prodId, 'tree')
         self._prodFile = os.path.join(self._prodPath, self._prodId, "%s.py" % self._prodId)
         if not os.path.exists(self._prodFile):
             raise KeyError, "[PM] | Error | Prod id not found: %r." % self._prodId

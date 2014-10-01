@@ -225,6 +225,12 @@ class ProdManagerUi(QtGui.QMainWindow, prodManagerUI.Ui_prodManager, pQt.Style):
             @return: (str) : Selected tab text """
         return self.tabManager.tabText(self.tabManager.currentIndex())
 
+    def getSelMode(self):
+        return self.wgTree.getSelMode()
+
+    def getSelTree(self):
+        return self.wgTree.getSelTree()
+
 
 def launch(uiType='loader', prodId=None, logLvl='info'):
     """ ProdManager Launcher
@@ -243,5 +249,5 @@ def launch(uiType='loader', prodId=None, logLvl='info'):
 
 
 if __name__ == '__main__':
-    launch(logLvl='info')
-    # launch(uiType='manager', prodId='lv--Le_Voeu', logLvl='debug')
+    # launch(logLvl='info')
+    launch(uiType='manager', prodId='lv--Le_Voeu', logLvl='debug')

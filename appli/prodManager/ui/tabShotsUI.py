@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\prodManager\ui\tabShots.ui'
 #
-# Created: Sun Sep 28 04:39:47 2014
+# Created: Sun Sep 28 16:11:22 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -55,10 +55,10 @@ class Ui_shotsTab(object):
         self.hlShotParamsBtns.setObjectName(_fromUtf8("hlShotParamsBtns"))
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.hlShotParamsBtns.addItem(spacerItem)
-        self.bCancelShotParams = QtGui.QPushButton(self.layoutWidget)
-        self.bCancelShotParams.setMaximumSize(QtCore.QSize(50, 20))
-        self.bCancelShotParams.setObjectName(_fromUtf8("bCancelShotParams"))
-        self.hlShotParamsBtns.addWidget(self.bCancelShotParams)
+        self.bCancelEdit = QtGui.QPushButton(self.layoutWidget)
+        self.bCancelEdit.setMaximumSize(QtCore.QSize(50, 20))
+        self.bCancelEdit.setObjectName(_fromUtf8("bCancelEdit"))
+        self.hlShotParamsBtns.addWidget(self.bCancelEdit)
         self.bEditShotParams = QtGui.QPushButton(self.layoutWidget)
         self.bEditShotParams.setMaximumSize(QtCore.QSize(40, 20))
         self.bEditShotParams.setCheckable(True)
@@ -134,7 +134,7 @@ class Ui_shotsTab(object):
 
     def retranslateUi(self, shotsTab):
         shotsTab.setWindowTitle(_translate("shotsTab", "Tab Shots", None))
-        self.bCancelShotParams.setText(_translate("shotsTab", "Cancel", None))
+        self.bCancelEdit.setText(_translate("shotsTab", "Cancel", None))
         self.bEditShotParams.setText(_translate("shotsTab", "Edit", None))
         self.lWorkDir.setText(_translate("shotsTab", "Work Dir:", None))
         self.bOpenWorkDir.setText(_translate("shotsTab", "Open", None))

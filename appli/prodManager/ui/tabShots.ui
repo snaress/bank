@@ -69,7 +69,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="bCancelShotParams">
+           <widget class="QPushButton" name="bCancelEdit">
             <property name="maximumSize">
              <size>
               <width>50</width>

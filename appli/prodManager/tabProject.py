@@ -20,7 +20,7 @@ class ProjectTab(QtGui.QWidget, tabProjectUI.Ui_projectTab):
     def _setupUi(self):
         """ Setup project tabWidget """
         self.setupUi(self)
-        self.log.info("#-- Setup Tab Project --#")
+        self.log.debug("#-- Setup Tab Project --#")
         self.bEditProd.clicked.connect(self.on_editProjectTab)
         self.bCancelEdit.clicked.connect(self.on_cancelProjectTab)
         self.bOpenWorkDir.clicked.connect(self.on_openWorkDir)
@@ -37,7 +37,7 @@ class ProjectTab(QtGui.QWidget, tabProjectUI.Ui_projectTab):
 
     def _refresh(self):
         """ Refresh project tabWidget """
-        self.log.info("#-- Refresh Tab Project --#")
+        self.log.debug("#-- Refresh Tab Project --#")
         self.rf_title()
         self.rf_date()
         self.rf_workDir()
@@ -56,7 +56,7 @@ class ProjectTab(QtGui.QWidget, tabProjectUI.Ui_projectTab):
     def rf_tabVis(self, state=False):
         """ Refresh project tab ui visibility
             @param state: (bool) : Visibility state """
-        self.log.info("#-- Refresh Tab Project Visibility --#")
+        self.log.debug("#-- Refresh Tab Project Visibility --#")
         self.bCancelEdit.setVisible(state)
         #-- Init Project Date --#
         self.deStart.setReadOnly(not state)
