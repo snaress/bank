@@ -1,5 +1,6 @@
 import os
 from appli import prodManager
+from appli.prodManager import pmCore
 from lib.system import procFile as pFile
 
 
@@ -62,7 +63,21 @@ class ProdManager(object):
             self.log.debug("Project params successfully written.")
         except:
             self.log.error("Can't write project params: %s" % self._prodFile)
-            raise KeyError, "[PM] | Error | Can't write project params: %s" % self._prodFile
+            raise IOError, "[PM] | Error | Can't write project params: %s" % self._prodFile
+
+    def writeShotData(self, dataFile, data):
+        """ Write Shot data file
+            @param dataFile: (str) : Data file absolut path
+            @param data: (str) : Shot data """
+        root = os.path.join(self._prodPath, self._prodId)
+        if pmCore.Manager.checkDataPath(root, os.path.dirname(dataFile)):
+            shotNode = os.path.basename(dataFile).replace('.py', '')
+            try:
+                pFile.writeFile(dataFile, data)
+                self.log.info("Data Successfully written: %s" % shotNode)
+            except:
+                self.log.error("Can't write data: %s" % shotNode)
+                raise IOError, "[PM] | Error | Can't write data: %s" % shotNode
 
     def _parseProject(self):
         """ Parse project """
@@ -91,7 +106,6 @@ class ProdManager(object):
         print "\n#----- ProdManager Dict -----#"
         print self.__getStr__()
         print "#----------------------------#\n"
-
 
 
 if __name__ == '__main__':

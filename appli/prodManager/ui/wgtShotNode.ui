@@ -29,8 +29,8 @@
       <widget class="QLabel" name="lPreview">
        <property name="minimumSize">
         <size>
-         <width>150</width>
-         <height>150</height>
+         <width>0</width>
+         <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
@@ -76,8 +76,11 @@
      </item>
      <item>
       <layout class="QGridLayout" name="glShotInfo">
+       <property name="margin">
+        <number>1</number>
+       </property>
        <property name="spacing">
-        <number>2</number>
+        <number>1</number>
        </property>
        <item row="0" column="0">
         <widget class="QLabel" name="lLabel">
@@ -97,12 +100,18 @@
          <property name="text">
           <string>Label</string>
          </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
         </widget>
        </item>
        <item row="0" column="1">
         <widget class="QLabel" name="lLabelVal">
          <property name="text">
           <string>TextLabel</string>
+         </property>
+         <property name="margin">
+          <number>6</number>
          </property>
         </widget>
        </item>
@@ -124,12 +133,18 @@
          <property name="text">
           <string>Name</string>
          </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
         </widget>
        </item>
        <item row="1" column="1">
         <widget class="QLabel" name="lNameVal">
          <property name="text">
           <string>TextLabel</string>
+         </property>
+         <property name="margin">
+          <number>6</number>
          </property>
         </widget>
        </item>
@@ -151,12 +166,18 @@
          <property name="text">
           <string>Type</string>
          </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
         </widget>
        </item>
        <item row="2" column="1">
         <widget class="QLabel" name="lTypeVal">
          <property name="text">
           <string>TextLabel</string>
+         </property>
+         <property name="margin">
+          <number>6</number>
          </property>
         </widget>
        </item>

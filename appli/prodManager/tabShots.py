@@ -1,9 +1,10 @@
 import os
-from PyQt4 import QtGui
 from lib.qt import textEditor
 from appli import prodManager
+from PyQt4 import QtGui, QtCore
 from lib.qt import procQt as pQt
 from lib.system import procFile as pFile
+from appli.prodManager import pmCore
 from appli.prodManager.ui import tabShotsUI, wgtShotNodeUI
 
 
@@ -18,6 +19,33 @@ class ShotsTab(QtGui.QWidget, tabShotsUI.Ui_shotsTab):
         super(ShotsTab, self).__init__()
         self._setupUi()
 
+    def __getDict__(self):
+        """ Get shots params writtable dict
+            @return: (dict) : Shots params """
+        shotDict = {}
+        shotDict['workDir'] = str(self.leWorkDir.text())
+        shotDict['imaDir'] = str(self.leImaDir.text())
+        for item in pQt.getTopItems(self.twShotParams):
+            if item.attrType == 'str':
+                shotDict[str(item.text(0))] = str(item._widget.text())
+            else:
+                shotDict[str(item.text(0))] = item._widget.value()
+        for k, v in self.wgComment.__getDict__().iteritems():
+            shotDict[k] = v
+        return shotDict
+
+    def __getStr__(self):
+        """ Get shots params writtable string
+            @return: (str) : Shots Params """
+        shotDict = self.__getDict__()
+        txt = []
+        for k, v in shotDict.iteritems():
+            if isinstance(v, str):
+                txt.append("%s = %r" % (k, v))
+            else:
+                txt.append("%s = %s" % (k, v))
+        return '\n'.join(txt)
+
     # noinspection PyUnresolvedReferences
     def _setupUi(self):
         """ Setup project tabWidget """
@@ -25,18 +53,29 @@ class ShotsTab(QtGui.QWidget, tabShotsUI.Ui_shotsTab):
         self.log.debug("#-- Setup Tab Shots --#")
         self.twShotNodes = ShotTree(self)
         self.vlTreeShots.insertWidget(0, self.twShotNodes)
-        self.leWorkDir.editingFinished.connect(self.on_workDir)
-        self.wgComment = Comment()
+        self.wgComment = Comment(self)
         self.glShotComment.addWidget(self.wgComment)
         self.bEditShotParams.clicked.connect(self.on_editShotsTab)
         self.bCancelEdit.clicked.connect(self.on_cancelShotsTab)
+        self.bOpenWorkDir.clicked.connect(self.on_openWorkDir)
+        self.leImaDir.editingFinished.connect(self.on_imaDir)
+        self.bOpenImaDir.clicked.connect(self.on_openImaDir)
 
     def _refresh(self):
         """ Refresh shots tabWidget """
         self.log.debug("#-- Refresh Tab Shots --#")
+        self.rf_workDir()
+        self.rf_imaDir()
         self.twShotNodes._refresh()
         self.rf_treeParams()
+        self.rf_comment()
         self.rf_tabVis()
+
+    def _update(self):
+        """ Update pmObject with tabWidget values """
+        selItems = self.twShotNodes.selectedItems()
+        if selItems:
+            self.pm.writeShotData(selItems[0]._dataFile, self.__getStr__())
 
     def rf_tabVis(self, state=False):
         """ Refresh project tab ui visibility
@@ -49,6 +88,7 @@ class ShotsTab(QtGui.QWidget, tabShotsUI.Ui_shotsTab):
         self.bOpenImaDir.setEnabled(state)
         for item in pQt.getAllItems(self.twShotParams):
             item._widget.setReadOnly(not state)
+        self.wgComment.setEnabled(state)
         if self.twShotNodes.selectedItems():
             self.bEditShotParams.setEnabled(True)
         else:
@@ -59,24 +99,31 @@ class ShotsTab(QtGui.QWidget, tabShotsUI.Ui_shotsTab):
         self.leWorkDir.clear()
         selItems = self.twShotNodes.selectedItems()
         if selItems:
-            itemDict = selItems[0].__dict__
-            if selItems[0].workDir is None:
-                defaultWorkDir = os.path.join(self.pm.prodWorkDir, itemDict['_shotType'])
-                for fld in itemDict['_dataPath'].split('/'):
-                    defaultWorkDir = os.path.join(defaultWorkDir, fld)
+            defaultWorkDir = os.path.join(self.pm.prodWorkDir, selItems[0].shotType)
+            for fld in selItems[0]._itemPath.split('/'):
+                defaultWorkDir = os.path.join(defaultWorkDir, fld)
+            if not os.path.exists(selItems[0]._dataFile):
                 self.leWorkDir.setText(pFile.conformPath(defaultWorkDir))
             else:
-                self.leWorkDir.setText(selItems[0].workDir)
+                data = pFile.readPyFile(selItems[0]._dataFile)
+                if 'workDir' in data.keys():
+                    self.leWorkDir.setText(data['workDir'])
+                else:
+                    self.leWorkDir.setText(pFile.conformPath(defaultWorkDir))
 
     def rf_imaDir(self):
         """ Refresh imaDir lineEdit """
         self.leImaDir.clear()
         selItems = self.twShotNodes.selectedItems()
         if selItems:
-            if selItems[0].imaDir is None:
+            if not os.path.exists(selItems[0]._dataFile):
                 self.leImaDir.setText('')
             else:
-                self.leImaDir.setText(selItems[0].imaDir)
+                data = pFile.readPyFile(selItems[0]._dataFile)
+                if 'imaDir' in data.keys():
+                    self.leImaDir.setText(data['imaDir'])
+                else:
+                    self.leImaDir.setText('')
 
     def rf_treeParams(self):
         """ Refresh paramsTree """
@@ -84,18 +131,41 @@ class ShotsTab(QtGui.QWidget, tabShotsUI.Ui_shotsTab):
         self.twShotParams.clear()
         selItems = self.twShotNodes.selectedItems()
         if selItems:
-            attrDict = selItems[0].__getDict__()['attr']
+            #-- Get Datas --#
+            attrDict = self.pm.prodTrees[selItems[0].shotType]['attr']
+            if os.path.exists(selItems[0]._dataFile):
+                data = pFile.readPyFile(selItems[0]._dataFile)
+            else:
+                data = None
+            #-- Refresh --#
             for attr in attrDict['_order']:
-                newItem = ShotParamItem(selItems[0], attr, attrDict[attr]['type'],
-                                        attrDict[attr]['value'])
+                if data is None:
+                    newItem = ShotParamItem(attr, attrDict[attr], None)
+                else:
+                    if attr in data.keys():
+                        newItem = ShotParamItem(attr, attrDict[attr], data[attr])
+                    else:
+                        newItem = ShotParamItem(attr, attrDict[attr], None)
                 self.twShotParams.addTopLevelItem(newItem)
                 self.twShotParams.setItemWidget(newItem, 1, newItem._widget)
+
+    def rf_comment(self):
+        """ Refresh comment """
+        self.log.debug("\t Refreshing comment ...")
+        self.wgComment.resetComment()
+        selItems = self.twShotNodes.selectedItems()
+        if selItems:
+            if os.path.exists(selItems[0]._dataFile):
+                data = pFile.readPyFile(selItems[0]._dataFile)
+                if 'commentHtml' in data.keys():
+                    self.wgComment.rf_comment(data['commentHtml'])
 
     def on_shotNodeItem(self):
         """ Command launch when twShotNodes item is clicked """
         self.rf_workDir()
         self.rf_imaDir()
         self.rf_treeParams()
+        self.rf_comment()
         self.rf_tabVis()
 
     def on_editShotsTab(self):
@@ -106,9 +176,12 @@ class ShotsTab(QtGui.QWidget, tabShotsUI.Ui_shotsTab):
             self.bEditShotParams.selIndex = self.twShotNodes.selectedIndexes()[0].row()
             self.setStyleSheet(self.mainUi.applyStyle(styleName='redGrey'))
             self.twShotNodes.setEnabled(False)
+            self.mainUi.wgTree.setEnabled(False)
         else:
             self.bEditShotParams.setText("Edit")
+            self._update()
             self.twShotNodes.setEnabled(True)
+            self.mainUi.wgTree.setEnabled(True)
             self.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
             item = pQt.getTopItems(self.twShotNodes)[self.bEditShotParams.selIndex]
             self.twShotNodes.setItemSelected(item, True)
@@ -119,17 +192,11 @@ class ShotsTab(QtGui.QWidget, tabShotsUI.Ui_shotsTab):
         self.bEditShotParams.setText("Edit")
         self.bEditShotParams.setChecked(False)
         self.twShotNodes.setEnabled(True)
+        self.mainUi.wgTree.setEnabled(True)
         self._refresh()
         item = pQt.getTopItems(self.twShotNodes)[self.bEditShotParams.selIndex]
         self.twShotNodes.setItemSelected(item, True)
         self.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
-
-    def on_workDir(self):
-        """ Store workDir in shotNode """
-        self.log.debug("Storing WorkDir ...")
-        selItems = self.twShotNodes.selectedItems()
-        if selItems:
-            selItems[0].workDir = str(self.leWorkDir.text())
 
     def on_openWorkDir(self):
         """ Command launch when bOpenWorkDir is clicked """
@@ -149,31 +216,33 @@ class ShotsTab(QtGui.QWidget, tabShotsUI.Ui_shotsTab):
         if selPath:
             self.leWorkDir.setText(str(selPath[0]))
 
-    def _getNodeDict(self, itemDict):
-        """ Init nodeDict
-            @param itemDict: (dict) : QTreeWidgetItem dict
-            @return: (dict) : Node dict """
-        nodeDict = {'workDir': None, 'imaDir': None, 'comment': None, 'attr': {'_order': []}}
-        for k, v in self._itemDictToNodeDict(itemDict).iteritems():
-            nodeDict[k] = v
-        attrs = self.pm.prodTrees[self.mainUi.getSelTree()]['attr']
-        nodeDict['attr']['_order'] = attrs['_order']
-        for attr in attrs['_order']:
-            nodeDict['attr'][attr] = {}
-            nodeDict['attr'][attr]['type'] = attrs[attr]
-            if not os.path.exists(nodeDict['_dataFile']):
-                nodeDict['attr'][attr]['value'] = None
-        return nodeDict
+    def on_openImaDir(self):
+        """ Command launch when bOpenImaDir is clicked """
+        root = str(self.leImaDir.text())
+        if not os.path.exists(root):
+            root = str(self.leWorkDir.text())
+            if not os.path.exists(str(self.leWorkDir.text())):
+                if self.pm.prodWorkDir == '':
+                    root = prodManager.rootDisk
+                else:
+                    root = self.pm.prodWorkDir
+        self.fdImaDir = pQt.fileDialog(fdRoot=root, fdCmd=self.ud_imaDir)
+        self.fdImaDir.setFileMode(QtGui.QFileDialog.AnyFile)
+        self.fdImaDir.exec_()
 
-    def _itemDictToNodeDict(self, itemDict):
-        """ Convert itemDict to nodeDict
-            @param itemDict: (dict) : QTreeWidgetItem dict
-            @return: (dict) : Converted dict """
-        newDict = {}
-        for k, v in itemDict.iteritems():
-            newDict['_%s' % k] = v
-        newDict['_shotType'] = self.mainUi.wgTree.getSelTree()
-        return newDict
+    def on_imaDir(self):
+        """ Command launch when imaDir edition is finished """
+        selItems = self.twShotNodes.selectedItems()
+        if selItems:
+            selItems[0]._widget.ud_shotNodeIcone(str(self.leImaDir.text()))
+
+    def ud_imaDir(self):
+        """ Update Ima dir with selected path from dialog """
+        selPath = self.fdImaDir.selectedFiles()
+        selItems = self.twShotNodes.selectedItems()
+        if selPath and selItems:
+            self.leImaDir.setText(str(selPath[0]))
+            selItems[0]._widget.ud_shotNodeIcone(str(selPath[0]))
 
 
 class ShotTree(QtGui.QTreeWidget):
@@ -181,8 +250,9 @@ class ShotTree(QtGui.QTreeWidget):
         @param parent: (object) : Parent QWidget """
 
     def __init__(self, parent):
-        self._parent = parent
-        self.mainUi = self._parent.mainUi
+        self._tab = parent
+        self.mainUi = self._tab.mainUi
+        self.pm = self._tab.pm
         self.log = self.mainUi.log
         super(ShotTree, self).__init__()
         self._setupUi()
@@ -193,7 +263,7 @@ class ShotTree(QtGui.QTreeWidget):
         self.setIndentation(0)
         self.header().setVisible(False)
         self.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
-        self.itemClicked.connect(self._parent.on_shotNodeItem)
+        self.itemClicked.connect(self._tab.on_shotNodeItem)
 
     def _refresh(self):
         """ Refresh shotTree """
@@ -206,7 +276,8 @@ class ShotTree(QtGui.QTreeWidget):
                 shotItems = []
                 for n in range(rootNode.childCount()):
                     if rootNode.child(n).nodeType == 'shotNode':
-                        itemDict = self._parent._getNodeDict(rootNode.child(n).__dict__)
+                        itemDict = rootNode.child(n).__dict__
+                        itemDict['shotType'] = self.mainUi.wgTree.getSelTree()
                         newShotItem = ShotItem(self, **itemDict)
                         shotItems.append(newShotItem)
                 self.addTopLevelItems(shotItems)
@@ -260,20 +331,11 @@ class ShotItem(QtGui.QTreeWidgetItem):
         @param kwargs: (dict) : ShotItem params (itemDict and nodeDict) """
 
     def __init__(self, ui, **kwargs):
-        self._ui = ui
+        self._tree = ui
         super(ShotItem, self).__init__()
         for k, v in kwargs.iteritems():
             setattr(self, k, v)
-        self._widget = ShotNode(self._ui, self)
-
-    def __getDict__(self):
-        """ Get ShotItem params writtable dict
-            @return: (dict) : ShotItem params """
-        itemDict = {}
-        for k, v in self.__dict__.iteritems():
-            if not k.startswith('_'):
-                itemDict[k] = v
-        return itemDict
+        self._widget = ShotNode(self._tree, self)
 
     def addChild(self, QTreeWidgetItem):
         """ Override function and add itemWidget
@@ -306,38 +368,91 @@ class ShotItem(QtGui.QTreeWidgetItem):
 
 class ShotNode(QtGui.QWidget, wgtShotNodeUI.Ui_shotNode):
     """ ShotNode WQidget used by ShotItem()
-        @param ui: (object) : Parent QWidget
+        @param tree: (object) : Parent QWidget
         @param parent: (object) : Parent QTreeWidgetItem """
 
-    def __init__(self, ui, parent):
-        self._ui = ui
-        self._parent = parent
+    def __init__(self, tree, parent):
+        self._tree = tree
+        self._item = parent
+        self.pm = self._tree.pm
+        self.log = self._tree.log
         super(ShotNode, self).__init__()
         self._setupUi()
         self._refresh()
 
     def _setupUi(self):
         """ Setup shotNode QWidget """
+        self.qIma = None
         self.setupUi(self)
 
     def _refresh(self):
         """ Refresh shotNode """
-        self.lLabelVal.setText(self._parent._nodeLabel)
-        self.lNameVal.setText(self._parent._nodeName)
-        self.lTypeVal.setText(self._parent._shotType)
+        self.lLabelVal.setText(self._item.nodeLabel)
+        self.lNameVal.setText(self._item.nodeName)
+        self.lTypeVal.setText(self._item.shotType)
         self.rf_shotNodeIma()
 
     def rf_shotNodeIma(self, ima=None):
+        """ Refresh shotNode preview image
+            @param ima: (str) : Image absolut path """
         if ima is None:
             ima = os.path.join(prodManager.libPath, 'ima', 'prodManager_300x300.png')
-        qIma = QtGui.QPixmap(ima)
-        self.lPreview.setPixmap(qIma)
+            iconeFile = os.path.join(self._item._dataPath, 'shotNodeIcone.png')
+            if os.path.exists(iconeFile):
+                ima = iconeFile
+        if ima == '' or ima == ' ':
+            ima = os.path.join(prodManager.libPath, 'ima', 'prodManager_300x300.png')
+        self.qIma = QtGui.QPixmap(ima)
+        self.lPreview.setPixmap(self.qIma)
+        self.lPreview.setMinimumSize(self.qIma.width()/2, self.qIma.height()/2)
+        self.lPreview.setMaximumSize(self.qIma.width()/2, self.qIma.height()/2)
+
+    def ud_shotNodeIcone(self, ima):
+        """ Update shotNode icone file
+            @param ima: (str) : Image absolut path """
+        root = os.path.join(self.pm._prodPath, self.pm._prodId)
+        iconeFile = os.path.join(self._item._dataPath, 'shotNodeIcone.png')
+        if ima == '' or ima == ' ':
+            self.rf_shotNodeIma(ima='')
+            self.removeShotNodeIcone(iconeFile)
+        else:
+            self.rf_shotNodeIma(ima=ima)
+            img = self.resizeImage()
+            if pmCore.Manager.checkDataPath(root, os.path.dirname(iconeFile)):
+                try:
+                    img.save(iconeFile, 'png', 100)
+                    self.rf_shotNodeIma(ima=iconeFile)
+                    self.log.info("Saving shotNode icone: %s ..." % pFile.conformPath(iconeFile))
+                except:
+                    self.log.error("Can't save shotNode icone: %s !!!" % pFile.conformPath(iconeFile))
+
+    def removeShotNodeIcone(self, iconeFile):
+        """ Remove shotNode icone file
+            @param iconeFile: (str) : Icone absolut path """
+        if os.path.exists(iconeFile):
+            try:
+                os.remove(iconeFile)
+                self.log.info("Remove shotNode icone: %s" % pFile.conformPath(iconeFile))
+            except:
+                self.log.error("Can't remove shotNode icone: %s !!!" % pFile.conformPath(iconeFile))
+
+    def resizeImage(self):
+        """ Resize image to icone size
+            @return: (object) : QPixmap """
+        ratio = float(self.qIma.width()) / float(self.qIma.height())
+        if self.qIma.width() > self.qIma.height():
+            maxWidth = 300
+            maxHeight = int(300 / ratio)
+        else:
+            maxWidth = int(300 / ratio)
+            maxHeight = 300
+        img = self.qIma.toImage().scaled(maxWidth, maxHeight, QtCore.Qt.KeepAspectRatio)
+        return img
 
 
 class ShotParamItem(QtGui.QTreeWidgetItem):
 
-    def __init__(self, shotItem, attrName, attrType, attrValue):
-        self._shotItem = shotItem
+    def __init__(self, attrName, attrType, attrValue):
         self.attrName = attrName
         self.attrType = attrType
         self.attrValue = attrValue
@@ -354,13 +469,6 @@ class ShotParamItem(QtGui.QTreeWidgetItem):
         elif self.attrType == 'float':
             self._widget = self._newFloatItem()
 
-    def storeParams(self):
-        """ Store attribute params """
-        if self.attrType == 'str':
-            self._shotItem.attr[self.attrName]['value'] = str(self._widget.text())
-        else:
-            self._shotItem.attr[self.attrName]['value'] = self._widget.value()
-
     # noinspection PyUnresolvedReferences
     def _newStrItem(self):
         """ Create new QLineEdit
@@ -368,7 +476,6 @@ class ShotParamItem(QtGui.QTreeWidgetItem):
         newItem = QtGui.QLineEdit()
         if self.attrValue is not None:
             newItem.setText(self.attrValue)
-        newItem.editingFinished.connect(self.storeParams)
         return newItem
 
     def _newIntItem(self):
@@ -377,7 +484,6 @@ class ShotParamItem(QtGui.QTreeWidgetItem):
         newItem = QtGui.QSpinBox()
         if self.attrValue is not None:
             newItem.setValue(self.attrValue)
-        newItem.editingFinished.connect(self.storeParams)
         return newItem
 
     def _newFloatItem(self):
@@ -386,11 +492,37 @@ class ShotParamItem(QtGui.QTreeWidgetItem):
         newItem = QtGui.QDoubleSpinBox()
         if self.attrValue is not None:
             newItem.setValue(self.attrValue)
-        newItem.editingFinished.connect(self.storeParams)
         return newItem
 
 
 class Comment(textEditor.TextEditor):
 
-    def __init__(self):
+    def __init__(self, parent):
+        self._parent = parent
         super(Comment, self).__init__()
+        self._setupWidget()
+
+    def __getDict__(self):
+        """ Get shot comment writtable dict
+            @return: (dict) : Shot comment """
+        return {'commentHtml': str(self.teText.toHtml()),
+                'commentTxt': str(self.teText.toPlainText())}
+
+    def __getStr__(self):
+        """ Get shot comment writtable string
+            @return: (str) : Shot comment """
+        return self.__getDict__()['commentTxt']
+
+    def _setupWidget(self):
+        """ Setup widegt ui """
+        self.bLoadFile.setEnabled(False)
+        self.bSaveFile.setEnabled(False)
+
+    def rf_comment(self, textHtml):
+        """ Refresh comment
+            @param textHtml: (str) : Comment in html form """
+        self.teText.setHtml(textHtml)
+
+    def resetComment(self):
+        """ Reset comment """
+        self.teText.clear()

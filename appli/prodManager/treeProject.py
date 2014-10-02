@@ -1,6 +1,7 @@
 import os
 from PyQt4 import QtGui
 from lib.qt import procQt as pQt
+from lib.system import procFile as pFile
 from appli.prodManager.ui import wgtMainTreeUI
 
 
@@ -99,11 +100,12 @@ class Tree(QtGui.QTreeWidget):
                 parent = self._getItemFromTreePath('/'.join(node.split('/')[:-1]))
                 parent.addChild(newItem)
             if getattr(newItem, 'nodeType') == 'shotNode':
-                newItem.dataPath = node
-                newItem.dataFile = os.path.join(self.pm._treePath)
+                newItem._itemPath = node
+                newItem._dataPath = os.path.join(self.pm._treePath)
                 for fld in node.split('/'):
-                    newItem.dataFile = os.path.join(newItem.dataFile, fld)
-                newItem.dataFile = "%s.py" % newItem.dataFile
+                    newItem._dataPath = os.path.join(newItem._dataPath, fld)
+                newItem._dataPath = pFile.conformPath(newItem._dataPath)
+                newItem._dataFile = "%s.py" % newItem._dataPath
                 for step in treeDict['steps']:
                     newStep = TreeNode(nodeType='step', nodeLabel=step, nodeName=step)
                     newItem.addChild(newStep)
@@ -123,11 +125,12 @@ class Tree(QtGui.QTreeWidget):
                     parent = self._getItemFromTreePath(rootPath)
                     parent.addChild(newItem)
                 if getattr(newItem, 'nodeType') == 'shotNode':
-                    newItem.dataPath = node
-                    newItem.dataFile = os.path.join(self.pm._treePath)
+                    newItem._itemPath = node
+                    newItem._dataPath = os.path.join(self.pm._treePath)
                     for fld in node.split('/'):
-                        newItem.dataFile = os.path.join(newItem.dataFile, fld)
-                    newItem.dataFile = "%s.py" % newItem.dataFile
+                        newItem._dataPath = os.path.join(newItem._dataPath, fld)
+                    newItem._dataPath = pFile.conformPath(newItem._dataPath)
+                    newItem._dataFile = "%s.py" % newItem._dataPath
 
     def on_treeNode(self):
         """ Command launch when shotNode is clicked """

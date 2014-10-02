@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\prodManager\ui\wgtShotNode.ui'
 #
-# Created: Sun Sep 28 04:03:22 2014
+# Created: Thu Oct 02 03:44:12 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -35,7 +35,7 @@ class Ui_shotNode(object):
         self.hlShotNode.setSpacing(2)
         self.hlShotNode.setObjectName(_fromUtf8("hlShotNode"))
         self.lPreview = QtGui.QLabel(shotNode)
-        self.lPreview.setMinimumSize(QtCore.QSize(150, 150))
+        self.lPreview.setMinimumSize(QtCore.QSize(0, 0))
         self.lPreview.setMaximumSize(QtCore.QSize(150, 150))
         self.lPreview.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
         self.lPreview.setFrameShape(QtGui.QFrame.StyledPanel)
@@ -50,7 +50,8 @@ class Ui_shotNode(object):
         self.lPreview.setObjectName(_fromUtf8("lPreview"))
         self.hlShotNode.addWidget(self.lPreview)
         self.glShotInfo = QtGui.QGridLayout()
-        self.glShotInfo.setSpacing(2)
+        self.glShotInfo.setMargin(1)
+        self.glShotInfo.setSpacing(1)
         self.glShotInfo.setObjectName(_fromUtf8("glShotInfo"))
         self.lLabel = QtGui.QLabel(shotNode)
         self.lLabel.setMaximumSize(QtCore.QSize(40, 16777215))
@@ -59,9 +60,11 @@ class Ui_shotNode(object):
         font.setUnderline(True)
         font.setWeight(75)
         self.lLabel.setFont(font)
+        self.lLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.lLabel.setObjectName(_fromUtf8("lLabel"))
         self.glShotInfo.addWidget(self.lLabel, 0, 0, 1, 1)
         self.lLabelVal = QtGui.QLabel(shotNode)
+        self.lLabelVal.setMargin(6)
         self.lLabelVal.setObjectName(_fromUtf8("lLabelVal"))
         self.glShotInfo.addWidget(self.lLabelVal, 0, 1, 1, 1)
         self.lName = QtGui.QLabel(shotNode)
@@ -71,9 +74,11 @@ class Ui_shotNode(object):
         font.setUnderline(True)
         font.setWeight(75)
         self.lName.setFont(font)
+        self.lName.setAlignment(QtCore.Qt.AlignCenter)
         self.lName.setObjectName(_fromUtf8("lName"))
         self.glShotInfo.addWidget(self.lName, 1, 0, 1, 1)
         self.lNameVal = QtGui.QLabel(shotNode)
+        self.lNameVal.setMargin(6)
         self.lNameVal.setObjectName(_fromUtf8("lNameVal"))
         self.glShotInfo.addWidget(self.lNameVal, 1, 1, 1, 1)
         self.lType = QtGui.QLabel(shotNode)
@@ -83,9 +88,11 @@ class Ui_shotNode(object):
         font.setUnderline(True)
         font.setWeight(75)
         self.lType.setFont(font)
+        self.lType.setAlignment(QtCore.Qt.AlignCenter)
         self.lType.setObjectName(_fromUtf8("lType"))
         self.glShotInfo.addWidget(self.lType, 2, 0, 1, 1)
         self.lTypeVal = QtGui.QLabel(shotNode)
+        self.lTypeVal.setMargin(6)
         self.lTypeVal.setObjectName(_fromUtf8("lTypeVal"))
         self.glShotInfo.addWidget(self.lTypeVal, 2, 1, 1, 1)
         self.hlShotNode.addLayout(self.glShotInfo)

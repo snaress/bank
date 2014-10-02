@@ -127,3 +127,29 @@ class Loader(object):
                 'WaitApproval': {'color': (255, 85, 255), 'stat': True},
                 'ToReview': {'color': (85, 85, 255), 'stat': True},
                 'Final':{'color': (85, 255, 0), 'stat': True}}
+
+
+class Manager(object):
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def checkDataPath(rootDir, dataPath):
+        _rootDir = pFile.conformPath(rootDir)
+        _dataPath = pFile.conformPath(dataPath)
+        if not os.path.exists(_rootDir):
+            raise IOError, "RootDir not found: %s" % _rootDir
+        if not _dataPath.startswith(_rootDir):
+            raise IOError, "RootDir and dataFile don't have the same rootDir: %s" % _rootDir
+        checkPath = _dataPath.replace('%s/' % _rootDir, '')
+        _check = _rootDir
+        for fld in checkPath.split('/'):
+            _check = os.path.join(os.path.normpath(_check), fld)
+            if not os.path.exists(_check):
+                try:
+                    os.mkdir(_check)
+                    print "Create folder %s" % _check
+                except:
+                    raise IOError, "Can no create folder %s" % _check
+        return True
