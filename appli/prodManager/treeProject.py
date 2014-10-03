@@ -108,6 +108,8 @@ class Tree(QtGui.QTreeWidget):
                 newItem._dataFile = "%s.py" % newItem._dataPath
                 for step in treeDict['steps']:
                     newStep = TreeNode(nodeType='step', nodeLabel=step, nodeName=step)
+                    newStep._dataPath = newItem._dataPath
+                    newStep._dataFile = newItem._dataFile
                     newItem.addChild(newStep)
 
     def rf_stepMode(self, treeDict):
@@ -131,11 +133,14 @@ class Tree(QtGui.QTreeWidget):
                         newItem._dataPath = os.path.join(newItem._dataPath, fld)
                     newItem._dataPath = pFile.conformPath(newItem._dataPath)
                     newItem._dataFile = "%s.py" % newItem._dataPath
+                    newItem._step = step
 
     def on_treeNode(self):
         """ Command launch when shotNode is clicked """
         if self.mainUi.getSelTab() == 'Shots':
             self.mainUi.wgShots._refresh()
+        elif self.mainUi.getSelTab() == 'LineTest':
+            self.mainUi.wgLineTest._refresh()
 
     def addTopLevelItem(self, QTreeWidgetItem):
         super(Tree, self).addTopLevelItem(QTreeWidgetItem)
