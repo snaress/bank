@@ -140,12 +140,12 @@ class ShotsTab(QtGui.QWidget, tabShotsUI.Ui_shotsTab):
             #-- Refresh --#
             for attr in attrDict['_order']:
                 if data is None:
-                    newItem = ShotParamItem(attr, attrDict[attr], None)
+                    newItem = self._newParamItem(attr, attrDict[attr], None)
                 else:
                     if attr in data.keys():
-                        newItem = ShotParamItem(attr, attrDict[attr], data[attr])
+                        newItem = self._newParamItem(attr, attrDict[attr], data[attr])
                     else:
-                        newItem = ShotParamItem(attr, attrDict[attr], None)
+                        newItem = self._newParamItem(attr, attrDict[attr], None)
                 self.twShotParams.addTopLevelItem(newItem)
                 self.twShotParams.setItemWidget(newItem, 1, newItem._widget)
 
@@ -244,6 +244,49 @@ class ShotsTab(QtGui.QWidget, tabShotsUI.Ui_shotsTab):
             self.leImaDir.setText(str(selPath[0]))
             selItems[0]._widget.ud_shotNodeIcone(str(selPath[0]))
 
+    def _newParamItem(self, attrName, attrType, attrValue):
+        """ Create paramsTree QTreeWidgetItem
+            @param attrName: (str) : Attribute label
+            @param attrType: (str) : 'str', 'int' or 'float'
+            @param attrValue: (str) or (int) or (float) : Attribute value
+            @return: (object) : QTreeWidgetItem """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setText(0, attrName)
+        newItem.attrName = attrName
+        newItem.attrType = attrType
+        newItem.attrValue = attrValue
+        newItem._widget = self._newParamWidget(attrType, attrValue)
+        return newItem
+
+    # noinspection PyUnresolvedReferences
+    @staticmethod
+    def _newParamWidget(attrType, attrValue):
+        """ Create new QSpinBox
+            @param attrType: (str) : 'str', 'int' or 'float'
+            @param attrValue: (str) or (int) or (float) : Attribute value
+            @return: (object) : QSpinBox or QDoubleSpinBox """
+        #-- Create Widget --#
+        if attrType == 'str':
+            newWidget = QtGui.QLineEdit()
+        elif attrType == 'int':
+            newWidget = QtGui.QSpinBox()
+        else:
+            newWidget = QtGui.QDoubleSpinBox()
+            newWidget.setDecimals(3)
+        #-- Init Widget --#
+        if not attrType == 'str':
+            newWidget.setMinimum(-999999)
+            newWidget.setMaximum(999999)
+            newWidget.setMaximumWidth(80)
+            newWidget.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        #-- Edit Widget --#
+        if attrValue is not None:
+            if attrType == 'str':
+                newWidget.setText(attrValue)
+            else:
+                newWidget.setValue(attrValue)
+        return newWidget
+
 
 class ShotTree(QtGui.QTreeWidget):
     """ ShotNodes QTreeWidget used by ShotsTab()
@@ -281,6 +324,8 @@ class ShotTree(QtGui.QTreeWidget):
                         newShotItem = ShotItem(self, **itemDict)
                         shotItems.append(newShotItem)
                 self.addTopLevelItems(shotItems)
+            self.reselectFromMainTree(selItems[0])
+            self._tab.on_shotNodeItem()
 
     def addTopLevelItem(self, QTreeWidgetItem):
         """ Override function and add itemWidget
@@ -323,6 +368,22 @@ class ShotTree(QtGui.QTreeWidget):
             if self.mainUi.wgTree.getSelMode() == 'treeMode':
                 rootNode = item.parent().parent()
         return rootNode
+
+    def reselectFromMainTree(self, selItem):
+        """ Link mainTree selection to shotNodeTree selection
+            @param selItem: (object) : Selected mainTree QTreeWidgetItem """
+        for item in pQt.getTopItems(self):
+            if self.mainUi.getSelMode() == 'treeMode':
+                if selItem.nodeType == 'shotNode':
+                    if item.nodeName == selItem.nodeName:
+                        self.setCurrentItem(item)
+                elif selItem.nodeType == 'step':
+                    if item.nodeName == selItem.parent().nodeName:
+                        self.setCurrentItem(item)
+            elif self.mainUi.getSelMode() == 'stepMode':
+                if selItem.nodeType == 'shotNode':
+                    if item.nodeName == selItem.nodeName:
+                        self.setCurrentItem(item)
 
 
 class ShotItem(QtGui.QTreeWidgetItem):
@@ -450,52 +511,9 @@ class ShotNode(QtGui.QWidget, wgtShotNodeUI.Ui_shotNode):
         return img
 
 
-class ShotParamItem(QtGui.QTreeWidgetItem):
-
-    def __init__(self, attrName, attrType, attrValue):
-        self.attrName = attrName
-        self.attrType = attrType
-        self.attrValue = attrValue
-        super(ShotParamItem, self).__init__()
-        self._setupUi()
-
-    def _setupUi(self):
-        """ Setup ShotParamItem QTreeWidgetItem """
-        self.setText(0, self.attrName)
-        if self.attrType == 'str':
-            self._widget = self._newStrItem()
-        elif self.attrType == 'int':
-            self._widget = self._newIntItem()
-        elif self.attrType == 'float':
-            self._widget = self._newFloatItem()
-
-    # noinspection PyUnresolvedReferences
-    def _newStrItem(self):
-        """ Create new QLineEdit
-            @return: (object) : QLineEdit """
-        newItem = QtGui.QLineEdit()
-        if self.attrValue is not None:
-            newItem.setText(self.attrValue)
-        return newItem
-
-    def _newIntItem(self):
-        """ Create new QSpinBox
-            @return: (object) : QSpinBox """
-        newItem = QtGui.QSpinBox()
-        if self.attrValue is not None:
-            newItem.setValue(self.attrValue)
-        return newItem
-
-    def _newFloatItem(self):
-        """ Create new QDoubleSpinBox
-            @return: (object) : QDoubleSpinBox """
-        newItem = QtGui.QDoubleSpinBox()
-        if self.attrValue is not None:
-            newItem.setValue(self.attrValue)
-        return newItem
-
-
 class Comment(textEditor.TextEditor):
+    """ Comment Widget used by ShotsTab()
+        @param parent: (object) : Parent widget """
 
     def __init__(self, parent):
         self._parent = parent

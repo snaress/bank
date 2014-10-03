@@ -5,8 +5,8 @@ from PyQt4 import QtGui, QtCore
 from lib.qt import procQt as pQt
 from lib.system import procFile as pFile
 from appli.prodManager import prodManager as pm
-from appli.prodManager import pmCore, tabProject, tabShots, treeProject
 from appli.prodManager.ui import prodLoaderUI, prodManagerUI
+from appli.prodManager import pmCore, tabProject, tabShots, treeProject, tabLineTest
 
 
 class ProdLoaderUi(QtGui.QMainWindow, prodLoaderUI.Ui_prodLoader, pmCore.Loader, pQt.Style):
@@ -207,6 +207,8 @@ class ProdManagerUi(QtGui.QMainWindow, prodManagerUI.Ui_prodManager, pQt.Style):
         self.glTabProject.addWidget(self.wgProject)
         self.wgShots = tabShots.ShotsTab(self)
         self.glTabShots.addWidget(self.wgShots)
+        self.wgLineTest = tabLineTest.LineTestTab(self)
+        self.glTabLineTest.addWidget(self.wgLineTest)
         self.tabManager.currentChanged.connect(self.wgTree.twTree.on_treeNode)
 
     def on_style(self, style):
@@ -226,9 +228,13 @@ class ProdManagerUi(QtGui.QMainWindow, prodManagerUI.Ui_prodManager, pQt.Style):
         return self.tabManager.tabText(self.tabManager.currentIndex())
 
     def getSelMode(self):
+        """ Get selected treeMode
+            @return: (str) : Tree mode """
         return self.wgTree.getSelMode()
 
     def getSelTree(self):
+        """ Get selected tree
+            @return: (str) : Tree name """
         return self.wgTree.getSelTree()
 
 

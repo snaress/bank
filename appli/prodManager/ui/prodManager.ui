@@ -115,6 +115,19 @@
          </property>
         </layout>
        </widget>
+       <widget class="QWidget" name="tabLineTest">
+        <attribute name="title">
+         <string>LineTest</string>
+        </attribute>
+        <layout class="QGridLayout" name="glTabLineTest">
+         <property name="margin">
+          <number>2</number>
+         </property>
+         <property name="spacing">
+          <number>1</number>
+         </property>
+        </layout>
+       </widget>
       </widget>
      </widget>
     </item>
