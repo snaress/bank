@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\prodManager\ui\wgtLtNode.ui'
 #
-# Created: Mon Oct 06 17:27:48 2014
+# Created: Thu Oct 09 12:59:07 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -58,14 +58,6 @@ class Ui_LineTest(object):
         self.gridLayout.addWidget(self.leTitle, 1, 0, 1, 1)
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem1, 1, 4, 1, 1)
-        self.bDelCmt = QtGui.QPushButton(LineTest)
-        self.bDelCmt.setMinimumSize(QtCore.QSize(0, 0))
-        self.bDelCmt.setMaximumSize(QtCore.QSize(16777215, 20))
-        font = QtGui.QFont()
-        font.setPointSize(7)
-        self.bDelCmt.setFont(font)
-        self.bDelCmt.setObjectName(_fromUtf8("bDelCmt"))
-        self.gridLayout.addWidget(self.bDelCmt, 1, 11, 1, 1)
         self.lDate = QtGui.QLabel(LineTest)
         self.lDate.setMaximumSize(QtCore.QSize(16777215, 20))
         self.lDate.setObjectName(_fromUtf8("lDate"))
@@ -104,7 +96,6 @@ class Ui_LineTest(object):
         self.dtTime.setDisplayFormat(_translate("LineTest", "HH:mm:ss", None))
         self.dtDate.setDisplayFormat(_translate("LineTest", "yyyy/MM/dd", None))
         self.leTitle.setText(_translate("LineTest", "Linetest Title", None))
-        self.bDelCmt.setText(_translate("LineTest", "DelCmt", None))
         self.lDate.setText(_translate("LineTest", "Date:", None))
         self.bAddCmt.setText(_translate("LineTest", "AddCmt", None))
         self.lTime.setText(_translate("LineTest", "Time:", None))

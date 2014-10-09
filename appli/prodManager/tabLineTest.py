@@ -151,7 +151,7 @@ class LtNode(QtGui.QWidget, wgtLtNodeUI.Ui_LineTest):
         self.setupUi(self)
         self._initStyle()
         self.leTitle.returnPressed.connect(self.on_title)
-        # self.bAddCmt.clicked.connect(self.on_addComment)
+        self.bAddCmt.clicked.connect(self.on_addComment)
         self._refresh()
         self.dtDate.dateChanged.connect(partial(self.on_dateTime, 'date'))
         self.dtTime.timeChanged.connect(partial(self.on_dateTime, 'time'))
@@ -167,7 +167,6 @@ class LtNode(QtGui.QWidget, wgtLtNodeUI.Ui_LineTest):
         self.lTime.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
         self.dtTime.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
         self.bAddCmt.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
-        self.bDelCmt.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
 
     def _refresh(self):
         """ Refresh lineTest node """
@@ -201,28 +200,20 @@ class LtNode(QtGui.QWidget, wgtLtNodeUI.Ui_LineTest):
                     if newLtPath is not None:
                         self._tabUi.twLtTree.clear()
                         self._tabUi.rf_ltTree()
-                        self.log.debug("Update LineTest Date successfully done.")
+                        self.log.debug("\t Update LineTest Date successfully done.")
 
-    # def on_addComment(self):
-    #     """ Command launched when 'NewCmt' QPushButton is clicked """
-    #     cmtDate = pFile.getDate()
-    #     cmtTime = pFile.getTime()
-    #     cmtName = "%s__%s" % (cmtDate, cmtTime)
-    #     data = self.getLtData()
-    #     data['ltComments']['_order'].insert(0, cmtName)
-    #     data['ltComments'][cmtName] = {'cmtUser': prodManager.user, 'cmtDate': cmtDate,
-    #                                    'cmtTime': cmtTime, 'cmtHtml': "", 'cmtText': ""}
-    #     self.writeLt(data)
-    #     self._item.treeWidget()._refresh()
-    #
-    # def newComment(self, cmtData):
-    #     """ Create new ltComment QTreeWidgetItem
-    #         @return: (object) : QTreeWidgetItem """
-    #     newItem = QtGui.QTreeWidgetItem()
-    #     newItem._tab = self._tab
-    #     newItem._ltFile = self._ltFile
-    #     newItem._widget = LtCommentNode(self._item, self, cmtData)
-    #     return newItem
+    def on_addComment(self):
+        """ Command launched when 'NewCmt' QPushButton is clicked """
+        cmtDate = pFile.getDate()
+        cmtTime = pFile.getTime()
+        cmtName = "%s__%s" % (cmtDate, cmtTime)
+        data = self.getLtData()
+        data['ltComments']['_order'].append(cmtName)
+        data['ltComments'][cmtName] = {'cmtUser': prodManager.user, 'cmtDate': cmtDate,
+                                       'cmtTime': cmtTime, 'cmtHtml': "", 'cmtText': ""}
+        if self.writeLt(data):
+            self._tabUi.twLtTree.clear()
+            self._tabUi.rf_ltTree()
 
     def getTypeParams(self, _type):
         """ Get type params
@@ -271,7 +262,8 @@ class LtCommentNode(QtGui.QWidget, wgtLtCmtNodeUI.Ui_ltComment):
     def _setupUi(self):
         """ Setup comment node """
         self.setupUi(self)
-        # self.bEdit.clicked.connect(self.on_edit)
+        self.bEdit.clicked.connect(self.on_edit)
+        self.bDelCmt.clicked.connect(self.on_delComment)
         self._refresh()
         self.dtDate.dateChanged.connect(partial(self.on_dateTime, 'date'))
         self.dtTime.timeChanged.connect(partial(self.on_dateTime, 'time'))
@@ -312,6 +304,28 @@ class LtCommentNode(QtGui.QWidget, wgtLtCmtNodeUI.Ui_ltComment):
         self._tabUi.twLtTree.clear()
         self._tabUi.rf_ltTree()
 
+    def on_edit(self):
+        """ Command launched when 'Edit' QPushButton is clicked """
+        ltNode = self._parent.parent()._widget
+        self.cmtEditor = CommentEditor(self.mainUi, self, self._ltFile, ltNode)
+        self.mainUi.setEnabled(False)
+        self.cmtEditor.show()
+
+    def on_delComment(self):
+        """ Command launch when 'DelLt' QPushButton is clicked """
+        self.delConf = pQt.ConfirmDialog("Delete ?", ['Delete'], [self.delComment])
+        self.delConf.exec_()
+
+    def delComment(self):
+        """ Delete selected comment """
+        data = self.getLtData()
+        data['ltComments']['_order'].pop(data['ltComments']['_order'].index(self.cmtName))
+        data['ltComments'].pop(self.cmtName)
+        if self._parent.parent()._widget.writeLt(data):
+            self.delConf.close()
+            self._tabUi.twLtTree.clear()
+            self._tabUi.rf_ltTree()
+
     def getTypeParams(self, _type):
         """ Get type params
             @param _type: (str) : 'date' or 'time'
@@ -327,18 +341,12 @@ class LtCommentNode(QtGui.QWidget, wgtLtCmtNodeUI.Ui_ltComment):
         if os.path.exists(self._ltFile):
             return pFile.readPyFile(self._ltFile)
 
-    def on_edit(self):
-        """ Command launched when 'Edit' QPushButton is clicked """
-        self.cmtEditor = CommentEditor(self.mainUi, self, self._ltFile, self._ltNode)
-        self.mainUi.setEnabled(False)
-        self.cmtEditor.show()
-
 
 class CommentEditor(textEditor.TextEditor):
 
-    def __init__(self, mainUi, ui, ltFile, ltNode):
+    def __init__(self, mainUi, cmtNode, ltFile, ltNode):
         self.mainUi = mainUi
-        self.ui = ui
+        self._cmtNode = cmtNode
         self._ltFile = ltFile
         self._ltNode = ltNode
         super(CommentEditor, self).__init__()
@@ -347,14 +355,14 @@ class CommentEditor(textEditor.TextEditor):
     def _setupWidget(self):
         """ Setup comment editor """
         self.bLoadFile.setEnabled(False)
-        self.teText.setHtml(str(self.ui.teComment.toHtml()))
+        self.teText.setHtml(str(self._cmtNode.teComment.toHtml()))
 
     def on_saveFile(self):
         """ Save comment """
         data = self._ltNode.getLtData()
-        data['ltComments'][self.ui.cmtName]['cmtHtml'] = str(self.teText.toHtml())
-        data['ltComments'][self.ui.cmtName]['cmtText'] = str(self.teText.toPlainText())
-        self.ui.teComment.setHtml(self.teText.toHtml())
+        data['ltComments'][self._cmtNode.cmtName]['cmtHtml'] = str(self.teText.toHtml())
+        data['ltComments'][self._cmtNode.cmtName]['cmtText'] = str(self.teText.toPlainText())
+        self._cmtNode.teComment.setHtml(self.teText.toHtml())
         if self._ltNode.writeLt(data):
             self.close()
 
