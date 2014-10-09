@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>695</width>
-    <height>300</height>
+    <height>551</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -94,6 +94,35 @@
          </item>
         </layout>
        </item>
+       <item>
+        <widget class="Line" name="line_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTreeWidget" name="twLtTree">
+         <property name="indentation">
+          <number>0</number>
+         </property>
+         <attribute name="headerVisible">
+          <bool>false</bool>
+         </attribute>
+         <column>
+          <property name="text">
+           <string notr="true">1</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="layoutWidget_2">
@@ -119,23 +148,6 @@
            </property>
            <property name="value">
             <number>5</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="cbLtAutoRf">
-           <property name="text">
-            <string>Auto Refresh</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="cbLtEditMode">
-           <property name="text">
-            <string>Edit Mode</string>
            </property>
           </widget>
          </item>
@@ -174,61 +186,17 @@
          <property name="movable">
           <bool>true</bool>
          </property>
-         <widget class="QWidget" name="tab">
+         <widget class="QWidget" name="ltShotTab1">
           <attribute name="title">
            <string>Tab 1</string>
           </attribute>
-          <layout class="QGridLayout" name="gridLayout_6" rowstretch="0">
+          <layout class="QGridLayout" name="glLtShotTab1" rowstretch="0">
            <property name="margin">
             <number>1</number>
            </property>
            <property name="spacing">
             <number>1</number>
            </property>
-           <item row="0" column="0">
-            <widget class="QTreeWidget" name="twLtShots">
-             <property name="selectionMode">
-              <enum>QAbstractItemView::NoSelection</enum>
-             </property>
-             <property name="selectionBehavior">
-              <enum>QAbstractItemView::SelectItems</enum>
-             </property>
-             <property name="indentation">
-              <number>0</number>
-             </property>
-             <property name="columnCount">
-              <number>5</number>
-             </property>
-             <attribute name="headerVisible">
-              <bool>false</bool>
-             </attribute>
-             <column>
-              <property name="text">
-               <string notr="true">1</string>
-              </property>
-             </column>
-             <column>
-              <property name="text">
-               <string notr="true">2</string>
-              </property>
-             </column>
-             <column>
-              <property name="text">
-               <string notr="true">3</string>
-              </property>
-             </column>
-             <column>
-              <property name="text">
-               <string notr="true">4</string>
-              </property>
-             </column>
-             <column>
-              <property name="text">
-               <string notr="true">5</string>
-              </property>
-             </column>
-            </widget>
-           </item>
           </layout>
          </widget>
         </widget>

@@ -81,15 +81,16 @@ class Tree(QtGui.QTreeWidget):
         """ Refresh mainTree """
         self.clear()
         if self._parent.getSelTree() is not None:
-            treeDict = self.pm.prodTrees[self._parent.getSelTree()]
+            selTree = self._parent.getSelTree()
+            treeDict = self.pm.prodTrees[selTree]
             if self._parent.getSelMode() == 'treeMode':
                 self.log.debug("\t Refreshing main tree (Tree Mode) ...")
-                self.rf_treeMode(treeDict)
+                self.rf_treeMode(selTree, treeDict)
             elif self._parent.getSelMode() == 'stepMode':
                 self.log.debug("\t Refreshing main tree (Step Mode) ...")
-                self.rf_stepMode(treeDict)
+                self.rf_stepMode(selTree, treeDict)
 
-    def rf_treeMode(self, treeDict):
+    def rf_treeMode(self, selTree, treeDict):
         """ Refresh main tree with treeMode listing
             @param treeDict: (dict) : Tree dict """
         for node in treeDict['tree']['_order']:
@@ -101,18 +102,21 @@ class Tree(QtGui.QTreeWidget):
                 parent.addChild(newItem)
             if getattr(newItem, 'nodeType') == 'shotNode':
                 newItem._itemPath = node
-                newItem._dataPath = os.path.join(self.pm._treePath)
+                newItem._dataPath = os.path.join(self.pm._treePath, selTree)
                 for fld in node.split('/'):
                     newItem._dataPath = os.path.join(newItem._dataPath, fld)
                 newItem._dataPath = pFile.conformPath(newItem._dataPath)
                 newItem._dataFile = "%s.py" % newItem._dataPath
                 for step in treeDict['steps']:
                     newStep = TreeNode(nodeType='step', nodeLabel=step, nodeName=step)
+                    newStep._tree = selTree
+                    newStep._step = step
                     newStep._dataPath = newItem._dataPath
+                    newStep._ltPath = pFile.conformPath(os.path.join(newStep._dataPath, 'lt', step))
                     newStep._dataFile = newItem._dataFile
                     newItem.addChild(newStep)
 
-    def rf_stepMode(self, treeDict):
+    def rf_stepMode(self, selTree, treeDict):
         """ Refresh main tree with stepMode listing
             @param treeDict: (dict) : Tree dict """
         for step in treeDict['steps']:
@@ -127,13 +131,15 @@ class Tree(QtGui.QTreeWidget):
                     parent = self._getItemFromTreePath(rootPath)
                     parent.addChild(newItem)
                 if getattr(newItem, 'nodeType') == 'shotNode':
+                    newItem._tree = selTree
+                    newItem._step = step
                     newItem._itemPath = node
-                    newItem._dataPath = os.path.join(self.pm._treePath)
+                    newItem._dataPath = os.path.join(self.pm._treePath, selTree)
                     for fld in node.split('/'):
                         newItem._dataPath = os.path.join(newItem._dataPath, fld)
                     newItem._dataPath = pFile.conformPath(newItem._dataPath)
+                    newItem._ltPath = pFile.conformPath(os.path.join(newItem._dataPath, 'lt', step))
                     newItem._dataFile = "%s.py" % newItem._dataPath
-                    newItem._step = step
 
     def on_treeNode(self):
         """ Command launch when shotNode is clicked """

@@ -1,4 +1,4 @@
-import os
+import os, shutil
 from appli import prodManager
 from appli.prodManager import pmCore
 from lib.system import procFile as pFile
@@ -78,6 +78,49 @@ class ProdManager(object):
             except:
                 self.log.error("Can't write data: %s" % shotNode)
                 raise IOError, "[PM] | Error | Can't write data: %s" % shotNode
+
+    def writeLineTest(self, ltFile, data):
+        """ Write LineTest data file
+            @param ltFile: (str) : LineTest file absolut path
+            @param data: (str) : LineTest data
+            @return: (bool) : True if success """
+        root = os.path.join(self._prodPath, self._prodId)
+        if pmCore.Manager.checkDataPath(root, os.path.dirname(ltFile)):
+            try:
+                pFile.writeFile(ltFile, data)
+                self.log.info("LineTest Successfully written")
+                return True
+            except:
+                self.log.error("Can't write lineTest")
+                raise IOError, "[PM] | Error | Can't write lineTest !!!"
+
+    @staticmethod
+    def editLtDateTime(ltFile, data):
+        """ Write LineTest data file
+            @param ltFile: (str) : LineTest file absolut path
+            @param data: (dict) : LineTest data """
+        oldLtPath = os.path.dirname(pFile.conformPath(ltFile))
+        newFolder = "lt__%s__%s" % (data['ltDate'], data['ltTime'])
+        path = os.sep.join(os.path.dirname(pFile.conformPath(ltFile)).split('/')[:-1])
+        ltPath = os.path.join(path, newFolder)
+        if not os.path.exists(ltPath):
+            os.rename(oldLtPath, ltPath)
+            return ltPath
+
+    def deleteLt(self, ltPath):
+        """ Delete given lineTest
+            @param ltPath: (str) : LineTest path
+            @return: (bool) : True if success """
+        lt = '/'.join(pFile.conformPath(ltPath).split('/')[-2:])
+        self.log.info("Deleting lineTest %s ..." % lt)
+        if os.path.exists(ltPath):
+            try:
+                shutil.rmtree(ltPath)
+                self.log.info("\t LineTest %s deleted." % lt)
+                return True
+            except:
+                self.log.error("Can't delete lineTest %s" % lt)
+                raise IOError, "[PM] | Error | Can't delete lineTest %s !!!" % lt
 
     def _parseProject(self):
         """ Parse project """

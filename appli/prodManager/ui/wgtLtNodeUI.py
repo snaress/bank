@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\prodManager\ui\wgtLtNode.ui'
 #
-# Created: Fri Oct 03 04:22:41 2014
+# Created: Mon Oct 06 17:27:48 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,11 +26,11 @@ except AttributeError:
 class Ui_LineTest(object):
     def setupUi(self, LineTest):
         LineTest.setObjectName(_fromUtf8("LineTest"))
-        LineTest.resize(814, 33)
+        LineTest.resize(814, 26)
         self.gridLayout = QtGui.QGridLayout(LineTest)
-        self.gridLayout.setMargin(1)
+        self.gridLayout.setMargin(0)
         self.gridLayout.setHorizontalSpacing(4)
-        self.gridLayout.setVerticalSpacing(1)
+        self.gridLayout.setVerticalSpacing(0)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.dtTime = QtGui.QDateTimeEdit(LineTest)
         self.dtTime.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
@@ -60,29 +60,39 @@ class Ui_LineTest(object):
         self.gridLayout.addItem(spacerItem1, 1, 4, 1, 1)
         self.bDelCmt = QtGui.QPushButton(LineTest)
         self.bDelCmt.setMinimumSize(QtCore.QSize(0, 0))
-        self.bDelCmt.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.bDelCmt.setMaximumSize(QtCore.QSize(16777215, 20))
+        font = QtGui.QFont()
+        font.setPointSize(7)
+        self.bDelCmt.setFont(font)
         self.bDelCmt.setObjectName(_fromUtf8("bDelCmt"))
         self.gridLayout.addWidget(self.bDelCmt, 1, 11, 1, 1)
         self.lDate = QtGui.QLabel(LineTest)
+        self.lDate.setMaximumSize(QtCore.QSize(16777215, 20))
         self.lDate.setObjectName(_fromUtf8("lDate"))
         self.gridLayout.addWidget(self.lDate, 1, 5, 1, 1)
         self.bAddCmt = QtGui.QPushButton(LineTest)
         self.bAddCmt.setMinimumSize(QtCore.QSize(0, 0))
-        self.bAddCmt.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.bAddCmt.setMaximumSize(QtCore.QSize(16777215, 20))
+        font = QtGui.QFont()
+        font.setPointSize(7)
+        self.bAddCmt.setFont(font)
         self.bAddCmt.setObjectName(_fromUtf8("bAddCmt"))
         self.gridLayout.addWidget(self.bAddCmt, 1, 10, 1, 1)
         self.lTime = QtGui.QLabel(LineTest)
+        self.lTime.setMaximumSize(QtCore.QSize(16777215, 20))
         self.lTime.setObjectName(_fromUtf8("lTime"))
         self.gridLayout.addWidget(self.lTime, 1, 7, 1, 1)
         spacerItem2 = QtGui.QSpacerItem(66, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem2, 1, 9, 1, 1)
         self.lUser = QtGui.QLabel(LineTest)
+        self.lUser.setMaximumSize(QtCore.QSize(16777215, 20))
         self.lUser.setAutoFillBackground(False)
         self.lUser.setFrameShape(QtGui.QFrame.NoFrame)
         self.lUser.setFrameShadow(QtGui.QFrame.Plain)
         self.lUser.setObjectName(_fromUtf8("lUser"))
         self.gridLayout.addWidget(self.lUser, 1, 2, 1, 1)
         self.lUserName = QtGui.QLabel(LineTest)
+        self.lUserName.setMaximumSize(QtCore.QSize(16777215, 20))
         self.lUserName.setObjectName(_fromUtf8("lUserName"))
         self.gridLayout.addWidget(self.lUserName, 1, 3, 1, 1)
 
