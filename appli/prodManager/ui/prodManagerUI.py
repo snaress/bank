@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\prodManager\ui\prodManager.ui'
 #
-# Created: Thu Oct 02 15:06:20 2014
+# Created: Fri Oct 10 14:01:47 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -37,29 +37,14 @@ class Ui_prodManager(object):
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.splitter.setObjectName(_fromUtf8("splitter"))
         self.qfLeftZone = QtGui.QFrame(self.splitter)
-        self.qfLeftZone.setMinimumSize(QtCore.QSize(300, 0))
-        self.qfLeftZone.setMaximumSize(QtCore.QSize(300, 16777215))
+        self.qfLeftZone.setMinimumSize(QtCore.QSize(302, 0))
+        self.qfLeftZone.setMaximumSize(QtCore.QSize(302, 16777215))
         self.qfLeftZone.setFrameShape(QtGui.QFrame.StyledPanel)
         self.qfLeftZone.setObjectName(_fromUtf8("qfLeftZone"))
         self.vlLeftZone = QtGui.QVBoxLayout(self.qfLeftZone)
         self.vlLeftZone.setSpacing(0)
         self.vlLeftZone.setMargin(0)
         self.vlLeftZone.setObjectName(_fromUtf8("vlLeftZone"))
-        self.hfPreview = QtGui.QFrame(self.qfLeftZone)
-        self.hfPreview.setMinimumSize(QtCore.QSize(0, 200))
-        self.hfPreview.setMaximumSize(QtCore.QSize(16777215, 200))
-        self.hfPreview.setFrameShape(QtGui.QFrame.StyledPanel)
-        self.hfPreview.setObjectName(_fromUtf8("hfPreview"))
-        self.horizontalLayout = QtGui.QHBoxLayout(self.hfPreview)
-        self.horizontalLayout.setSpacing(0)
-        self.horizontalLayout.setMargin(0)
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.vlLeftZone.addWidget(self.hfPreview)
-        self.line = QtGui.QFrame(self.qfLeftZone)
-        self.line.setFrameShape(QtGui.QFrame.HLine)
-        self.line.setFrameShadow(QtGui.QFrame.Sunken)
-        self.line.setObjectName(_fromUtf8("line"))
-        self.vlLeftZone.addWidget(self.line)
         self.tabManager = QtGui.QTabWidget(self.splitter)
         self.tabManager.setObjectName(_fromUtf8("tabManager"))
         self.tabProject = QtGui.QWidget()

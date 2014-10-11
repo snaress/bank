@@ -160,6 +160,20 @@ class ShotsTab(QtGui.QWidget, tabShotsUI.Ui_shotsTab):
                 if 'commentHtml' in data.keys():
                     self.wgComment.rf_comment(data['commentHtml'])
 
+    def rf_preview(self):
+        """ Refresh mainUi preview """
+        selItems = self.twShotNodes.selectedItems()
+        if selItems:
+            iconeFile = os.path.join(selItems[0]._dataPath, 'shotNodeIcone.png')
+            if os.path.exists(iconeFile):
+                self.mainUi.wgPreview._ima = iconeFile
+            else:
+                self.mainUi.wgPreview._ima = None
+            self.mainUi.wgPreview.pIma = str(self.leImaDir.text())
+            self.mainUi.wgPreview.pXplor = str(self.leWorkDir.text())
+            self.mainUi.wgPreview.pXterm = str(self.leWorkDir.text())
+            self.mainUi.wgPreview.rf_preview()
+
     def on_shotNodeItem(self):
         """ Command launch when twShotNodes item is clicked """
         self.rf_workDir()
@@ -167,6 +181,7 @@ class ShotsTab(QtGui.QWidget, tabShotsUI.Ui_shotsTab):
         self.rf_treeParams()
         self.rf_comment()
         self.rf_tabVis()
+        self.rf_preview()
 
     def on_editShotsTab(self):
         """ Command launch when bEditShotParams is clicked """
@@ -396,7 +411,7 @@ class ShotItem(QtGui.QTreeWidgetItem):
         super(ShotItem, self).__init__()
         for k, v in kwargs.iteritems():
             setattr(self, k, v)
-        self._widget = ShotNode(self._tree, self)
+        self._widget = ShotNode(ui, self)
 
     def addChild(self, QTreeWidgetItem):
         """ Override function and add itemWidget

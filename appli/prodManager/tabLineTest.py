@@ -5,7 +5,7 @@ from lib.qt import textEditor
 from PyQt4 import QtGui, QtCore
 from lib.qt import procQt as pQt
 from lib.system import procFile as pFile
-from appli.prodManager.ui import tabLineTestUI, wgtLtNodeUI, wgtLtCmtNodeUI, wgtLtShotNodeUI
+from appli.prodManager.ui import tabLineTestUI, wgtLtNodeUI, wgtLtShotNodeUI, dialLtEditorUI
 
 
 class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
@@ -25,14 +25,15 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
         self.log.debug("#-- Setup Tab LineTest --#")
         self.bLtNew.clicked.connect(self.on_newLt)
         self.bLtDel.clicked.connect(self.on_delLt)
+        self.sbLtColumns.editingFinished.connect(self.rf_shotTree)
         self.rf_tabVis()
 
     def _refresh(self):
         """ Refresh lineTest tabWidget """
         self.log.debug("#-- Refresh Tab LineTest --#")
         selItems = self.mainUi.wgTree.twTree.selectedItems()
-        self.twLtTree.clear()
         if selItems:
+            self.twLtTree.clear()
             if self.mainUi.getSelMode() == 'treeMode':
                 if selItems[0].nodeType == 'step':
                     self.rf_tabVis(state=True)
@@ -45,6 +46,7 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
                     self.rf_ltTree()
                 else:
                     self.rf_tabVis(state=False)
+            self.rf_shotTree()
 
     def rf_tabVis(self, state=False):
         """ Refresh project tab ui visibility
@@ -64,7 +66,7 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
                 ltPath = os.path.join(selItem._ltPath, lt)
                 if os.path.isdir(ltPath) and lt.startswith('lt__'):
                     ltFile = os.path.join(ltPath, 'ltData.py')
-                    newLtItem = self._newLtItem(ltFile)
+                    newLtItem = self._newLtItem(selItem._dataFile, ltFile)
                     self.twLtTree.addTopLevelItem(newLtItem)
                     self.twLtTree.setItemWidget(newLtItem, 0, newLtItem._widget)
                     newLtItem.setExpanded(True)
@@ -75,6 +77,27 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
                         newLtItem.addChild(newCmtItem)
                         self.twLtTree.setItemWidget(newCmtItem, 0, newCmtItem._widget)
 
+    def rf_shotTree(self):
+        """ Refresh ltShots treeWidget """
+        self.log.debug("\t Refreshing Tree Shots ...")
+        self.twShotTree.clear()
+        self.rf_shotTreeColumnSize()
+        selItem = self.mainUi.wgTree.twTree.selectedItems()[0]
+        rootItem = self.getRootItem(selItem)
+        if rootItem is not None:
+            newItems = self._initShotItem(rootItem)
+            self.twShotTree.addTopLevelItems(newItems)
+            for item in newItems:
+                for n, widget in enumerate(item.shotNodes):
+                    self.twShotTree.setItemWidget(item, n, widget)
+                self.adjustShotNodeHeight(item)
+
+    def rf_shotTreeColumnSize(self):
+        """ Adjust shotTree column size """
+        self.twShotTree.setColumnCount(self.sbLtColumns.value())
+        for n in range(self.sbLtColumns.value()):
+            self.twShotTree.setColumnWidth(n, int(self.twShotTree.width() / self.sbLtColumns.value()))
+
     def on_newLt(self):
         """ Command launch when 'NewLt' QPushButton is clicked """
         item = self.mainUi.wgTree.twTree.selectedItems()[0]
@@ -83,7 +106,8 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
         ltName = "lt__%s__%s" % (ltDate, ltTime)
         ltFile = pFile.conformPath(os.path.join(item._ltPath, ltName, 'ltData.py'))
         ltDict = {'ltTitle': "New LineTest", 'ltDate': ltDate, 'ltTime': ltTime,
-                  'ltUser': prodManager.user, 'ltComments': {'_order': []}}
+                  'ltUser': prodManager.user, 'ltImaPath': "", 'ltSeqPath': "", 'ltMovPath': "",
+                  'ltComments': {'_order': []}}
         ltData = []
         for k, v in ltDict.iteritems():
             if isinstance(v, str):
@@ -109,11 +133,60 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
             self.twLtTree.clear()
             self._refresh()
 
-    def _newLtItem(self, ltFile):
+    def getRootItem(self, selItem):
+        """ Get given item's rootItem
+            @param selItem: (object) : QTreeWidgetItem
+            @return: (object) : QTreeWidgetItem """
+        rootItem = None
+        if self.mainUi.getSelMode() == 'treeMode':
+            if selItem.nodeType == 'step':
+                rootItem = selItem.parent().parent()
+        if selItem.nodeType == 'shotNode':
+            rootItem = selItem.parent()
+        if selItem.nodeType == 'container':
+            for n in range(selItem.childCount()):
+                if selItem.child(n).nodeType == 'shotNode':
+                    rootItem = selItem
+                    break
+        return rootItem
+
+    def adjustShotNodeHeight(self, item):
+        """ Adjust QTreeWidgetItem maximum height
+            @param item: (object) : QTreeWidgetItem """
+        maxHeight = 0
+        for node in item.shotNodes:
+            if node.lPreview.height() > maxHeight:
+                maxHeight = node.lPreview.height()
+        for node in item.shotNodes:
+            node.lPreview.setMinimumHeight(maxHeight)
+            node.lPreview.setMaximumHeight(maxHeight)
+
+    def _initShotItem(self, rootItem):
+        """ Initialize shotItem
+            @param rootItem: (object) : QTreeWidgetItem
+            @return: (list) : List of QTreeWidgetItems """
+        nc = 0
+        newItems = []
+        newItem = None
+        for n in range(rootItem.childCount()):
+            if nc == 0:
+                newItem = self._newShotItem()
+                newItems.append(newItem)
+            nc += 1
+            if newItem is not None:
+                newNode = LtShotNode(self, **rootItem.child(n).__dict__)
+                newItem.shotNodes.append(newNode)
+            if nc == self.sbLtColumns.value():
+                nc = 0
+        return newItems
+
+    def _newLtItem(self, dataFile, ltFile):
         """ Create new lineTest QTreeWidgetItem
+            @param dataFile: (str) : DataFile absolut path
             @param ltFile: (str) : LtFile absolut path
             @return: (object) : QTreeWidgetItem """
         newItem = QtGui.QTreeWidgetItem()
+        newItem._dataFile = dataFile
         newItem._ltFile = ltFile
         newItem._wgParent = self
         newItem._widget = LtNode(newItem)
@@ -130,11 +203,20 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
         newItem._widget = LtCommentNode(newItem, cmtData)
         return newItem
 
+    def _newShotItem(self):
+        """ Create new ltShot QTreeWidgetItem
+            @return: (object) : QTreeWidgetItem """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.shotNodes = []
+        newItem._wgParent = self
+        return newItem
 
-class LtNode(QtGui.QWidget, wgtLtNodeUI.Ui_LineTest):
+
+class LtNode(QtGui.QWidget, wgtLtNodeUI.Ui_ltNode):
 
     def __init__(self, parent):
         self._parent = parent
+        self._dataFile = self._parent._dataFile
         self._ltFile = self._parent._ltFile
         self._tabUi = self._parent._wgParent
         self.mainUi = self._tabUi.mainUi
@@ -151,7 +233,10 @@ class LtNode(QtGui.QWidget, wgtLtNodeUI.Ui_LineTest):
         self.setupUi(self)
         self._initStyle()
         self.leTitle.returnPressed.connect(self.on_title)
-        self.bAddCmt.clicked.connect(self.on_addComment)
+        self.bEdit.clicked.connect(self.on_editLt)
+        self.bEdition.setText("AddCmt")
+        self.bEdition.clicked.connect(self.on_addComment)
+        self.teComment.setVisible(False)
         self._refresh()
         self.dtDate.dateChanged.connect(partial(self.on_dateTime, 'date'))
         self.dtTime.timeChanged.connect(partial(self.on_dateTime, 'time'))
@@ -166,7 +251,8 @@ class LtNode(QtGui.QWidget, wgtLtNodeUI.Ui_LineTest):
         self.dtDate.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
         self.lTime.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
         self.dtTime.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
-        self.bAddCmt.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
+        self.bEdit.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
+        self.bEdition.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
 
     def _refresh(self):
         """ Refresh lineTest node """
@@ -201,6 +287,11 @@ class LtNode(QtGui.QWidget, wgtLtNodeUI.Ui_LineTest):
                         self._tabUi.twLtTree.clear()
                         self._tabUi.rf_ltTree()
                         self.log.debug("\t Update LineTest Date successfully done.")
+
+    def on_editLt(self):
+        """ Command launched when 'edit' QPushButton is clicked """
+        self.dialLt = LineTestEditor(self.mainUi, self)
+        self.dialLt.exec_()
 
     def on_addComment(self):
         """ Command launched when 'NewCmt' QPushButton is clicked """
@@ -243,7 +334,7 @@ class LtNode(QtGui.QWidget, wgtLtNodeUI.Ui_LineTest):
         return result
 
 
-class LtCommentNode(QtGui.QWidget, wgtLtCmtNodeUI.Ui_ltComment):
+class LtCommentNode(QtGui.QWidget, wgtLtNodeUI.Ui_ltNode):
 
     def __init__(self, parent, cmtData):
         self._parent = parent
@@ -262,8 +353,10 @@ class LtCommentNode(QtGui.QWidget, wgtLtCmtNodeUI.Ui_ltComment):
     def _setupUi(self):
         """ Setup comment node """
         self.setupUi(self)
+        self.leTitle.setVisible(False)
         self.bEdit.clicked.connect(self.on_edit)
-        self.bDelCmt.clicked.connect(self.on_delComment)
+        self.bEdition.setText("DelCmt")
+        self.bEdition.clicked.connect(self.on_delComment)
         self._refresh()
         self.dtDate.dateChanged.connect(partial(self.on_dateTime, 'date'))
         self.dtTime.timeChanged.connect(partial(self.on_dateTime, 'time'))
@@ -278,6 +371,18 @@ class LtCommentNode(QtGui.QWidget, wgtLtCmtNodeUI.Ui_ltComment):
                                          int(self.cmtTime.split('_')[1]),
                                          int(self.cmtTime.split('_')[2])))
         self.teComment.setHtml(self.cmtHtml)
+        self.rf_commentSize()
+
+    def rf_commentSize(self):
+        """ Refresh QTextEdit sizeHeight """
+        nLines = len(self.cmtText.split('\n'))
+        height = (12 + (nLines * 20))
+        if height < 50:
+            height = 50
+        elif height > 250:
+            height = 250
+        self.teComment.setMinimumHeight(height)
+        self.teComment.setMaximumHeight(height)
 
     def on_dateTime(self, _type):
         """ Command launched when 'Date' or 'time' QDateTime is edited
@@ -342,151 +447,6 @@ class LtCommentNode(QtGui.QWidget, wgtLtCmtNodeUI.Ui_ltComment):
             return pFile.readPyFile(self._ltFile)
 
 
-class CommentEditor(textEditor.TextEditor):
-
-    def __init__(self, mainUi, cmtNode, ltFile, ltNode):
-        self.mainUi = mainUi
-        self._cmtNode = cmtNode
-        self._ltFile = ltFile
-        self._ltNode = ltNode
-        super(CommentEditor, self).__init__()
-        self._setupWidget()
-
-    def _setupWidget(self):
-        """ Setup comment editor """
-        self.bLoadFile.setEnabled(False)
-        self.teText.setHtml(str(self._cmtNode.teComment.toHtml()))
-
-    def on_saveFile(self):
-        """ Save comment """
-        data = self._ltNode.getLtData()
-        data['ltComments'][self._cmtNode.cmtName]['cmtHtml'] = str(self.teText.toHtml())
-        data['ltComments'][self._cmtNode.cmtName]['cmtText'] = str(self.teText.toPlainText())
-        self._cmtNode.teComment.setHtml(self.teText.toHtml())
-        if self._ltNode.writeLt(data):
-            self.close()
-
-    def closeEvent(self, *args, **kwargs):
-        """ Unfreeze mainUi """
-        self.mainUi.setEnabled(True)
-
-
-class LtShotTree(QtGui.QTreeWidget):
-    def __init__(self, tab):
-        self._tab = tab
-        self.log = self._tab.log
-        self.mainUi = self._tab.mainUi
-        super(LtShotTree, self).__init__()
-        self._setupUi()
-
-    def _setupUi(self):
-        """ Setup lineTest treeWidget """
-        self.log.debug("\t Setup Tree ShotLineTest ...")
-        self.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
-        self.header().setVisible(False)
-        self.setIndentation(0)
-
-    def _refresh(self):
-        """ Refresh lineTest tabWidget """
-        self.log.debug("\t Refreshing Tree ShotLineTest ...")
-        self.clear()
-        self.rf_columnSize()
-        selItem = self.mainUi.wgTree.twTree.selectedItems()[0]
-        rootItem = self._getRootItem(selItem)
-        if rootItem is not None:
-            nc = 0
-            newItems = []
-            newItem = None
-            for n in range(rootItem.childCount()):
-                if nc == 0:
-                    newItem = LtShotItem(self._tab)
-                    newItems.append(newItem)
-                nc += 1
-                if newItem is not None:
-                    newNode = LtShotNode(self._tab, **rootItem.child(n).__dict__)
-                    newItem.shotNodes.append(newNode)
-                if nc == self._tab.sbLtColumns.value():
-                    nc = 0
-            self.addTopLevelItems(newItems)
-
-    def rf_columnSize(self):
-        """ Adjust shotTree column size """
-        self.setColumnCount(self._tab.sbLtColumns.value())
-        for n in range(self._tab.sbLtColumns.value()):
-            self.setColumnWidth(n, int(self.width() / self._tab.sbLtColumns.value()))
-
-    def _getRootItem(self, selItem):
-        """ Get refresh rootItem
-            @param selItem: (object) : QTreeWidgetItem
-            @return: (object) : QTreeWidgetItem """
-        rootItem = None
-        if self.mainUi.getSelMode() == 'treeMode':
-            if selItem.nodeType == 'step':
-                rootItem = selItem.parent().parent()
-        if selItem.nodeType == 'shotNode':
-            rootItem = selItem.parent()
-        if selItem.nodeType == 'container':
-            for n in range(selItem.childCount()):
-                if selItem.child(n).nodeType == 'shotNode':
-                    rootItem = selItem
-                    break
-        return rootItem
-
-    def addTopLevelItem(self, QTreeWidgetItem):
-        """ Override function and add itemWidget
-            @param QTreeWidgetItem: (object) : QTreeWidgetItem """
-        super(LtShotTree, self).addTopLevelItem(QTreeWidgetItem)
-        for n, widget in enumerate(QTreeWidgetItem.shotNodes):
-            self.setItemWidget(QTreeWidgetItem, n, widget)
-        QTreeWidgetItem.adjustMaxHeight()
-
-    def addTopLevelItems(self, list_of_QTreeWidgetItem):
-        """ Override function and add itemWidget
-            @param list_of_QTreeWidgetItem: (list) : List of QTreeWidgetItems """
-        super(LtShotTree, self).addTopLevelItems(list_of_QTreeWidgetItem)
-        for QTreeWidgetItem in list_of_QTreeWidgetItem:
-            for n, widget in enumerate(QTreeWidgetItem.shotNodes):
-                self.setItemWidget(QTreeWidgetItem, n, widget)
-            QTreeWidgetItem.adjustMaxHeight()
-
-    def insertTopLevelItem(self, p_int, QTreeWidgetItem):
-        """ Override function and add itemWidget
-            @param p_int: (int) : Column index
-            @param QTreeWidgetItem: (object) : QTreeWidgetItem """
-        super(LtShotTree, self).insertTopLevelItem(p_int, QTreeWidgetItem)
-        for n, widget in enumerate(QTreeWidgetItem.shotNodes):
-            self.setItemWidget(QTreeWidgetItem, n, widget)
-        QTreeWidgetItem.adjustMaxHeight()
-
-    def insertTopLevelItems(self, p_int, list_of_QTreeWidgetItem):
-        """ Override function and add itemWidget
-            @param p_int: (int) : Column index
-            @param list_of_QTreeWidgetItem: (list) : List of QTreeWidgetItems """
-        super(LtShotTree, self).insertTopLevelItems(p_int, list_of_QTreeWidgetItem)
-        for QTreeWidgetItem in list_of_QTreeWidgetItem:
-            for n, widget in enumerate(QTreeWidgetItem.shotNodes):
-                self.setItemWidget(QTreeWidgetItem, n, widget)
-            QTreeWidgetItem.adjustMaxHeight()
-
-
-class LtShotItem(QtGui.QTreeWidgetItem):
-
-    def __init__(self, tab):
-        self._tab = tab
-        self.shotNodes = []
-        super(LtShotItem, self).__init__()
-    
-    def adjustMaxHeight(self):
-        """ Adjust QTreeWidgetItem maximum height """
-        maxHeight = 0
-        for node in self.shotNodes:
-            if node.lPreview.height() > maxHeight:
-                maxHeight = node.lPreview.height()
-        for node in self.shotNodes:
-            node.lPreview.setMinimumHeight(maxHeight)
-            node.lPreview.setMaximumHeight(maxHeight)
-
-
 class LtShotNode(QtGui.QWidget, wgtLtShotNodeUI.Ui_LineTestShot):
 
     def __init__(self, tab, **kwargs):
@@ -530,12 +490,123 @@ class LtShotNode(QtGui.QWidget, wgtLtShotNodeUI.Ui_LineTestShot):
         """ Resize previw icone QLabel """
         ratio = float(self.qIma.width()) / float(self.qIma.height())
         if self.qIma.width() >= self.qIma.height():
-            width = self._tab.twLtShotTree.columnWidth(0)
+            width = self._tab.twShotTree.columnWidth(0)
             height = int(float(width) / ratio)
         else:
-            height = self._tab.twLtShotTree.columnWidth(0)
+            height = self._tab.twShotTree.columnWidth(0)
             width = int(float(height) / ratio)
         if 'prodManager' in os.path.basename(self._ima):
             height = int(height / 2)
         self.lPreview.setMinimumSize(width, height)
         self.lPreview.setMaximumSize(width, height)
+
+
+class LineTestEditor(QtGui.QDialog, dialLtEditorUI.Ui_editLt):
+
+    def __init__(self, mainUi, ltNode):
+        self.mainUi = mainUi
+        self.ltNode = ltNode
+        self.pm = self.ltNode.pm
+        super(LineTestEditor, self).__init__()
+        self._setupUi()
+
+    def _setupUi(self):
+        """ Setup widget """
+        self.setupUi(self)
+        self.setStyleSheet(self.mainUi.applyStyle(styleName=self.mainUi._currentStyle))
+        self.bImaOpen.clicked.connect(partial(self.on_open, 'ima'))
+        self.bSeqOpen.clicked.connect(partial(self.on_open, 'seq'))
+        self.bMovOpen.clicked.connect(partial(self.on_open, 'mov'))
+        self.bSave.clicked.connect(self.on_save)
+        self.bCancel.clicked.connect(self.close)
+        self._refresh()
+
+    def _refresh(self):
+        """ Refresh widget """
+        ltData = self.ltNode.getLtData()
+        self.leImaPath.setText(ltData['ltImaPath'])
+        self.leSeqPath.setText(ltData['ltSeqPath'])
+        self.leMovPath.setText(ltData['ltMovPath'])
+
+    def on_open(self, pathType):
+        """ Command launched when 'Open' QPushButton is clicked
+            @param pathType: (str) : 'ima', 'seq' or 'mov' """
+        QLineEdit = None
+        if pathType == 'ima':
+            QLineEdit = self.leImaPath
+        elif pathType == 'seq':
+            QLineEdit = self.leSeqPath
+        elif pathType == 'mov':
+            QLineEdit = self.leMovPath
+        root = os.path.dirname(str(QLineEdit.text()))
+        if root is None or root in ['', ' ']:
+            if os.path.exists(self.ltNode._dataFile):
+                data = pFile.readPyFile(self.ltNode._dataFile)
+                if not data['workDir'] in ['', ' ']:
+                    root = data['workDir']
+                else:
+                    if not self.pm.prodWorkDir in ['', ' ']:
+                        root = self.pm.prodWorkDir
+                    else:
+                        root = prodManager.rootDisk
+            else:
+                if not self.pm.prodWorkDir in ['', ' ']:
+                    root = self.pm.prodWorkDir
+                else:
+                    root = prodManager.rootDisk
+        self.fdPath = pQt.fileDialog(fdRoot=root, fdCmd=partial(self.ud_path, QLineEdit))
+        self.fdPath.setFileMode(QtGui.QFileDialog.AnyFile)
+        self.fdPath.exec_()
+
+    def ud_path(self, QLineEdit):
+        """ Update given widget
+            @param QLineEdit: (object) : QLineEdit """
+        selPath = self.fdPath.selectedFiles()
+        if selPath:
+            QLineEdit.setText(str(selPath[0]))
+
+    def on_save(self):
+        """ Command launched when 'Save' QPushButton is clicked """
+        ltData = self.ltNode.getLtData()
+        ltData['ltImaPath'] = str(self.leImaPath.text())
+        ltData['ltSeqPath'] = str(self.leSeqPath.text())
+        ltData['ltMovPath'] = str(self.leMovPath.text())
+        if self.ltNode.writeLt(ltData):
+            self.fdPath.close()
+
+    def getRootDir(self):
+        """ Get root directory from selected node
+            @return: (str) : Root path """
+        if os.path.exists(self.ltNode._dataFile):
+            dataDict = pFile.readPyFile(self.ltNode._dataFile)
+            if 'workDir' in dataDict.keys():
+                return dataDict['workDir']
+
+
+class CommentEditor(textEditor.TextEditor):
+
+    def __init__(self, mainUi, cmtNode, ltFile, ltNode):
+        self.mainUi = mainUi
+        self._cmtNode = cmtNode
+        self._ltFile = ltFile
+        self._ltNode = ltNode
+        super(CommentEditor, self).__init__()
+        self._setupWidget()
+
+    def _setupWidget(self):
+        """ Setup comment editor """
+        self.bLoadFile.setEnabled(False)
+        self.teText.setHtml(str(self._cmtNode.teComment.toHtml()))
+
+    def on_saveFile(self):
+        """ Save comment """
+        data = self._ltNode.getLtData()
+        data['ltComments'][self._cmtNode.cmtName]['cmtHtml'] = str(self.teText.toHtml())
+        data['ltComments'][self._cmtNode.cmtName]['cmtText'] = str(self.teText.toPlainText())
+        if self._ltNode.writeLt(data):
+            self._cmtNode.teComment.setHtml(self.teText.toHtml())
+            self.close()
+
+    def closeEvent(self, *args, **kwargs):
+        """ Unfreeze mainUi """
+        self.mainUi.setEnabled(True)

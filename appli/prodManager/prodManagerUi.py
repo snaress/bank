@@ -200,6 +200,8 @@ class ProdManagerUi(QtGui.QMainWindow, prodManagerUI.Ui_prodManager, pQt.Style):
         self.miDarkGreyStyle.triggered.connect(partial(self.on_style, 'darkGrey'))
         self.miDarkOrangeStyle.triggered.connect(partial(self.on_style, 'darkOrange'))
         #-- Left Zone --#
+        self.wgPreview = treeProject.Preview(self)
+        self.vlLeftZone.insertWidget(0, self.wgPreview)
         self.wgTree = treeProject.ProjectTree(self)
         self.vlLeftZone.insertWidget(-1, self.wgTree)
         #-- Tabs --#
@@ -256,4 +258,4 @@ def launch(uiType='loader', prodId=None, logLvl='info'):
 
 if __name__ == '__main__':
     # launch(logLvl='info')
-    launch(uiType='manager', prodId='lv--Le_Voeu', logLvl='debug')
+    launch(uiType='manager', prodId='lv--Le_Voeu', logLvl='info')

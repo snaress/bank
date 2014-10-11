@@ -1,8 +1,96 @@
 import os
 from PyQt4 import QtGui
+from appli import prodManager
 from lib.qt import procQt as pQt
 from lib.system import procFile as pFile
-from appli.prodManager.ui import wgtMainTreeUI
+from appli.prodManager.ui import wgtPreviewUI, wgtMainTreeUI
+
+
+class Preview(QtGui.QWidget, wgtPreviewUI.Ui_preview):
+    """ Preview and launcher ui used by ProdManagerUi
+        @param mainUi: (object) : QMainWindow """
+
+    def __init__(self, mainUi):
+        self.mainUi = mainUi
+        self.pm = self.mainUi.pm
+        self.log = self.mainUi.log
+        self._ima = None
+        self.pIma = None
+        self.pSeq = None
+        self.pMov = None
+        self.pXterm = None
+        self.pXplor = None
+        self.pGraph = None
+        super(Preview, self).__init__()
+        self._setupUi()
+
+    def _setupUi(self):
+        """ Setup preview Widget """
+        self.log.debug("#-- Setup Preview --#")
+        self.setupUi(self)
+        self.qIma = None
+        self.bExplorer.clicked.connect(self.on_explorer)
+        self.bXterm.clicked.connect(self.on_xTerm)
+        self.rf_preview()
+
+    def rf_preview(self):
+        """ Refresh preview image """
+        self.storeImaFile()
+        self.qIma = QtGui.QPixmap(self._ima)
+        self.lPreview.setPixmap(self.qIma)
+        self.resizePreview()
+        self.rf_btnsVisibility()
+
+    def rf_btnsVisibility(self):
+        """ Refresh Preview buttons visibility """
+        self._setBtnVis(self.pIma, self.bImage)
+        self._setBtnVis(self.pSeq, self.bSequence)
+        self._setBtnVis(self.pMov, self.bMovie)
+        self._setBtnVis(self.pXplor, self.bExplorer)
+        self._setBtnVis(self.pXterm, self.bXterm)
+        self._setBtnVis(self.pGraph, self.bGrapher)
+
+    def on_explorer(self):
+        """ Command launched when 'Explorer' QPushButton is clicked """
+        path = os.path.normpath(self.pXplor)
+        os.system('explorer "%s"' % path)
+
+    def on_xTerm(self):
+        """ Command launched when 'Xterm' QPushButton is clicked """
+        path = os.path.normpath(self.pXterm)
+        os.system('start "Toto" /d "%s"' % path)
+
+    def storeImaFile(self):
+        """ Store image file """
+        if self._ima is None or self._ima == '' or self._ima == ' ':
+            self._ima = os.path.join(prodManager.libPath, 'ima', 'prodManager_300x300.png')
+
+    def resizePreview(self):
+        """ Resize previw icone QLabel """
+        ratio = float(self.qIma.width()) / float(self.qIma.height())
+        if self.qIma.width() > self.qIma.height():
+            width = 300
+            height = int(float(width) / ratio)
+        else:
+            height = 170
+            width = int(float(height) / ratio)
+        if 'prodManager' in os.path.basename(self._ima):
+            width = 300
+            height = 170
+        self.lPreview.setMinimumSize(width, height)
+        self.lPreview.setMaximumSize(width, height)
+
+    def _setBtnVis(self, path, btn):
+        """ Set given QPushButton visibility
+            @param path: (str) : Absolut path
+            @param btn: (object) : QPushButton """
+        if path is None or path == '' or path == ' ':
+            btn.setEnabled(False)
+        else:
+            if os.path.exists(path):
+                btn.setEnabled(True)
+            else:
+                btn.setEnabled(False)
 
 
 class ProjectTree(QtGui.QWidget, wgtMainTreeUI.Ui_mainTree):
@@ -19,8 +107,8 @@ class ProjectTree(QtGui.QWidget, wgtMainTreeUI.Ui_mainTree):
 
     def _setupUi(self):
         """ Setup projectTree Widget """
-        self.setupUi(self)
         self.log.debug("#-- Setup Tree Project --#")
+        self.setupUi(self)
         self.twTree = Tree(self)
         self.vlTree.insertWidget(-1, self.twTree)
         self.rbTreeMode.clicked.connect(self.twTree.rf_tree)

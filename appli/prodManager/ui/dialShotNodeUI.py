@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\prodManager\ui\dialShotNode.ui'
 #
-# Created: Sat Sep 27 12:56:01 2014
+# Created: Fri Oct 10 17:20:44 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -229,7 +229,7 @@ class Ui_editProdTree(object):
         editProdTree.setTabOrder(self.bCreate, self.bClose)
 
     def retranslateUi(self, editProdTree):
-        editProdTree.setWindowTitle(_translate("editProdTree", "Dialog", None))
+        editProdTree.setWindowTitle(_translate("editProdTree", "ShotNode Editor", None))
         self.lMessage.setText(_translate("editProdTree", "Message", None))
         self.lNodeType.setText(_translate("editProdTree", "Type: ", None))
         self.rbContainer.setText(_translate("editProdTree", "Container", None))
