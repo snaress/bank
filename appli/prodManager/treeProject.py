@@ -1,7 +1,8 @@
 import os
-from PyQt4 import QtGui
 from appli import prodManager
+from PyQt4 import QtGui, QtCore
 from lib.qt import procQt as pQt
+from appli.prodManager import pmCore
 from lib.system import procFile as pFile
 from appli.prodManager.ui import wgtPreviewUI, wgtMainTreeUI
 
@@ -18,8 +19,8 @@ class Preview(QtGui.QWidget, wgtPreviewUI.Ui_preview):
         self.pIma = None
         self.pSeq = None
         self.pMov = None
-        self.pXterm = None
         self.pXplor = None
+        self.pXterm = None
         self.pGraph = None
         super(Preview, self).__init__()
         self._setupUi()
@@ -29,6 +30,8 @@ class Preview(QtGui.QWidget, wgtPreviewUI.Ui_preview):
         self.log.debug("#-- Setup Preview --#")
         self.setupUi(self)
         self.qIma = None
+        self.bImage.clicked.connect(self.on_image)
+        self.bMovie.clicked.connect(self.on_movie)
         self.bExplorer.clicked.connect(self.on_explorer)
         self.bXterm.clicked.connect(self.on_xTerm)
         self.rf_preview()
@@ -50,6 +53,15 @@ class Preview(QtGui.QWidget, wgtPreviewUI.Ui_preview):
         self._setBtnVis(self.pXterm, self.bXterm)
         self._setBtnVis(self.pGraph, self.bGrapher)
 
+    def on_image(self):
+        path = os.path.normcase(self.pIma)
+        os.system('fcheck "%s"' % path)
+
+    def on_movie(self):
+        """ Command launched when 'Movie' QPushButton is clicked """
+        path = os.path.normcase(self.pMov)
+        os.system('"%s"' % path)
+
     def on_explorer(self):
         """ Command launched when 'Explorer' QPushButton is clicked """
         path = os.path.normpath(self.pXplor)
@@ -59,6 +71,28 @@ class Preview(QtGui.QWidget, wgtPreviewUI.Ui_preview):
         """ Command launched when 'Xterm' QPushButton is clicked """
         path = os.path.normpath(self.pXterm)
         os.system('start "Toto" /d "%s"' % path)
+
+    def ud_previewIcone(self, imaFile, iconeFile):
+        """ Update preview icone file
+            @param imaFile: (str) : Image absolut path
+            @param iconeFile: (str) : Icone absolut path """
+        root = os.path.join(self.pm._prodPath, self.pm._prodId)
+        if imaFile == '' or imaFile == ' ':
+            self._ima = None
+            self.rf_preview()
+            self.removePreviewIcone(iconeFile)
+        else:
+            self._ima = imaFile
+            self.rf_preview()
+            img = self.resizeImage()
+            if pmCore.Manager.checkDataPath(root, os.path.dirname(iconeFile)):
+                try:
+                    img.save(iconeFile, 'png', 100)
+                    self._ima = iconeFile
+                    self.rf_preview()
+                    self.log.info("Saving preview icone: %s ..." % pFile.conformPath(iconeFile))
+                except:
+                    self.log.error("Can't save preview icone: %s !!!" % pFile.conformPath(iconeFile))
 
     def storeImaFile(self):
         """ Store image file """
@@ -79,6 +113,29 @@ class Preview(QtGui.QWidget, wgtPreviewUI.Ui_preview):
             height = 170
         self.lPreview.setMinimumSize(width, height)
         self.lPreview.setMaximumSize(width, height)
+
+    def resizeImage(self):
+        """ Resize image to icone size
+            @return: (object) : QPixmap """
+        ratio = float(self.qIma.width()) / float(self.qIma.height())
+        if self.qIma.width() > self.qIma.height():
+            maxWidth = 300
+            maxHeight = int(300 / ratio)
+        else:
+            maxWidth = int(300 / ratio)
+            maxHeight = 300
+        img = self.qIma.toImage().scaled(maxWidth, maxHeight, QtCore.Qt.KeepAspectRatio)
+        return img
+
+    def removePreviewIcone(self, iconeFile):
+        """ Remove preview icone file
+            @param iconeFile: (str) : Icone absolut path """
+        if os.path.exists(iconeFile):
+            try:
+                os.remove(iconeFile)
+                self.log.info("Remove preview icone: %s" % pFile.conformPath(iconeFile))
+            except:
+                self.log.error("Can't remove preview icone: %s !!!" % pFile.conformPath(iconeFile))
 
     def _setBtnVis(self, path, btn):
         """ Set given QPushButton visibility

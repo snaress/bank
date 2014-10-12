@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\prodManager\ui\wgtLtShotNode.ui'
 #
-# Created: Sun Oct 05 16:54:14 2014
+# Created: Sun Oct 12 04:29:03 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_LineTestShot(object):
     def setupUi(self, LineTestShot):
         LineTestShot.setObjectName(_fromUtf8("LineTestShot"))
-        LineTestShot.resize(190, 48)
+        LineTestShot.resize(190, 46)
         self.gridLayout = QtGui.QGridLayout(LineTestShot)
         self.gridLayout.setMargin(0)
         self.gridLayout.setSpacing(0)
@@ -47,15 +47,10 @@ class Ui_LineTestShot(object):
         self.bShotName.setFlat(True)
         self.bShotName.setObjectName(_fromUtf8("bShotName"))
         self.gridLayout.addWidget(self.bShotName, 1, 0, 1, 1)
-        self.pbShot = QtGui.QProgressBar(LineTestShot)
-        self.pbShot.setMaximumSize(QtCore.QSize(16777215, 15))
-        font = QtGui.QFont()
-        font.setPointSize(8)
-        self.pbShot.setFont(font)
-        self.pbShot.setProperty("value", 24)
-        self.pbShot.setAlignment(QtCore.Qt.AlignCenter)
-        self.pbShot.setObjectName(_fromUtf8("pbShot"))
-        self.gridLayout.addWidget(self.pbShot, 2, 0, 1, 1)
+        self.lTask = QtGui.QLabel(LineTestShot)
+        self.lTask.setAlignment(QtCore.Qt.AlignCenter)
+        self.lTask.setObjectName(_fromUtf8("lTask"))
+        self.gridLayout.addWidget(self.lTask, 2, 0, 1, 1)
 
         self.retranslateUi(LineTestShot)
         QtCore.QMetaObject.connectSlotsByName(LineTestShot)
@@ -64,4 +59,5 @@ class Ui_LineTestShot(object):
         LineTestShot.setWindowTitle(_translate("LineTestShot", "Linetest Shot", None))
         self.lPreview.setText(_translate("LineTestShot", "Shot Preview", None))
         self.bShotName.setText(_translate("LineTestShot", "ShotNode Name", None))
+        self.lTask.setText(_translate("LineTestShot", "Task", None))
 

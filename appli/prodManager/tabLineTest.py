@@ -19,12 +19,14 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
         super(LineTestTab, self).__init__()
         self._setupUi()
 
+    # noinspection PyUnresolvedReferences
     def _setupUi(self):
         """ Setup lineTest tabWidget """
         self.setupUi(self)
         self.log.debug("#-- Setup Tab LineTest --#")
         self.bLtNew.clicked.connect(self.on_newLt)
         self.bLtDel.clicked.connect(self.on_delLt)
+        self.twLtTree.itemClicked.connect(self.on_ltNode)
         self.sbLtColumns.editingFinished.connect(self.rf_shotTree)
         self.rf_tabVis()
 
@@ -34,19 +36,21 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
         selItems = self.mainUi.wgTree.twTree.selectedItems()
         if selItems:
             self.twLtTree.clear()
+            self.twShotTree.clear()
             if self.mainUi.getSelMode() == 'treeMode':
                 if selItems[0].nodeType == 'step':
                     self.rf_tabVis(state=True)
                     self.rf_ltTree()
+                    self.rf_shotTree()
                 else:
                     self.rf_tabVis(state=False)
             elif self.mainUi.getSelMode() == 'stepMode':
                 if selItems[0].nodeType == 'shotNode':
                     self.rf_tabVis(state=True)
                     self.rf_ltTree()
+                    self.rf_shotTree()
                 else:
                     self.rf_tabVis(state=False)
-            self.rf_shotTree()
 
     def rf_tabVis(self, state=False):
         """ Refresh project tab ui visibility
@@ -58,6 +62,7 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
     def rf_ltTree(self):
         """ Refresh lineTest treeWidget """
         self.log.debug("\t Refreshing Tree LineTest ...")
+        self.twLtTree.clear()
         selItem = self.mainUi.wgTree.twTree.selectedItems()[0]
         if os.path.exists(selItem._ltPath):
             ltList = os.listdir(selItem._ltPath) or []
@@ -85,7 +90,7 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
         selItem = self.mainUi.wgTree.twTree.selectedItems()[0]
         rootItem = self.getRootItem(selItem)
         if rootItem is not None:
-            newItems = self._initShotItem(rootItem)
+            newItems = self._initShotItem(rootItem, selItem._step)
             self.twShotTree.addTopLevelItems(newItems)
             for item in newItems:
                 for n, widget in enumerate(item.shotNodes):
@@ -125,6 +130,25 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
             self.delConf = pQt.ConfirmDialog("Delete ?", ['Delete'], [self.delLt])
             self.delConf.exec_()
 
+    def on_ltNode(self):
+        """ Command launched when 'ltNode' QTreeWidgetItem is clicked """
+        selItems = self.twLtTree.selectedItems()
+        if selItems:
+            iconeFile = os.path.join(os.path.dirname(selItems[0]._ltFile), 'previewIcone.png')
+            if os.path.exists(iconeFile):
+                self.mainUi.wgPreview._ima = iconeFile
+            else:
+                self.mainUi.wgPreview._ima = None
+            ltData = selItems[0]._widget.getLtData()
+            self.mainUi.wgPreview.pIma = ltData['ltImaPath']
+            self.mainUi.wgPreview.pSeq = ltData['ltSeqPath']
+            self.mainUi.wgPreview.pMov = ltData['ltMovPath']
+            if os.path.exists(selItems[0]._dataFile):
+                data = pFile.readPyFile(selItems[0]._dataFile)
+                self.mainUi.wgPreview.pXplor = data['workDir']
+                self.mainUi.wgPreview.pXterm = data['workDir']
+            self.mainUi.wgPreview.rf_preview()
+
     def delLt(self):
         """ Delete selected lineTest """
         ltItem = self.twLtTree.selectedItems()[0]
@@ -161,7 +185,7 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
             node.lPreview.setMinimumHeight(maxHeight)
             node.lPreview.setMaximumHeight(maxHeight)
 
-    def _initShotItem(self, rootItem):
+    def _initShotItem(self, rootItem, step):
         """ Initialize shotItem
             @param rootItem: (object) : QTreeWidgetItem
             @return: (list) : List of QTreeWidgetItems """
@@ -174,7 +198,7 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
                 newItems.append(newItem)
             nc += 1
             if newItem is not None:
-                newNode = LtShotNode(self, **rootItem.child(n).__dict__)
+                newNode = LtShotNode(self, step, **rootItem.child(n).__dict__)
                 newItem.shotNodes.append(newNode)
             if nc == self.sbLtColumns.value():
                 nc = 0
@@ -449,12 +473,16 @@ class LtCommentNode(QtGui.QWidget, wgtLtNodeUI.Ui_ltNode):
 
 class LtShotNode(QtGui.QWidget, wgtLtShotNodeUI.Ui_LineTestShot):
 
-    def __init__(self, tab, **kwargs):
+    def __init__(self, tab, step, **kwargs):
         self._tab = tab
+        self.pm = self._tab.pm
+        self.mainUi = self._tab.mainUi
+        self.log = self.mainUi.log
         self._dataPath = kwargs['_dataPath']
         self._dataFile = kwargs['_dataFile']
-        self._ltPath = os.path.join(self._dataPath, 'lt')
-        self._ltFile = os.path.join(self._ltPath, 'lt_%s' % os.path.basename(self._dataFile))
+        self._step = step
+        self._ltPath = os.path.join(self._dataPath, 'lt', self._step)
+        self._taskFile = pFile.conformPath(os.path.join(self._ltPath, 'ltTask.py'))
         self._ima = None
         self.shotName = kwargs['nodeName']
         super(LtShotNode, self).__init__()
@@ -464,8 +492,33 @@ class LtShotNode(QtGui.QWidget, wgtLtShotNodeUI.Ui_LineTestShot):
         """ Setup lineTest itemWidget """
         self.setupUi(self)
         self.bShotName.setText(self.shotName)
+        self.bShotName.clicked.connect(self.on_shotNode)
         self.qIma = None
         self.rf_shotNodeIma()
+        self.rf_task()
+        self._popUpMenu()
+
+    def _popUpMenu(self):
+        """ Init shotNode popUp menu """
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.connect(self, QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'),
+                     self.on_popUpMenu)
+        self.tbMenu = QtGui.QToolBar()
+        self.pMenu = QtGui.QMenu(self)
+        self.menuTask = self._menuTask()
+        self.pMenu.addMenu(self.menuTask)
+
+    def _menuTask(self):
+        """ Create menu 'Task'
+            @return: (object) : QMenu """
+        taskDict = self.pm.prodTasks
+        menuTask = QtGui.QMenu(self.pMenu)
+        menuTask.setTitle("Task")
+        for task in taskDict['_order']:
+            newMenuItem = self.tbMenu.addAction(task, partial(self.on_task, task))
+            newMenuItem.setChecked(True)
+            menuTask.addAction(newMenuItem)
+        return menuTask
 
     def rf_shotNodeIma(self):
         """ Refresh shotNode preview image """
@@ -475,6 +528,73 @@ class LtShotNode(QtGui.QWidget, wgtLtShotNodeUI.Ui_LineTestShot):
         self.lPreview.setMaximumSize(20, 20)
         self.lPreview.setPixmap(self.qIma)
         self.resizePreview()
+
+    def rf_task(self):
+        """ Refresh current task """
+        taskDict = self.pm.prodTasks
+        if not os.path.exists(self._taskFile):
+            self.lTask.setText("ToDo")
+            col1 = taskDict['ToDo']['color']
+        else:
+            taskData = pFile.readPyFile(self._taskFile)
+            self.lTask.setText(taskData['task'])
+            col1 = taskDict[taskData['task']]['color']
+        checkCol = float((col1[0] + col1[1] + col1[2]) / 3)
+        if checkCol > float(255 / 3):
+            col2 = (30, 30, 30)
+        else:
+            col2 = (220, 220, 220)
+        self.lTask.setStyleSheet("background-color:rgb(%s, %s, %s);"
+                                 "color:rgb(%s, %s, %s)" % (col1[0], col1[1], col1[2],
+                                                            col2[0], col2[1], col2[2]))
+
+    def on_popUpMenu(self, point):
+        """ Show popUp menu
+            @param point: (object) : QPoint """
+        selItems = self.mainUi.wgTree.twTree.selectedItems()
+        self.pMenu.setEnabled(False)
+        if selItems:
+            item = selItems[0]
+            if self.mainUi.getSelMode() == 'treeMode':
+                if item.nodeType == 'step':
+                    if item._step == self._step and item.parent().nodeName == self.shotName:
+                        self.pMenu.setEnabled(True)
+            else:
+                if item.nodeType == 'shotNode':
+                    if item._step == self._step and item.nodeName == self.shotName:
+                        self.pMenu.setEnabled(True)
+        self.pMenu.exec_(self.mapToGlobal(point))
+
+    def on_shotNode(self):
+        """ Command launched when a shotNode is clicked """
+        allItems = pQt.getAllItems(self.mainUi.wgTree.twTree)
+        itemToSelect = None
+        for item in allItems:
+            if self.mainUi.getSelMode() == 'treeMode':
+                if item.nodeType == 'step':
+                    if item._step == self._step and item.parent().nodeName == self.shotName:
+                        itemToSelect = item
+                        break
+            elif self.mainUi.getSelMode() == 'stepMode':
+                if item.nodeType == 'shotNode':
+                    if item._step == self._step and item.nodeName == self.shotName:
+                        itemToSelect = item
+                        break
+        if itemToSelect is not None:
+            self.mainUi.wgTree.twTree.setCurrentItem(itemToSelect)
+            self._tab.rf_ltTree()
+
+    def on_task(self, task):
+        """ Command launched when task QMenuItem is clicked
+            @param task: (str) : task name """
+        taskTxt = ["task = %r" % task, "user = %r" % prodManager.user,
+                   "date = %r" % pFile.getDate(), "time = %r" % pFile.getTime()]
+        try:
+            pFile.writeFile(self._taskFile, '\n'.join(taskTxt))
+            self.log.info("Write task for %s" % self.shotName)
+            self.rf_task()
+        except:
+            self.log.error("Can not write task for %s" % self.shotName)
 
     def storeImaFile(self):
         """ Store image file """
@@ -572,7 +692,10 @@ class LineTestEditor(QtGui.QDialog, dialLtEditorUI.Ui_editLt):
         ltData['ltSeqPath'] = str(self.leSeqPath.text())
         ltData['ltMovPath'] = str(self.leMovPath.text())
         if self.ltNode.writeLt(ltData):
-            self.fdPath.close()
+            iconeFile = os.path.join(os.path.dirname(self.ltNode._ltFile), 'previewIcone.png')
+            self.mainUi.wgPreview.ud_previewIcone(pFile.conformPath(str(self.leImaPath.text())),
+                                                  pFile.conformPath(iconeFile))
+            self.close()
 
     def getRootDir(self):
         """ Get root directory from selected node
