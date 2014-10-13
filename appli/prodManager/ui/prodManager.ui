@@ -94,6 +94,19 @@
          </property>
         </layout>
        </widget>
+       <widget class="QWidget" name="tabOverView">
+        <attribute name="title">
+         <string>OverView</string>
+        </attribute>
+        <layout class="QGridLayout" name="glTabOverView">
+         <property name="margin">
+          <number>2</number>
+         </property>
+         <property name="spacing">
+          <number>1</number>
+         </property>
+        </layout>
+       </widget>
       </widget>
      </widget>
     </item>

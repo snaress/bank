@@ -170,12 +170,19 @@ class ProjectTree(QtGui.QWidget, wgtMainTreeUI.Ui_mainTree):
         self.vlTree.insertWidget(-1, self.twTree)
         self.rbTreeMode.clicked.connect(self.twTree.rf_tree)
         self.rbStepMode.clicked.connect(self.twTree.rf_tree)
-        self.rbAsset.clicked.connect(self.twTree.rf_tree)
-        self.rbShot.clicked.connect(self.twTree.rf_tree)
+        self.rbAsset.clicked.connect(self.on_rbTree)
+        self.rbShot.clicked.connect(self.on_rbTree)
 
     def _refresh(self):
+        """ Refresh projectTree widget """
         self.log.debug("#-- Refresh Tree Project --#")
         self.twTree.rf_tree()
+
+    def on_rbTree(self):
+        """ Command launched when 'rbTree' is clicked """
+        self.twTree.rf_tree()
+        if self.mainUi.getSelTab() == 'OverView':
+            self.mainUi.wgOverView._refresh()
 
     def getSelMode(self):
         """ Get selected display mode
@@ -292,6 +299,8 @@ class Tree(QtGui.QTreeWidget):
             self.mainUi.wgShots._refresh()
         elif self.mainUi.getSelTab() == 'LineTest':
             self.mainUi.wgLineTest._refresh()
+        elif self.mainUi.getSelTab() == 'OverView':
+            self.mainUi.wgOverView._refresh()
 
     def addTopLevelItem(self, QTreeWidgetItem):
         super(Tree, self).addTopLevelItem(QTreeWidgetItem)

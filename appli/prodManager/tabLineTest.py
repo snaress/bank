@@ -28,6 +28,13 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
         self.bLtDel.clicked.connect(self.on_delLt)
         self.twLtTree.itemClicked.connect(self.on_ltNode)
         self.sbLtColumns.editingFinished.connect(self.rf_shotTree)
+        self.bStore.clicked.connect(self.on_storePref)
+        self.bRemove.clicked.connect(self.on_rmPref)
+        self.twShotPref.itemClicked.connect(self.on_prefItem)
+        self.twShotPref.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+        self.twShotPref.header().setResizeMode(1, QtGui.QHeaderView.ResizeToContents)
+        self.twShotPref.header().setResizeMode(2, QtGui.QHeaderView.ResizeToContents)
+        self.twShotPref.header().setSortIndicator(0, QtCore.Qt.AscendingOrder)
         self.rf_tabVis()
 
     def _refresh(self):
@@ -58,6 +65,8 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
         self.log.debug("\t Refreshing Tab LineTest Visibility ...")
         self.bLtNew.setEnabled(state)
         self.bLtDel.setEnabled(state)
+        self.bStore.setEnabled(state)
+        self.bRemove.setEnabled(state)
 
     def rf_ltTree(self):
         """ Refresh lineTest treeWidget """
@@ -149,6 +158,66 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
                 self.mainUi.wgPreview.pXterm = data['workDir']
             self.mainUi.wgPreview.rf_preview()
 
+    def on_storePref(self):
+        """ Command launched when 'bStore' QPushButton is clicked """
+        selItems = self.mainUi.wgTree.twTree.selectedItems()
+        if selItems:
+            if self.mainUi.getSelMode() == 'treeMode':
+                if selItems[0].nodeType == 'step':
+                    newItem = self._newPrefItem(self.mainUi.getSelTree(),
+                                                selItems[0]._step,
+                                                selItems[0].parent().parent().nodeName,
+                                                selItems[0].nodeName,
+                                                selItems[0].parent().nodeName)
+                    self.twShotPref.addTopLevelItem(newItem)
+            elif self.mainUi.getSelMode() == 'stepMode':
+                if selItems[0].nodeType == 'shotNode':
+                    newItem = self._newPrefItem(self.mainUi.getSelTree(),
+                                                selItems[0]._step,
+                                                selItems[0].parent().nodeName,
+                                                selItems[0].nodeName,
+                                                selItems[0].nodeName)
+                    self.twShotPref.addTopLevelItem(newItem)
+
+    def on_rmPref(self):
+        """ Command launched when 'bRemove' QPushButton is clicked """
+        pQt.delSelItems(self.twShotPref)
+
+    def on_prefItem(self):
+        """ Command launched when prefItem QTreeWidgetItem is clicked """
+        selItems = self.twShotPref.selectedItems()
+        if selItems:
+            #-- Check Selected Tree --#
+            if selItems[0].tree == 'asset':
+                if not self.mainUi.wgTree.rbAsset.isChecked():
+                    self.mainUi.wgTree.rbAsset.setChecked(True)
+                    self.mainUi.wgTree._refresh()
+            elif selItems[0].tree == 'shot':
+                if not self.mainUi.wgTree.rbShot.isChecked():
+                    self.mainUi.wgTree.rbShot.setChecked(True)
+                    self.mainUi.wgTree._refresh()
+            #-- Search Item To Select --#
+            itemToSelect = None
+            allItems = pQt.getAllItems(self.mainUi.wgTree.twTree)
+            for item in allItems:
+                if self.mainUi.getSelMode() == 'treeMode':
+                    if item.nodeType == 'step':
+                        if item._step == selItems[0].step:
+                            if item.parent().nodeName == selItems[0].shotName:
+                                if item.nodeName == selItems[0].nodeName:
+                                    itemToSelect = item
+                                    break
+                elif self.mainUi.getSelMode() == 'stepMode':
+                    if item.nodeType == 'shotNode':
+                        if item._step == selItems[0].step:
+                            if item.nodeName == selItems[0].shotName:
+                                itemToSelect = item
+                                break
+            #-- Select Item --#
+            if itemToSelect is not None:
+                self.mainUi.wgTree.twTree.setCurrentItem(itemToSelect)
+                self._refresh()
+
     def delLt(self):
         """ Delete selected lineTest """
         ltItem = self.twLtTree.selectedItems()[0]
@@ -233,6 +302,24 @@ class LineTestTab(QtGui.QWidget, tabLineTestUI.Ui_ltTab):
         newItem = QtGui.QTreeWidgetItem()
         newItem.shotNodes = []
         newItem._wgParent = self
+        return newItem
+
+    @staticmethod
+    def _newPrefItem(tree, step, label, nodeName, shotName):
+        """ Create new shotPref QTreeWidgetItem
+            @param tree: (str) : Tree name
+            @param step: (str) : Step name
+            @param shotName: (str) : shotName
+            @return: (object) : QTreeWidgetItem """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setText(0, tree)
+        newItem.setText(1, step)
+        newItem.setText(2, label)
+        newItem.nodeName = nodeName
+        newItem.shotName = shotName
+        newItem.label = label
+        newItem.step = step
+        newItem.tree = tree
         return newItem
 
 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\prodManager\ui\prodManager.ui'
 #
-# Created: Fri Oct 10 14:01:47 2014
+# Created: Sun Oct 12 18:02:18 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -68,6 +68,13 @@ class Ui_prodManager(object):
         self.glTabLineTest.setSpacing(1)
         self.glTabLineTest.setObjectName(_fromUtf8("glTabLineTest"))
         self.tabManager.addTab(self.tabLineTest, _fromUtf8(""))
+        self.tabOverView = QtGui.QWidget()
+        self.tabOverView.setObjectName(_fromUtf8("tabOverView"))
+        self.glTabOverView = QtGui.QGridLayout(self.tabOverView)
+        self.glTabOverView.setMargin(2)
+        self.glTabOverView.setSpacing(1)
+        self.glTabOverView.setObjectName(_fromUtf8("glTabOverView"))
+        self.tabManager.addTab(self.tabOverView, _fromUtf8(""))
         self.gridLayout.addWidget(self.splitter, 0, 0, 1, 1)
         prodManager.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(prodManager)
@@ -102,6 +109,7 @@ class Ui_prodManager(object):
         self.tabManager.setTabText(self.tabManager.indexOf(self.tabProject), _translate("prodManager", "Project", None))
         self.tabManager.setTabText(self.tabManager.indexOf(self.tabShots), _translate("prodManager", "Shots", None))
         self.tabManager.setTabText(self.tabManager.indexOf(self.tabLineTest), _translate("prodManager", "LineTest", None))
+        self.tabManager.setTabText(self.tabManager.indexOf(self.tabOverView), _translate("prodManager", "OverView", None))
         self.menuPref.setTitle(_translate("prodManager", "Pref", None))
         self.menuStyle.setTitle(_translate("prodManager", "Style", None))
         self.miDefaultStyle.setText(_translate("prodManager", "Default", None))

@@ -134,13 +134,13 @@
         <widget class="QFrame" name="qfLtColumns">
          <property name="minimumSize">
           <size>
-           <width>120</width>
+           <width>180</width>
            <height>0</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>120</width>
+           <width>180</width>
            <height>16777215</height>
           </size>
          </property>
@@ -188,7 +188,7 @@
           <item>
            <widget class="QTreeWidget" name="twShotPref">
             <property name="selectionMode">
-             <enum>QAbstractItemView::NoSelection</enum>
+             <enum>QAbstractItemView::SingleSelection</enum>
             </property>
             <property name="indentation">
              <number>0</number>
@@ -196,18 +196,76 @@
             <property name="itemsExpandable">
              <bool>false</bool>
             </property>
+            <property name="sortingEnabled">
+             <bool>true</bool>
+            </property>
             <property name="expandsOnDoubleClick">
              <bool>false</bool>
             </property>
+            <property name="columnCount">
+             <number>3</number>
+            </property>
             <attribute name="headerVisible">
+             <bool>true</bool>
+            </attribute>
+            <attribute name="headerStretchLastSection">
              <bool>false</bool>
             </attribute>
             <column>
              <property name="text">
-              <string notr="true">1</string>
+              <string notr="true">Tree</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Step</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>ShotNode</string>
              </property>
             </column>
            </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="hlPrefBtns">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="bStore">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Store</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="bRemove">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Remove</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>

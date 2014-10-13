@@ -6,7 +6,7 @@ from lib.qt import procQt as pQt
 from lib.system import procFile as pFile
 from appli.prodManager import prodManager as pm
 from appli.prodManager.ui import prodLoaderUI, prodManagerUI
-from appli.prodManager import pmCore, tabProject, tabShots, treeProject, tabLineTest
+from appli.prodManager import pmCore, tabProject, tabShots, treeProject, tabLineTest, tabOverView
 
 
 class ProdLoaderUi(QtGui.QMainWindow, prodLoaderUI.Ui_prodLoader, pmCore.Loader, pQt.Style):
@@ -211,6 +211,8 @@ class ProdManagerUi(QtGui.QMainWindow, prodManagerUI.Ui_prodManager, pQt.Style):
         self.glTabShots.addWidget(self.wgShots)
         self.wgLineTest = tabLineTest.LineTestTab(self)
         self.glTabLineTest.addWidget(self.wgLineTest)
+        self.wgOverView = tabOverView.OverViewTab(self)
+        self.glTabOverView.addWidget(self.wgOverView)
         self.tabManager.currentChanged.connect(self.wgTree.twTree.on_treeNode)
 
     def on_style(self, style):

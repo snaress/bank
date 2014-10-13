@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\prodManager\ui\tabLineTest.ui'
 #
-# Created: Fri Oct 10 03:14:02 2014
+# Created: Sun Oct 12 15:44:13 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -80,8 +80,8 @@ class Ui_ltTab(object):
         self.hlLtShots.setMargin(0)
         self.hlLtShots.setObjectName(_fromUtf8("hlLtShots"))
         self.qfLtColumns = QtGui.QFrame(self.layoutWidget_2)
-        self.qfLtColumns.setMinimumSize(QtCore.QSize(120, 0))
-        self.qfLtColumns.setMaximumSize(QtCore.QSize(120, 16777215))
+        self.qfLtColumns.setMinimumSize(QtCore.QSize(180, 0))
+        self.qfLtColumns.setMaximumSize(QtCore.QSize(180, 16777215))
         self.qfLtColumns.setFrameShape(QtGui.QFrame.StyledPanel)
         self.qfLtColumns.setObjectName(_fromUtf8("qfLtColumns"))
         self.vlLtShotsColumn = QtGui.QVBoxLayout(self.qfLtColumns)
@@ -98,14 +98,29 @@ class Ui_ltTab(object):
         self.sbLtColumns.setObjectName(_fromUtf8("sbLtColumns"))
         self.vlLtShotsColumn.addWidget(self.sbLtColumns)
         self.twShotPref = QtGui.QTreeWidget(self.qfLtColumns)
-        self.twShotPref.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
+        self.twShotPref.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.twShotPref.setIndentation(0)
         self.twShotPref.setItemsExpandable(False)
         self.twShotPref.setExpandsOnDoubleClick(False)
+        self.twShotPref.setColumnCount(3)
         self.twShotPref.setObjectName(_fromUtf8("twShotPref"))
-        self.twShotPref.headerItem().setText(0, _fromUtf8("1"))
-        self.twShotPref.header().setVisible(False)
+        self.twShotPref.headerItem().setText(0, _fromUtf8("Tree"))
+        self.twShotPref.header().setVisible(True)
+        self.twShotPref.header().setStretchLastSection(False)
         self.vlLtShotsColumn.addWidget(self.twShotPref)
+        self.hlPrefBtns = QtGui.QHBoxLayout()
+        self.hlPrefBtns.setSpacing(0)
+        self.hlPrefBtns.setContentsMargins(-1, 0, -1, 0)
+        self.hlPrefBtns.setObjectName(_fromUtf8("hlPrefBtns"))
+        self.bStore = QtGui.QPushButton(self.qfLtColumns)
+        self.bStore.setMaximumSize(QtCore.QSize(16777215, 20))
+        self.bStore.setObjectName(_fromUtf8("bStore"))
+        self.hlPrefBtns.addWidget(self.bStore)
+        self.bRemove = QtGui.QPushButton(self.qfLtColumns)
+        self.bRemove.setMaximumSize(QtCore.QSize(16777215, 20))
+        self.bRemove.setObjectName(_fromUtf8("bRemove"))
+        self.hlPrefBtns.addWidget(self.bRemove)
+        self.vlLtShotsColumn.addLayout(self.hlPrefBtns)
         self.hlLtShots.addWidget(self.qfLtColumns)
         self.twShotTree = QtGui.QTreeWidget(self.layoutWidget_2)
         self.twShotTree.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
@@ -126,4 +141,9 @@ class Ui_ltTab(object):
         self.bLtNew.setText(_translate("ltTab", "New LT", None))
         self.bLtDel.setText(_translate("ltTab", "Del LT", None))
         self.sbLtColumns.setPrefix(_translate("ltTab", "Columns = ", None))
+        self.twShotPref.setSortingEnabled(True)
+        self.twShotPref.headerItem().setText(1, _translate("ltTab", "Step", None))
+        self.twShotPref.headerItem().setText(2, _translate("ltTab", "ShotNode", None))
+        self.bStore.setText(_translate("ltTab", "Store", None))
+        self.bRemove.setText(_translate("ltTab", "Remove", None))
 

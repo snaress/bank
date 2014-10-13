@@ -6,6 +6,7 @@ typoExclusion = [' ', '  ', '__', '--', '/', '\\', ':', '.']
 
 
 class Loader(object):
+    """ Class used by ProdManager LoaderUi for project preload """
 
     def __init__(self):
         pass
@@ -116,6 +117,8 @@ class Loader(object):
 
     @staticmethod
     def defaultTasks():
+        """ Default tasks
+            @return: (dict) : Task dict """
         return {'_order': ['Out', 'StandBy', 'ToDo', 'Retake', 'InProgress', 'Warning',
                            'WaitApproval', 'ToReview', 'Final'],
                 'Out': {'color': (0, 0, 0), 'stat': False},
@@ -130,12 +133,17 @@ class Loader(object):
 
 
 class Manager(object):
+    """ Class used by ProdManagerUi for project management """
 
     def __init__(self):
         pass
 
     @staticmethod
     def checkDataPath(rootDir, dataPath):
+        """ Check if all folders of given path exists
+            @param rootDir: (str) : Absolut path
+            @param dataPath: (str) : Absolut path
+            @return: (bool) : True if success """
         _rootDir = pFile.conformPath(rootDir)
         _dataPath = pFile.conformPath(dataPath)
         if not os.path.exists(_rootDir):
