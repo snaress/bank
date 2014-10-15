@@ -15,8 +15,10 @@ pyUic = C:\Python27\Lib\site-packages\PyQt4\pyuic4.bat $*
 aliasSync = python F:\rnd\workspace\bank\lib\env\aliasSync.py
 textEditor = python F:\rnd\workspace\bank\lib\qt\__exeTE__.py
 scriptEditor = python F:\rnd\workspace\bank\lib\qt\__exeSE__.py
+userManager = python F:\rnd\workspace\bank\appli\userManager\__exe__.py $*
 prodManager = python F:\rnd\workspace\bank\appli\prodManager\__exe__.py $*
 grapher = python F:\rnd\workspace\bank\appli\grapher\__exe__.py $*
 framing = python F:\rnd\workspace\bank\lib\nuke\framingOpt.py $*
+nConvert = F:\rnd\workspace\bank\lib\system\_lib\nConvert\nconvert.exe
 
 aliasHelp = type "F:\rnd\workspace\bank\lib\env\alias.txt"
