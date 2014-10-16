@@ -81,6 +81,7 @@ class UserTree(QtGui.QTreeWidget):
         self.header().setStretchLastSection(False)
         alignment = QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter|QtCore.Qt.AlignCenter
         self.setSortingEnabled(True)
+        self.setIndentation(0)
         self.header().setSortIndicatorShown(True)
         self.header().setSortIndicator(2, QtCore.Qt.AscendingOrder)
         for n in range(len(self.um.userAttrs)):
@@ -94,6 +95,9 @@ class UserTree(QtGui.QTreeWidget):
             newUserItem = UserItem(self.mainUi, user)
             userItems.append(newUserItem)
         self.addTopLevelItems(userItems)
+        for item in userItems:
+            self.setItemWidget(item, 0, item.wg_photo)
+            self.setItemWidget(item, 1, item.wg_logo)
 
 
 class UserItem(QtGui.QTreeWidgetItem):
@@ -110,10 +114,29 @@ class UserItem(QtGui.QTreeWidgetItem):
 
     def _refresh(self):
         userDict = self.userNode.__getDict__
+        #-- Refresh Data --#
         for n, attr in enumerate(self.um.userAttrs):
             if not attr in ['photo', 'logo']:
                 self.setText(n, userDict[attr])
-                self.setTextAlignment(n, 4)
+            self.setTextAlignment(n, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter|QtCore.Qt.AlignCenter)
+        #-- Refresh Icones --#
+        for imaType in ['photo', 'logo']:
+            newIcone = self._newIcone(imaType)
+            setattr(self, 'wg_%s' % imaType, newIcone)
+
+    def _newIcone(self, imaType):
+        """ Create icone widget
+            @param imaType: (str) : 'photo' or 'logo'
+            @return: (object) : QLabel.QPixmap """
+        newLabel = QtGui.QLabel()
+        newLabel.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter|QtCore.Qt.AlignCenter)
+        imaFile = os.path.join(self.userNode._userPath, '%s.png' % imaType)
+        if not os.path.exists(imaFile):
+            imaFile = self.um.defaultIcone
+        newIma = QtGui.QPixmap(imaFile)
+        newLabel.setPixmap(newIma)
+        newLabel.qIma = newIma
+        return newLabel
 
 
 class UserEditor(QtGui.QDialog, userEditorUI.Ui_userEditor, pQt.Style):
@@ -133,11 +156,11 @@ class UserEditor(QtGui.QDialog, userEditorUI.Ui_userEditor, pQt.Style):
 
     @property
     def __getDict__(self):
-        return {'name': str(self.leName.text()),
+        return {'_photo': str(self.lePhoto.text()),
+                '_logo': str(self.leLogo.text()),
+                'name': str(self.leName.text()),
                 'firstName': str(self.leFirstName.text()),
                 'alias': str(self.leAlias.text()),
-                'photo': str(self.lePhoto.text()),
-                'logo': str(self.leLogo.text()),
                 'userGrp': str(self.cbUserGrp.currentText()),
                 'status': str(self.cbStatus.currentText())}
 
@@ -158,27 +181,22 @@ class UserEditor(QtGui.QDialog, userEditorUI.Ui_userEditor, pQt.Style):
             self.leName.setText(self.userNode.name)
             self.leFirstName.setText(self.userNode.firstName)
             self.leAlias.setText(self.userNode.alias)
-            self.lePhoto.setText(self.userNode.photo)
-            self.leLogo.setText(self.userNode.logo)
             self.cbUserGrp.setCurrentIndex(self.cbUserGrp.findText(self.userNode.userGrp))
             self.cbStatus.setCurrentIndex(self.cbStatus.findText(self.userNode.status))
-        else:
-            self.lePhoto.setEnabled(False)
-            self.bOpenPhoto.setEnabled(False)
-            self.leLogo.setEnabled(False)
-            self.bOpenLogo.setEnabled(False)
 
     def on_open(self, QLineEdit):
         """ Command launched when 'Open' QPushButton is clicked
             @param QLineEdit: (object) : QLineEdit """
-        if os.path.exists(self.userNode._userPath):
-            self.fdPath = pQt.fileDialog(fdRoot=self.userNode._userPath,
-                                         fdCmd=partial(self.ud_imaPath, QLineEdit))
-            self.fdPath.setFileMode(QtGui.QFileDialog.AnyFile)
-            self.fdPath.exec_()
+        rootPath = self.um.binPath
+        if self.userNode is not None:
+            if os.path.exists(self.userNode._userPath):
+                rootPath = self.userNode._userPath
+        self.fdPath = pQt.fileDialog(fdRoot=rootPath, fdCmd=partial(self.ud_imaPath, QLineEdit))
+        self.fdPath.setFileMode(QtGui.QFileDialog.AnyFile)
+        self.fdPath.exec_()
 
     def on_save(self):
-        """ Command launched whan 'Save' QPushButton is clicked """
+        """ Command launched when 'Save' QPushButton is clicked """
         if self.userNode is None:
             result, log = self.um.newUser(**self.__getDict__)
         else:
@@ -187,7 +205,6 @@ class UserEditor(QtGui.QDialog, userEditorUI.Ui_userEditor, pQt.Style):
         if not result:
             pQt.errorDialog(log, self)
         else:
-            self.userNode.updateIcone('photo')
             self.mainUi.twTree._refresh()
             self.close()
 

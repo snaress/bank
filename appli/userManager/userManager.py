@@ -10,6 +10,7 @@ class UserManager(object):
     def __init__(self, logLvl='info'):
         self.log = pFile.Logger(title="UM", level=logLvl)
         self.binPath = userManager.binPath
+        self.defaultIcone = userManager.defaultIcone
         self.nConvert = userManager.nConvert
         self.users = []
 
@@ -19,10 +20,11 @@ class UserManager(object):
             @return: (str) : User datas """
         txt = []
         for k, v in dataDict.iteritems():
-            if isinstance(v, str):
-                txt.append("%s = %r" % (k, v))
-            else:
-                txt.append("%s = %s" % (k, v))
+            if not k.startswith('_'):
+                if isinstance(v, str):
+                    txt.append("%s = %r" % (k, v))
+                else:
+                    txt.append("%s = %s" % (k, v))
         return '\n'.join(txt)
 
     @property
@@ -78,8 +80,8 @@ class UserManager(object):
                 @keyword name: (str) : User name
                 @keyword firstName: (str) : User first name
                 @keyword alias: (str) : User alias
-                @keyword photo: (str) : User original photo absolute path
-                @keyword logo: (str) : User original logo absolute path
+                @keyword _photo: (str) : User original photo absolute path
+                @keyword _logo: (str) : User original logo absolute path
                 @keyword userGrp: (str) : User group
                 @keyword status: (str) : 'active' or 'off'
             @return: (bool), (str) : True if success, Log text """
@@ -103,17 +105,19 @@ class UserManager(object):
                     #-- Create New User File --#
                     userFile = os.path.join(newPath, "userData.py")
                     datas = self.__dictToStr__(self._checkUserDict(kwargs))
-                    try:
-                        pFile.writeFile(userFile, datas)
-                        log = "New user file successfully created: %s" % kwargs['alias']
-                        self.log.info(log)
+                    resultFile, logFile = self._createUserFile(userFile, kwargs['alias'], datas)
+                    if not resultFile:
+                        return resultFile, logFile
+                    else:
+                        #-- Create Icones --#
+                        for ima in ['_photo', '_logo']:
+                            if os.path.exists(kwargs[ima]):
+                                imaFile = os.path.normpath(kwargs[ima])
+                                iconeFile = os.path.normpath(os.path.join(newPath, '%s.png' % ima[1:]))
+                                self.updateIcone(imaFile, iconeFile)
                         #-- Update data --#
                         self.parse()
-                        return True, log
-                    except:
-                        error = "Can not create new user file: %s" % kwargs['alias']
-                        self.log.error(error)
-                        return False, error
+                        return True, "New user %s succesfully created." % kwargs['alias']
 
     def getNodeFromAlias(self, alias):
         """ Get userNode from given alias
@@ -123,6 +127,23 @@ class UserManager(object):
             if user.alias == alias:
                 return user
         self.log.warning("User %r not found !!!" % alias)
+
+    def updateIcone(self, imaFile, iconeFile):
+        """ Convert original image to thumbnail icone
+            @param imaFile: (str) : Originale image absolute path
+            @param iconeFile: (str) : Thumbnail icone absolute path """
+        convert = False
+        if not imaFile in ['', ' ', '.']:
+            if not os.path.exists(iconeFile):
+                convert = True
+            else:
+                if os.path.getmtime(imaFile) < os.path.getmtime(iconeFile):
+                    convert = True
+                else:
+                    self.log.debug("Icone %s is up to date, skip." % os.path.basename(iconeFile))
+        if convert and os.path.exists(imaFile):
+            os.system("%s -out png -ratio -resize 80 80 -overwrite -o %s %s" % (self.nConvert,
+                                                                                iconeFile, imaFile))
 
     def _checkNewAlias(self, alias):
         """ Check if new alias is valid
@@ -172,9 +193,26 @@ class UserManager(object):
             @return: (dict) : User Attributes """
         self.log.debug("\t Checking new user dict ...")
         for attr in self.userAttrs:
-            if not attr in kwargs.keys():
-                kwargs[attr] = ""
+            if not attr in ['photo', 'logo']:
+                if not attr in kwargs.keys():
+                    kwargs[attr] = ""
         return kwargs
+
+    def _createUserFile(self, userFile, alias, data):
+        """ Create new user file
+            @param userFile: (str) : User file absolute path
+            @param alias: (str) : User alias
+            @param data: (dict) : User data
+            @return: (bool), (str) : True if success, Log text """
+        try:
+            pFile.writeFile(userFile, data)
+            log = "New user file successfully created: %s" % alias
+            self.log.info(log)
+            return True, log
+        except:
+            error = "Can not create new user file: %s" % alias
+            self.log.error(error)
+            return False, error
 
 
 class UserNode(object):
@@ -224,33 +262,19 @@ class UserNode(object):
                 @keyword name: (str) : User name
                 @keyword firstName: (str) : User first name
                 @keyword alias: (str) : User alias
-                @keyword photo: (str) : User original photo absolute path
-                @keyword logo: (str) : User original logo absolute path
+                @keyword _photo: (str) : User original photo absolute path
+                @keyword _logo: (str) : User original logo absolute path
                 @keyword userGrp: (str) : User group
                 @keyword status: (str) : 'active' or 'off' """
         for k, v in kwargs.iteritems():
-            if hasattr(self, k):
+            if not k.startswith('_'):
                 setattr(self, k, v)
             else:
-                self._parent.log.warning("%s not found, skip !!!" % k)
-
-    def updateIcone(self, imaType):
-        """ Convert original image to thumbnail icone
-            @param imaType: (str) : 'photo' or 'logo' """
-        convert = False
-        ima = os.path.normpath(getattr(self, imaType))
-        icone = os.path.normpath(os.path.join(self._userPath, '%s.png' % imaType))
-        if not os.path.exists(icone):
-            convert = True
-        else:
-            if os.path.exists(ima):
-                if os.path.getmtime(ima) < os.path.getmtime(icone):
-                    convert = True
-                else:
-                    self._parent.log.debug("Icone %s is up to date, skip." % imaType)
-        if convert and os.path.exists(ima):
-            os.system("%s -out png -ratio -resize 150 150 -overwrite -o %s %s" % (self._parent.nConvert,
-                                                                                  icone, ima))
+                if k in ['_photo', '_logo']:
+                    imaFile = os.path.normpath(kwargs[k])
+                    iconeFile = os.path.normpath(os.path.join(self._userPath, '%s.png' % k[1:]))
+                    if os.path.exists(imaFile):
+                        self._parent.updateIcone(imaFile, iconeFile)
 
     def writeData(self):
         """ Write user data file
@@ -289,11 +313,15 @@ class UserNode(object):
 
 
 if __name__ == '__main__':
-    um = UserManager()
-    um.parse()
-    for user in um.users:
-        user.printData()
-#     users = um.userList()
-#     for user in users:
-#         print user
-#     um.getNodeFromAlias('tt').remove()
+    pass
+    # um = UserManager()
+    # um.parse()
+    # um.newUser(name='Buisseret', firstName='Julien', alias='kheops',
+    #            userGrp='admin', status='active',
+    #            _photo='C:\Users\kheops\Pictures\originalPhoto.jpg',
+    #            _logo='C:\Users\kheops\Pictures\originalLogo.jpg')
+    # um.parse()
+    # for user in um.users:
+    #     user.printData()
+    # userDict = um.userList(asDict=True)
+    # print userDict

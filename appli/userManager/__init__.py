@@ -11,7 +11,9 @@ toolPack = __package__
 #-- Global Var --#
 user = os.environ.get('username')
 binPath = os.path.join('G:', os.sep, 'rndBin', 'userManager')
-nConvert = os.path.normpath("F:/rnd/workspace/bank/lib/system/_lib/nConvert/nconvert.exe")
+wsPath = "F:/rnd/workspace/bank"
+defaultIcone = os.path.join(toolPath, '_lib', 'ima', 'noImage.png')
+nConvert = os.path.normpath(os.path.join(wsPath, "lib/system/_lib/nConvert/nconvert.exe"))
 
 
 #-- Show Info --#

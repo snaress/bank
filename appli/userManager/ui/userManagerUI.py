@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\userManager\ui\userManager.ui'
 #
-# Created: Tue Oct 14 02:27:03 2014
+# Created: Thu Oct 16 03:30:00 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_userManager(object):
     def setupUi(self, userManager):
         userManager.setObjectName(_fromUtf8("userManager"))
-        userManager.resize(536, 133)
+        userManager.resize(509, 712)
         self.centralwidget = QtGui.QWidget(userManager)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.glUserManager = QtGui.QGridLayout(self.centralwidget)
