@@ -1,0 +1,152 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\factory\ui\factory.ui'
+#
+# Created: Fri Oct 17 03:32:01 2014
+#      by: PyQt4 UI code generator 4.10.4
+#
+# WARNING! All changes made in this file will be lost!
+
+from PyQt4 import QtCore, QtGui
+
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
+
+class Ui_factory(object):
+    def setupUi(self, factory):
+        factory.setObjectName(_fromUtf8("factory"))
+        factory.resize(826, 600)
+        self.centralwidget = QtGui.QWidget(factory)
+        self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
+        self.gridLayout = QtGui.QGridLayout(self.centralwidget)
+        self.gridLayout.setMargin(0)
+        self.gridLayout.setSpacing(2)
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.qfLeftZone = QtGui.QFrame(self.centralwidget)
+        self.qfLeftZone.setMinimumSize(QtCore.QSize(200, 0))
+        self.qfLeftZone.setMaximumSize(QtCore.QSize(200, 16777215))
+        self.qfLeftZone.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.qfLeftZone.setObjectName(_fromUtf8("qfLeftZone"))
+        self.vlLeftZone = QtGui.QVBoxLayout(self.qfLeftZone)
+        self.vlLeftZone.setSpacing(2)
+        self.vlLeftZone.setMargin(0)
+        self.vlLeftZone.setObjectName(_fromUtf8("vlLeftZone"))
+        self.qfSwitch = QtGui.QFrame(self.qfLeftZone)
+        self.qfSwitch.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.qfSwitch.setObjectName(_fromUtf8("qfSwitch"))
+        self.hlSwitch = QtGui.QHBoxLayout(self.qfSwitch)
+        self.hlSwitch.setSpacing(0)
+        self.hlSwitch.setContentsMargins(4, 0, 4, 0)
+        self.hlSwitch.setObjectName(_fromUtf8("hlSwitch"))
+        self.rbTexture = QtGui.QRadioButton(self.qfSwitch)
+        self.rbTexture.setChecked(True)
+        self.rbTexture.setObjectName(_fromUtf8("rbTexture"))
+        self.bgSwitch = QtGui.QButtonGroup(factory)
+        self.bgSwitch.setObjectName(_fromUtf8("bgSwitch"))
+        self.bgSwitch.addButton(self.rbTexture)
+        self.hlSwitch.addWidget(self.rbTexture)
+        self.rbShader = QtGui.QRadioButton(self.qfSwitch)
+        self.rbShader.setObjectName(_fromUtf8("rbShader"))
+        self.bgSwitch.addButton(self.rbShader)
+        self.hlSwitch.addWidget(self.rbShader)
+        self.rbStockShot = QtGui.QRadioButton(self.qfSwitch)
+        self.rbStockShot.setObjectName(_fromUtf8("rbStockShot"))
+        self.bgSwitch.addButton(self.rbStockShot)
+        self.hlSwitch.addWidget(self.rbStockShot)
+        self.vlLeftZone.addWidget(self.qfSwitch)
+        self.twTree = QtGui.QTreeWidget(self.qfLeftZone)
+        self.twTree.setObjectName(_fromUtf8("twTree"))
+        self.twTree.headerItem().setText(0, _fromUtf8("1"))
+        self.twTree.header().setVisible(False)
+        self.vlLeftZone.addWidget(self.twTree)
+        self.gridLayout.addWidget(self.qfLeftZone, 0, 0, 1, 1)
+        self.splitter = QtGui.QSplitter(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.splitter.sizePolicy().hasHeightForWidth())
+        self.splitter.setSizePolicy(sizePolicy)
+        self.splitter.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.splitter.setOrientation(QtCore.Qt.Vertical)
+        self.splitter.setObjectName(_fromUtf8("splitter"))
+        self.twThumbnail = QtGui.QTreeWidget(self.splitter)
+        self.twThumbnail.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
+        self.twThumbnail.setIndentation(0)
+        self.twThumbnail.setItemsExpandable(False)
+        self.twThumbnail.setExpandsOnDoubleClick(False)
+        self.twThumbnail.setColumnCount(5)
+        self.twThumbnail.setObjectName(_fromUtf8("twThumbnail"))
+        self.twThumbnail.headerItem().setText(0, _fromUtf8("1"))
+        self.twThumbnail.headerItem().setText(1, _fromUtf8("2"))
+        self.twThumbnail.headerItem().setText(2, _fromUtf8("3"))
+        self.twThumbnail.headerItem().setText(3, _fromUtf8("4"))
+        self.twThumbnail.headerItem().setText(4, _fromUtf8("5"))
+        self.twThumbnail.header().setVisible(False)
+        self.qfInfo = QtGui.QFrame(self.splitter)
+        self.qfInfo.setMaximumSize(QtCore.QSize(16777215, 205))
+        self.qfInfo.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.qfInfo.setObjectName(_fromUtf8("qfInfo"))
+        self.horizontalLayout = QtGui.QHBoxLayout(self.qfInfo)
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.verticalLayout = QtGui.QVBoxLayout()
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.sbColumns = QtGui.QSpinBox(self.qfInfo)
+        self.sbColumns.setMinimum(1)
+        self.sbColumns.setMaximum(20)
+        self.sbColumns.setProperty("value", 5)
+        self.sbColumns.setObjectName(_fromUtf8("sbColumns"))
+        self.verticalLayout.addWidget(self.sbColumns)
+        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout.addItem(spacerItem)
+        self.horizontalLayout.addLayout(self.verticalLayout)
+        self.textEdit = QtGui.QTextEdit(self.qfInfo)
+        self.textEdit.setMaximumSize(QtCore.QSize(16777215, 200))
+        self.textEdit.setObjectName(_fromUtf8("textEdit"))
+        self.horizontalLayout.addWidget(self.textEdit)
+        self.gridLayout.addWidget(self.splitter, 0, 1, 1, 1)
+        factory.setCentralWidget(self.centralwidget)
+        self.menubar = QtGui.QMenuBar(factory)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 826, 21))
+        self.menubar.setObjectName(_fromUtf8("menubar"))
+        self.mPreview = QtGui.QMenu(self.menubar)
+        self.mPreview.setObjectName(_fromUtf8("mPreview"))
+        self.mThumbnail = QtGui.QMenu(self.menubar)
+        self.mThumbnail.setObjectName(_fromUtf8("mThumbnail"))
+        factory.setMenuBar(self.menubar)
+        self.statusbar = QtGui.QStatusBar(factory)
+        self.statusbar.setObjectName(_fromUtf8("statusbar"))
+        factory.setStatusBar(self.statusbar)
+        self.miCreateSelIcons = QtGui.QAction(factory)
+        self.miCreateSelIcons.setObjectName(_fromUtf8("miCreateSelIcons"))
+        self.miCreateAllIcons = QtGui.QAction(factory)
+        self.miCreateAllIcons.setObjectName(_fromUtf8("miCreateAllIcons"))
+        self.mThumbnail.addAction(self.miCreateSelIcons)
+        self.mThumbnail.addAction(self.miCreateAllIcons)
+        self.menubar.addAction(self.mPreview.menuAction())
+        self.menubar.addAction(self.mThumbnail.menuAction())
+
+        self.retranslateUi(factory)
+        QtCore.QMetaObject.connectSlotsByName(factory)
+
+    def retranslateUi(self, factory):
+        factory.setWindowTitle(_translate("factory", "Factory", None))
+        self.rbTexture.setText(_translate("factory", "Texture", None))
+        self.rbShader.setText(_translate("factory", "Shader", None))
+        self.rbStockShot.setText(_translate("factory", "StockShot", None))
+        self.sbColumns.setPrefix(_translate("factory", "Columns = ", None))
+        self.mPreview.setTitle(_translate("factory", "Preview", None))
+        self.mThumbnail.setTitle(_translate("factory", "Thumbnail", None))
+        self.miCreateSelIcons.setText(_translate("factory", "Create Selected Icons", None))
+        self.miCreateAllIcons.setText(_translate("factory", "Create All Icons", None))
+
