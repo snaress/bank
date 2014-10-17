@@ -22,6 +22,7 @@ print 'Tool Path : ', toolPath
 print 'Tool Package : ', toolPack
 print '#%s#' % ('-'*(22+len(toolName)))
 print 'User : ', user
+print 'ws Path : ', wsPath
 print 'Bin Path : ', binPath
 pQt.CompileUi(uiDir=os.path.join(toolPath, 'ui'))
 print '%s\n' % ('#'*(22+len(toolName)))
