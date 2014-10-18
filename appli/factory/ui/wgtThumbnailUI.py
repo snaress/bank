@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\factory\ui\wgtThumbnail.ui'
 #
-# Created: Fri Oct 17 02:42:54 2014
+# Created: Fri Oct 17 14:47:26 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,8 +33,8 @@ class Ui_thumbnail(object):
         self.gridLayout.setSpacing(0)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.cbPreview = QtGui.QCheckBox(thumbnail)
-        self.cbPreview.setMinimumSize(QtCore.QSize(18, 0))
-        self.cbPreview.setMaximumSize(QtCore.QSize(18, 16777215))
+        self.cbPreview.setMinimumSize(QtCore.QSize(0, 0))
+        self.cbPreview.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.cbPreview.setText(_fromUtf8(""))
         self.cbPreview.setObjectName(_fromUtf8("cbPreview"))
         self.gridLayout.addWidget(self.cbPreview, 1, 0, 1, 1)

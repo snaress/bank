@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\rnd\workspace\bank\appli\factory\ui\factory.ui'
 #
-# Created: Fri Oct 17 03:32:01 2014
+# Created: Sat Oct 18 01:27:17 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -29,13 +29,13 @@ class Ui_factory(object):
         factory.resize(826, 600)
         self.centralwidget = QtGui.QWidget(factory)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
-        self.gridLayout = QtGui.QGridLayout(self.centralwidget)
-        self.gridLayout.setMargin(0)
-        self.gridLayout.setSpacing(2)
-        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.glFactory = QtGui.QGridLayout(self.centralwidget)
+        self.glFactory.setMargin(0)
+        self.glFactory.setSpacing(2)
+        self.glFactory.setObjectName(_fromUtf8("glFactory"))
         self.qfLeftZone = QtGui.QFrame(self.centralwidget)
-        self.qfLeftZone.setMinimumSize(QtCore.QSize(200, 0))
-        self.qfLeftZone.setMaximumSize(QtCore.QSize(200, 16777215))
+        self.qfLeftZone.setMinimumSize(QtCore.QSize(252, 0))
+        self.qfLeftZone.setMaximumSize(QtCore.QSize(252, 16777215))
         self.qfLeftZone.setFrameShape(QtGui.QFrame.StyledPanel)
         self.qfLeftZone.setObjectName(_fromUtf8("qfLeftZone"))
         self.vlLeftZone = QtGui.QVBoxLayout(self.qfLeftZone)
@@ -70,7 +70,7 @@ class Ui_factory(object):
         self.twTree.headerItem().setText(0, _fromUtf8("1"))
         self.twTree.header().setVisible(False)
         self.vlLeftZone.addWidget(self.twTree)
-        self.gridLayout.addWidget(self.qfLeftZone, 0, 0, 1, 1)
+        self.glFactory.addWidget(self.qfLeftZone, 0, 0, 1, 1)
         self.splitter = QtGui.QSplitter(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -98,6 +98,8 @@ class Ui_factory(object):
         self.qfInfo.setFrameShape(QtGui.QFrame.StyledPanel)
         self.qfInfo.setObjectName(_fromUtf8("qfInfo"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.qfInfo)
+        self.horizontalLayout.setSpacing(2)
+        self.horizontalLayout.setMargin(0)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.verticalLayout = QtGui.QVBoxLayout()
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
@@ -114,7 +116,7 @@ class Ui_factory(object):
         self.textEdit.setMaximumSize(QtCore.QSize(16777215, 200))
         self.textEdit.setObjectName(_fromUtf8("textEdit"))
         self.horizontalLayout.addWidget(self.textEdit)
-        self.gridLayout.addWidget(self.splitter, 0, 1, 1, 1)
+        self.glFactory.addWidget(self.splitter, 0, 1, 1, 1)
         factory.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(factory)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 826, 21))
@@ -131,6 +133,12 @@ class Ui_factory(object):
         self.miCreateSelIcons.setObjectName(_fromUtf8("miCreateSelIcons"))
         self.miCreateAllIcons = QtGui.QAction(factory)
         self.miCreateAllIcons.setObjectName(_fromUtf8("miCreateAllIcons"))
+        self.miCreateSelPreviews = QtGui.QAction(factory)
+        self.miCreateSelPreviews.setObjectName(_fromUtf8("miCreateSelPreviews"))
+        self.miCreateAllPreviews = QtGui.QAction(factory)
+        self.miCreateAllPreviews.setObjectName(_fromUtf8("miCreateAllPreviews"))
+        self.mPreview.addAction(self.miCreateSelPreviews)
+        self.mPreview.addAction(self.miCreateAllPreviews)
         self.mThumbnail.addAction(self.miCreateSelIcons)
         self.mThumbnail.addAction(self.miCreateAllIcons)
         self.menubar.addAction(self.mPreview.menuAction())
@@ -149,4 +157,6 @@ class Ui_factory(object):
         self.mThumbnail.setTitle(_translate("factory", "Thumbnail", None))
         self.miCreateSelIcons.setText(_translate("factory", "Create Selected Icons", None))
         self.miCreateAllIcons.setText(_translate("factory", "Create All Icons", None))
+        self.miCreateSelPreviews.setText(_translate("factory", "Create Selected Previews", None))
+        self.miCreateAllPreviews.setText(_translate("factory", "Create All Previews", None))
 

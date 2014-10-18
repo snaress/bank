@@ -1,5 +1,6 @@
 import os, sys
 from PyQt4 import QtGui
+from lib.qt import preview
 from functools import partial
 from lib.qt import procQt as pQt
 from appli.factory import factory
@@ -25,9 +26,14 @@ class FactoryUi(QtGui.QMainWindow, factoryUI.Ui_factory, pQt.Style):
         self.log.debug("#-- Setup Factory Ui --#")
         self.setupUi(self)
         self.setStyleSheet(self.applyStyle(styleName='darkOrange'))
+        self.mPreview.aboutToShow.connect(self.rf_previewMenu)
+        self.miCreateSelPreviews.triggered.connect(partial(self.on_createIcone, 'sel', 'preview'))
+        self.miCreateAllPreviews.triggered.connect(partial(self.on_createIcone, 'all', 'preview'))
         self.mThumbnail.aboutToShow.connect(self.rf_thumbnailMenu)
         self.miCreateSelIcons.triggered.connect(partial(self.on_createIcone, 'sel', 'icon'))
         self.miCreateAllIcons.triggered.connect(partial(self.on_createIcone, 'all', 'icon'))
+        self.wgPreview = Preview(self)
+        self.vlLeftZone.insertWidget(0, self.wgPreview)
         self.rbTexture.clicked.connect(self.on_switch)
         self.rbShader.clicked.connect(self.on_switch)
         self.rbStockShot.clicked.connect(self.on_switch)
@@ -67,6 +73,17 @@ class FactoryUi(QtGui.QMainWindow, factoryUI.Ui_factory, pQt.Style):
                     nc += 1
                     if nc == NC:
                         nc = 0
+
+    def rf_previewMenu(self):
+        """ Refresh preview menu """
+        self.miCreateSelPreviews.setEnabled(False)
+        self.miCreateAllPreviews.setEnabled(False)
+        selItems = self.twTree.selectedItems()
+        if selItems:
+            if selItems[0].node.nodeType == 'subCategory':
+                self.miCreateAllPreviews.setEnabled(True)
+                if self.getSelThumbnails():
+                    self.miCreateSelPreviews.setEnabled(True)
 
     def rf_thumbnailMenu(self):
         """ Refresh thumbnail menu """
@@ -162,16 +179,61 @@ class Thumbnail(QtGui.QWidget, wgtThumbnailUI.Ui_thumbnail):
     def _setupUi(self):
         """ Setup widget """
         self.setupUi(self)
+        self.bPreview.clicked.connect(self.on_icon)
         self.rf_icon()
+
+    @property
+    def iconFile(self):
+        """ Get icon file
+            @return: (str) : Icon absolute path """
+        iconPath = os.path.join(os.path.dirname(self.node.nodePath), '_icon')
+        return pFile.conformPath(os.path.join(iconPath, '%s.png' % self.node.nodeName))
+
+    @property
+    def previewFile(self):
+        """ Get preview file
+            @return: (str) : Preview absolute path """
+        previewPath = os.path.join(os.path.dirname(self.node.nodePath), '_preview')
+        return pFile.conformPath(os.path.join(previewPath, '%s.png' % self.node.nodeName))
 
     def rf_icon(self):
         """ Refresh thumbnail icon """
-        iconPath = pFile.conformPath(os.path.join(os.path.dirname(self.node.nodePath), '_icon'))
-        iconFile = pFile.conformPath(os.path.join(iconPath, '%s.png' % self.node.nodeName))
-        if not os.path.exists(iconFile):
+        #-- Icone --#
+        if not os.path.exists(self.iconFile):
             self.bPreview.setIcon(QtGui.QIcon(self.noImage))
         else:
-            self.bPreview.setIcon(QtGui.QIcon(iconFile))
+            self.bPreview.setIcon(QtGui.QIcon(self.iconFile))
+        #-- Preview --#
+        if not os.path.exists(self.previewFile):
+            self.cbPreview.setText("No Preview")
+        else:
+            self.cbPreview.setText("")
+
+    def on_icon(self):
+        """ Command launched when thumbnail icon is clicked """
+        if os.path.exists(self.previewFile):
+            self.mainUi.wgPreview.previewFile = self.previewFile
+            self.mainUi.wgPreview.imagePath = self.node.nodePath
+        else:
+            self.mainUi.wgPreview.previewFile = None
+            self.mainUi.wgPreview.imagePath = None
+        self.mainUi.wgPreview.rf_preview()
+        self.mainUi.wgPreview.rf_btnsVisibility()
+
+
+class Preview(preview.Preview):
+
+    def __init__(self, mainUi):
+        self.mainUi = mainUi
+        super(Preview, self).__init__(widgetSize=(250, 250), previewSize=(245, 245))
+        self._setupWidget()
+
+    def _setupWidget(self):
+        """ Setup widget """
+        self.qfButtonsDn.setVisible(False)
+        self.bImage.setEnabled(False)
+        self.bSequence.setEnabled(False)
+        self.bMovie.setEnabled(False)
 
 
 def launch(logLvl='info'):

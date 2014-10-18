@@ -30,13 +30,13 @@
     <widget class="QCheckBox" name="cbPreview">
      <property name="minimumSize">
       <size>
-       <width>18</width>
+       <width>0</width>
        <height>0</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>18</width>
+       <width>16777215</width>
        <height>16777215</height>
       </size>
      </property>

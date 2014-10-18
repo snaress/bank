@@ -59,9 +59,14 @@ class Factory(object):
         thumbFile = os.path.splitext(os.path.basename(imaFile))[0]
         thumbAbsPath = os.path.normpath(os.path.join(thumbPath, '%s.png' % thumbFile))
         if imaType == 'icon':
-            os.system("%s -out png -ratio -resize 100 100 -overwrite -o %s %s" % (self.nConvert,
-                                                                                  thumbAbsPath,
-                                                                                  srcFile))
+            iconSize = 100
+        elif imaType == 'preview':
+            iconSize = 250
+        else:
+            iconSize = 80
+        os.system("%s -out png -ratio -resize %s %s -overwrite -o %s %s" % (self.nConvert, iconSize,
+                                                                            iconSize, thumbAbsPath,
+                                                                            srcFile))
 
 
 class Tree(object):
@@ -93,3 +98,25 @@ class TreeNode(object):
         self.nodeType = nodeType
         self.nodeName = nodeName
         self.nodePath = nodePath
+
+    @property
+    def seqPath(self):
+        return os.path.join(self.nodePath, 'seq')
+
+    @property
+    def movPath(self):
+        return os.path.join(self.nodePath, 'mov')
+
+    @property
+    def hasSeq(self):
+        if os.path.exists(self.seqPath):
+            return True
+        else:
+            return False
+
+    @property
+    def hasMov(self):
+        if os.path.exists(self.movPath):
+            return True
+        else:
+            return False
