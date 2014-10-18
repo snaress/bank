@@ -9,6 +9,9 @@ ws = cd F:\rnd\workspace
 ma = "C:\Program Files\Autodesk\Maya2012\bin\maya.exe"
 textPad = "C:\Program Files (x86)\TextPad 6\TextPad.exe"
 designer = "C:\Python27\Lib\site-packages\PyQt4\designer.exe"
+nConvert = F:\rnd\workspace\bank\lib\system\_lib\nConvert\nconvert.exe
+djvView = "C:\Program Files\djv-1.0.2-Windows-64\bin\djv_view.com" $*
+djvInfo = "C:\Program Files\djv-1.0.2-Windows-64\bin\djv_info.exe" $*
 
 my = "F:\rnd\workspace\bank\lib\env\alias.txt"
 pyUic = C:\Python27\Lib\site-packages\PyQt4\pyuic4.bat $*
@@ -18,7 +21,8 @@ scriptEditor = python F:\rnd\workspace\bank\lib\qt\__exeSE__.py
 userManager = python F:\rnd\workspace\bank\appli\userManager\__exe__.py $*
 prodManager = python F:\rnd\workspace\bank\appli\prodManager\__exe__.py $*
 grapher = python F:\rnd\workspace\bank\appli\grapher\__exe__.py $*
+factory = python F:\rnd\workspace\bank\appli\factory\__exe__.py
 framing = python F:\rnd\workspace\bank\lib\nuke\framingOpt.py $*
-nConvert = F:\rnd\workspace\bank\lib\system\_lib\nConvert\nconvert.exe
+
 
 aliasHelp = type "F:\rnd\workspace\bank\lib\env\alias.txt"
