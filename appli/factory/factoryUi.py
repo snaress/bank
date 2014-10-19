@@ -26,12 +26,11 @@ class FactoryUi(QtGui.QMainWindow, factoryUI.Ui_factory, pQt.Style):
         self.log.debug("#-- Setup Factory Ui --#")
         self.setupUi(self)
         self.setStyleSheet(self.applyStyle(styleName='darkOrange'))
-        self.mPreview.aboutToShow.connect(self.rf_previewMenu)
-        self.miCreateSelPreviews.triggered.connect(partial(self.on_createIcone, 'sel', 'preview'))
-        self.miCreateAllPreviews.triggered.connect(partial(self.on_createIcone, 'all', 'preview'))
         self.mThumbnail.aboutToShow.connect(self.rf_thumbnailMenu)
         self.miCreateSelIcons.triggered.connect(partial(self.on_createIcone, 'sel', 'icon'))
         self.miCreateAllIcons.triggered.connect(partial(self.on_createIcone, 'all', 'icon'))
+        self.miCreateSelPreviews.triggered.connect(partial(self.on_createIcone, 'sel', 'preview'))
+        self.miCreateAllPreviews.triggered.connect(partial(self.on_createIcone, 'all', 'preview'))
         self.wgPreview = Preview(self)
         self.vlLeftZone.insertWidget(0, self.wgPreview)
         self.rbTexture.clicked.connect(self.on_switch)
@@ -39,6 +38,7 @@ class FactoryUi(QtGui.QMainWindow, factoryUI.Ui_factory, pQt.Style):
         self.rbStockShot.clicked.connect(self.on_switch)
         self.twTree.itemClicked.connect(self.rf_thumbnail)
         self.sbColumns.editingFinished.connect(self.rf_thumbnail)
+        self.cbStorage.clicked.connect(self.on_showStorage)
         self.twThumbnail.header().setStretchLastSection(False)
 
     def rf_tree(self):
@@ -74,38 +74,26 @@ class FactoryUi(QtGui.QMainWindow, factoryUI.Ui_factory, pQt.Style):
                     if nc == NC:
                         nc = 0
 
-    def rf_previewMenu(self):
-        """ Refresh preview menu """
+    def rf_thumbnailMenu(self):
+        """ Refresh thumbnail menu """
+        self.miCreateSelIcons.setEnabled(False)
+        self.miCreateAllIcons.setEnabled(False)
         self.miCreateSelPreviews.setEnabled(False)
         self.miCreateAllPreviews.setEnabled(False)
         selItems = self.twTree.selectedItems()
         if selItems:
             if selItems[0].node.nodeType == 'subCategory':
+                self.miCreateAllIcons.setEnabled(True)
                 self.miCreateAllPreviews.setEnabled(True)
                 if self.getSelThumbnails():
-                    self.miCreateSelPreviews.setEnabled(True)
-
-    def rf_thumbnailMenu(self):
-        """ Refresh thumbnail menu """
-        self.miCreateSelIcons.setEnabled(False)
-        self.miCreateAllIcons.setEnabled(False)
-        selItems = self.twTree.selectedItems()
-        if selItems:
-            if selItems[0].node.nodeType == 'subCategory':
-                self.miCreateAllIcons.setEnabled(True)
-                if self.getSelThumbnails():
                     self.miCreateSelIcons.setEnabled(True)
+                    self.miCreateSelPreviews.setEnabled(True)
 
     def rf_thumbnailColumns(self):
         """ Refresh factory thumbnail columns """
         self.twThumbnail.setColumnCount(self.sbColumns.value())
         for n in range(self.twThumbnail.columnCount()):
             self.twThumbnail.header().setResizeMode(n, QtGui.QHeaderView.ResizeToContents)
-
-    def on_switch(self):
-        """ Command launched when treeSwitch QRadioButton is clicked """
-        self.rf_tree()
-        self.rf_thumbnail()
 
     def on_createIcone(self, mode, _type):
         """ Command launched when 'Create Icons' menuItems are clicked
@@ -117,6 +105,15 @@ class FactoryUi(QtGui.QMainWindow, factoryUI.Ui_factory, pQt.Style):
             wList = self.getAllThumbnails()
         for w in wList:
             self.factory.ud_thumbnailImages(w.node.nodePath, _type)
+
+    def on_switch(self):
+        """ Command launched when treeSwitch QRadioButton is clicked """
+        self.rf_tree()
+        self.rf_thumbnail()
+
+    def on_showStorage(self):
+        """ Command launched when 'Storage' QCheckBox is clicked """
+        self.qfRightZone.setVisible(self.cbStorage.isChecked())
 
     def getSelTree(self):
         """ Get selected tree
@@ -180,6 +177,7 @@ class Thumbnail(QtGui.QWidget, wgtThumbnailUI.Ui_thumbnail):
         """ Setup widget """
         self.setupUi(self)
         self.bPreview.clicked.connect(self.on_icon)
+        self.cbPreview.clicked.connect(self.on_selBox)
         self.rf_icon()
 
     @property
@@ -209,6 +207,14 @@ class Thumbnail(QtGui.QWidget, wgtThumbnailUI.Ui_thumbnail):
         else:
             self.cbPreview.setText("")
 
+    def rf_info(self):
+        """ Refresh file info """
+        info = self.node.getFileInfo()
+        if info is not None:
+            self.mainUi.teInfo.setText(info)
+        else:
+            self.mainUi.teInfo.clear()
+
     def on_icon(self):
         """ Command launched when thumbnail icon is clicked """
         if os.path.exists(self.previewFile):
@@ -217,8 +223,21 @@ class Thumbnail(QtGui.QWidget, wgtThumbnailUI.Ui_thumbnail):
         else:
             self.mainUi.wgPreview.previewFile = None
             self.mainUi.wgPreview.imagePath = None
+        if self.node.hasMovie():
+            self.mainUi.wgPreview.moviePath = self.node.movieFile
+        else:
+            self.mainUi.wgPreview.moviePath = None
+        if self.node.hasSequence():
+            self.mainUi.wgPreview.sequencePath = self.node.sequencePath
+        else:
+            self.mainUi.wgPreview.sequencePath = None
         self.mainUi.wgPreview.rf_preview()
         self.mainUi.wgPreview.rf_btnsVisibility()
+        self.rf_info()
+
+    def on_selBox(self):
+        """ Command launched when thumbnail QCheckBox is clicked """
+        print 'sel'
 
 
 class Preview(preview.Preview):

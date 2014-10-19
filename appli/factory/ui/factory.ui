@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>826</width>
-    <height>600</height>
+    <width>1086</width>
+    <height>637</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Factory</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="glFactory">
+   <layout class="QGridLayout" name="gridLayout">
     <property name="margin">
      <number>0</number>
     </property>
@@ -212,6 +212,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="cbStorage">
+            <property name="text">
+             <string>Storage</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="verticalSpacer">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -227,7 +237,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QTextEdit" name="textEdit">
+         <widget class="QTextEdit" name="teInfo">
           <property name="maximumSize">
            <size>
             <width>16777215</width>
@@ -240,6 +250,70 @@
       </widget>
      </widget>
     </item>
+    <item row="0" column="2">
+     <widget class="QFrame" name="qfRightZone">
+      <property name="minimumSize">
+       <size>
+        <width>250</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>250</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <layout class="QVBoxLayout" name="vlRightZone">
+       <property name="spacing">
+        <number>2</number>
+       </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QSplitter" name="splitter_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <widget class="QTreeWidget" name="twTextures">
+          <column>
+           <property name="text">
+            <string notr="true">Stored Textures</string>
+           </property>
+           <property name="textAlignment">
+            <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+           </property>
+          </column>
+         </widget>
+         <widget class="QTreeWidget" name="twShaders">
+          <column>
+           <property name="text">
+            <string notr="true">Stored Shaders</string>
+           </property>
+           <property name="textAlignment">
+            <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+           </property>
+          </column>
+         </widget>
+         <widget class="QTreeWidget" name="twStockShots">
+          <column>
+           <property name="text">
+            <string notr="true">Stored StockShots</string>
+           </property>
+           <property name="textAlignment">
+            <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+           </property>
+          </column>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -247,25 +321,26 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>826</width>
+     <width>1086</width>
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="mPreview">
-    <property name="title">
-     <string>Preview</string>
-    </property>
-    <addaction name="miCreateSelPreviews"/>
-    <addaction name="miCreateAllPreviews"/>
-   </widget>
    <widget class="QMenu" name="mThumbnail">
     <property name="title">
      <string>Thumbnail</string>
     </property>
     <addaction name="miCreateSelIcons"/>
     <addaction name="miCreateAllIcons"/>
+    <addaction name="separator"/>
+    <addaction name="miCreateSelPreviews"/>
+    <addaction name="miCreateAllPreviews"/>
    </widget>
-   <addaction name="mPreview"/>
+   <widget class="QMenu" name="mTransfert">
+    <property name="title">
+     <string>Transfert</string>
+    </property>
+   </widget>
+   <addaction name="mTransfert"/>
    <addaction name="mThumbnail"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -287,6 +362,16 @@
   <action name="miCreateAllPreviews">
    <property name="text">
     <string>Create All Previews</string>
+   </property>
+  </action>
+  <action name="miCreateSelDatas">
+   <property name="text">
+    <string>Create Selected Datas</string>
+   </property>
+  </action>
+  <action name="miCreateAllDatas">
+   <property name="text">
+    <string>Create All Datas</string>
    </property>
   </action>
  </widget>

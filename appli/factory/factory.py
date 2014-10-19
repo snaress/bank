@@ -100,23 +100,31 @@ class TreeNode(object):
         self.nodePath = nodePath
 
     @property
-    def seqPath(self):
-        return os.path.join(self.nodePath, 'seq')
+    def sequencePath(self):
+        path = os.path.join(os.path.dirname(self.nodePath), 'seq', self.nodeName)
+        return pFile.conformPath(path)
 
     @property
-    def movPath(self):
-        return os.path.join(self.nodePath, 'mov')
+    def movieFile(self):
+        path = os.path.join(os.path.dirname(self.nodePath), 'mov')
+        return pFile.conformPath(os.path.join(path, "%s.mov" % self.nodeName))
 
-    @property
-    def hasSeq(self):
-        if os.path.exists(self.seqPath):
+    def hasSequence(self):
+        if os.path.exists(self.sequencePath):
             return True
         else:
             return False
 
-    @property
-    def hasMov(self):
-        if os.path.exists(self.movPath):
+    def hasMovie(self):
+        if os.path.exists(self.movieFile):
             return True
         else:
             return False
+
+    def getFileInfo(self):
+        """ Get file info
+            @return: (str) : File info """
+        if self.hasSequence():
+            return pFile.Image().getInfo(self.sequencePath, returnAs='str')
+        else:
+            return pFile.Image().getInfo(self.nodePath, returnAs='str')
