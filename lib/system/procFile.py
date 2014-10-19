@@ -1,4 +1,4 @@
-import os, sys, math, time, logging
+import os, sys, math, time, logging, subprocess
 
 
 def conformPath(path):
@@ -216,6 +216,98 @@ class Logger(logging.Logger):
             return logging.DEBUG
 
 
+class Image(object):
+    """ Class to manipulate image or get info from file """
+
+    djvInfo = os.path.normpath("C:/Program Files/djv-1.0.2-Windows-64/bin/djv_info.exe")
+    djvList = os.path.normpath("C:/Program Files/djv-1.0.2-Windows-64/bin/djv_ls.exe")
+    djvConvert = os.path.normpath("C:/Program Files/djv-1.0.2-Windows-64/bin/djv_convert.exe")
+    nConvert = "F:/rnd/worspace/bank/lib/system/_lib/nConvert/nconvert.exe"
+
+    def __init__(self):
+        pass
+
+    def getInfo(self, path, options=None, returnAs='dict'):
+        """ get image file info
+            @param path: (str) : Directory or image file absolute path
+            @param options: (list) : Options from djv_info.exe
+            @param returnAs: (str) : 'dict' or 'str'
+            @return: (dict or str) : Image file info """
+        proc = self._getInfoProc(path, options)
+        result = proc.communicate()[0]
+        if not result.startswith('[ERROR]'):
+            info = self._getInfoDict(result, path)
+            if returnAs == 'dict':
+                return info
+            elif returnAs == 'str':
+                return self._getInfoString(result, path)
+
+    def _getInfoProc(self, path, options):
+        """ Get info subprocess cmdArgs
+            @param path: (str) : Directory or image file absolute path
+            @param options: (list) : Options from djv_info.exe
+            @return: (object) : Subprocess """
+        cmd = [self.djvInfo, os.path.normpath(path)]
+        if options is not None:
+            for opt in options:
+                cmd.append(opt)
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        return proc
+
+    def _getInfoDict(self, result, path):
+        """ Translate info subprocess result to dict
+            @param result: Subprocess result
+            @param path: (str) : Directory or image file absolute path
+            @return: (dict) : Info dict """
+        info = {'_order': []}
+        if not os.path.isdir(path):
+            path = os.path.dirname(path)
+        for line in result.split('\r'):
+            l = line.strip().replace('\n', '')
+            if not l == '' or l == ' ':
+                datas = self._cleanResultLine(l)
+                info['_order'].append(datas[0])
+                info[datas[0]] = {'name': datas[0], 'path': path,
+                                  'width': datas[1].split(':')[0].split('x')[0],
+                                  'height': datas[1].split(':')[0].split('x')[1],
+                                  'ratio': datas[1].split(':')[1],
+                                  'channel': datas[2],
+                                  'depth': datas[3].replace('U', ''),
+                                  'duration': datas[4].split('@')[0],
+                                  'speed': datas[4].split('@')[1]}
+        return info
+
+    # noinspection PyTypeChecker
+    def _getInfoString(self, result, path):
+        """ Translate info subprocess result to string
+            @param result: Subprocess result
+            @param path: (str) : Directory or image file absolute path
+            @return: (str) : Info string """
+        txt = []
+        infoOrder = ['path', 'name', 'width', 'height', 'ratio', 'channel', 'depth',
+                     'duration', 'speed']
+        infoDict = self._getInfoDict(result, path)
+        for ima in infoDict['_order']:
+            txt.append("#-- %s --#" % ima)
+            for info in infoOrder:
+                if isinstance(infoDict[ima][info], str):
+                    txt.append("%s = %r" % (info, infoDict[ima][info]))
+                else:
+                    txt.append("%s = %s" % (info, infoDict[ima][info]))
+        return '\n'.join(txt)
+
+    def _cleanResultLine(self, line):
+        """ Get clean line from result line
+            @param line: (str) : result line
+            @return: (list) : Clean line args """
+        datas = line.split(' ')
+        cleanLine = []
+        for n in range(len(datas)):
+            if not datas[n] == '':
+                cleanLine.append(datas[n])
+        return cleanLine
+
+
 class ProgressBar(object):
     """ Create a progress bar
         @param valMax: (int) : Max iteration
@@ -241,4 +333,3 @@ class ProgressBar(object):
         bar = int(perc / scale)
         out = "\r %10s [%s%s] %3d %%" % (self.title, '=' * bar, ' ' * (self.maxBar - bar), perc)
         sys.stdout.write(out)
-
