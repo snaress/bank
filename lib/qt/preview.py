@@ -2,6 +2,7 @@ import os, sys, subprocess
 from lib import qt
 from PyQt4 import QtGui, QtCore
 from lib.qt import procQt as pQt
+from lib.system import procFile as pFile
 if __name__ == '__main__':
     pQt.CompileUi(uiFile=qt.uiList['preview'])
 from lib.qt.ui import previewUI
@@ -14,7 +15,6 @@ class Preview(QtGui.QWidget, previewUI.Ui_preview):
 
     noImage = os.path.join(qt.libPath, 'ima', 'noImage_500.jpg')
     djvView = os.path.normpath("C:/Program Files/djv-1.0.2-Windows-64/bin/djv_view.exe")
-    djvInfo = os.path.normpath("C:/Program Files/djv-1.0.2-Windows-64/bin/djv_info.exe")
 
     def __init__(self, widgetSize=(200, 200), previewSize=(200, 200)):
         super(Preview, self).__init__()
@@ -97,16 +97,19 @@ class Preview(QtGui.QWidget, previewUI.Ui_preview):
 
     def on_image(self):
         """ Command launched when 'Image' QPushButton is clicked """
-        proc = subprocess.Popen([self.djvView, os.path.normcase(self.imagePath)])
+        proc = subprocess.Popen([self.djvView, os.path.normpath(self.imagePath)])
         proc.poll()
 
     def on_sequence(self):
         """ Command launched when 'Sequence' QPushButton is clicked """
-        pass
+        fileName = pFile.Image().getInfo(self.sequencePath)['_order'][0]
+        absPath = os.path.normpath(os.path.join(self.sequencePath, fileName))
+        proc = subprocess.Popen([self.djvView, absPath])
+        proc.poll()
 
     def on_movie(self):
         """ Command launched when 'Movie' QPushButton is clicked """
-        pass
+        os.system('"%s"' % os.path.normpath(self.moviePath))
 
     def on_explorer(self):
         """ Command launched when 'Explorer' QPushButton is clicked """

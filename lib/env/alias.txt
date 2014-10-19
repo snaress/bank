@@ -12,6 +12,7 @@ designer = "C:\Python27\Lib\site-packages\PyQt4\designer.exe"
 nConvert = F:\rnd\workspace\bank\lib\system\_lib\nConvert\nconvert.exe
 djvView = "C:\Program Files\djv-1.0.2-Windows-64\bin\djv_view.com" $*
 djvInfo = "C:\Program Files\djv-1.0.2-Windows-64\bin\djv_info.exe" $*
+djvList = "C:\Program Files\djv-1.0.2-Windows-64\bin\djv_ls.exe" $*
 
 my = "F:\rnd\workspace\bank\lib\env\alias.txt"
 pyUic = C:\Python27\Lib\site-packages\PyQt4\pyuic4.bat $*
