@@ -1,4 +1,4 @@
-import os, sys, math, time, logging, subprocess
+import os, sys, math, time, subprocess
 
 
 def conformPath(path):
@@ -179,41 +179,36 @@ def subProcessPrint(process, errorFilters, errorMessages, force=False):
         if process.poll() is not None:
             break
 
-
-class Logger(logging.Logger):
-    """ Print given message with log levels
+class Logger(object):
+    """ Print given message using log levels
         @param title: (str) : Log title
         @param level: (str) : Log level ('critical', 'error', 'warning', 'info', 'debug') """
 
     def __init__(self, title='LOG', level='info'):
-        self._level = self._setLevel(level)
-        super(Logger, self).__init__(title, level=self._level)
-        self.addHandler(self._setFormat())
+        self.levels = ['critical', 'error', 'warning', 'info', 'debug']
+        self.title = title
+        self.level = level
+        self.lvlIndex = self.levels.index(self.level)
 
-    def _setFormat(self):
-        """ Set log format
-            @return: (object) : Log streamHandler """
-        console = logging.StreamHandler()
-        console.setLevel(self._level)
-        formatter = logging.Formatter('[%(name)s] | %(levelname)s | %(message)s')
-        console.setFormatter(formatter)
-        return console
+    def critical(self, message):
+        if self.lvlIndex >= 0:
+            print "[%s] | CRITICAL | %s" % (self.title, message)
 
-    def _setLevel(self, lvl):
-        """ Set log level
-            @param lvl: (str) : Log level ('critical', 'error', 'warning', 'info', 'debug')
-            @return: (object) : Log level
-        """
-        if lvl == 'critical':
-            return logging.CRITICAL
-        elif lvl == 'error':
-            return logging.ERROR
-        elif lvl == 'warning':
-            return logging.WARNING
-        elif lvl == 'info':
-            return logging.INFO
-        elif lvl == 'debug':
-            return logging.DEBUG
+    def error(self, message):
+        if self.lvlIndex >= 1:
+            print "[%s] | ERROR | %s" % (self.title, message)
+
+    def warning(self, message):
+        if self.lvlIndex >= 2:
+            print "[%s] | WARNING | %s" % (self.title, message)
+
+    def info(self, message):
+        if self.lvlIndex >= 3:
+            print "[%s] | INFO | %s" % (self.title, message)
+
+    def debug(self, message):
+        if self.lvlIndex >= 4:
+            print "[%s] | DEBUG | %s" % (self.title, message)
 
 
 class Image(object):
