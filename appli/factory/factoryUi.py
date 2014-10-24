@@ -6,6 +6,11 @@ from lib.qt import procQt as pQt
 from appli.factory import factory
 from lib.system import procFile as pFile
 from appli.factory.ui import factoryUI, wgtThumbnailUI
+try:
+    import maya.cmds as mc
+    __inMaya__ = True
+except:
+    __inMaya__ = False
 
 
 class FactoryUi(QtGui.QMainWindow, factoryUI.Ui_factory, pQt.Style):
@@ -15,6 +20,7 @@ class FactoryUi(QtGui.QMainWindow, factoryUI.Ui_factory, pQt.Style):
     def __init__(self, logLvl='info'):
         self.log = pFile.Logger(title="Factory-ui", level=logLvl)
         self.log.info("#-- Launching Factory --#")
+        self.log.info("Mode StandAlone: %s" % __inMaya__)
         self.factory = factory.Factory()
         super(FactoryUi, self).__init__()
         self._setupUi()
@@ -31,6 +37,8 @@ class FactoryUi(QtGui.QMainWindow, factoryUI.Ui_factory, pQt.Style):
         self.miCreateAllIcons.triggered.connect(partial(self.on_createIcone, 'all', 'icon'))
         self.miCreateSelPreviews.triggered.connect(partial(self.on_createIcone, 'sel', 'preview'))
         self.miCreateAllPreviews.triggered.connect(partial(self.on_createIcone, 'all', 'preview'))
+        self.miCreateSelDatas.triggered.connect(partial(self.on_createData, 'sel'))
+        self.miCreateAllDatas.triggered.connect(partial(self.on_createData, 'all'))
         self.wgPreview = Preview(self)
         self.vlLeftZone.insertWidget(0, self.wgPreview)
         self.rbTexture.clicked.connect(self.on_switch)
@@ -40,6 +48,9 @@ class FactoryUi(QtGui.QMainWindow, factoryUI.Ui_factory, pQt.Style):
         self.sbColumns.editingFinished.connect(self.rf_thumbnail)
         self.cbStorage.clicked.connect(self.on_showStorage)
         self.twThumbnail.header().setStretchLastSection(False)
+        self.twTexture.itemClicked.connect(partial(self.on_storageItem, 'texture'))
+        self.twShader.itemClicked.connect(partial(self.on_storageItem, 'shader'))
+        self.twStockShot.itemClicked.connect(partial(self.on_storageItem, 'stockShot'))
 
     def rf_tree(self):
         """ Refresh factory tree """
@@ -80,14 +91,18 @@ class FactoryUi(QtGui.QMainWindow, factoryUI.Ui_factory, pQt.Style):
         self.miCreateAllIcons.setEnabled(False)
         self.miCreateSelPreviews.setEnabled(False)
         self.miCreateAllPreviews.setEnabled(False)
+        self.miCreateSelDatas.setEnabled(False)
+        self.miCreateAllDatas.setEnabled(False)
         selItems = self.twTree.selectedItems()
         if selItems:
             if selItems[0].node.nodeType == 'subCategory':
                 self.miCreateAllIcons.setEnabled(True)
                 self.miCreateAllPreviews.setEnabled(True)
+                self.miCreateAllDatas.setEnabled(True)
                 if self.getSelThumbnails():
                     self.miCreateSelIcons.setEnabled(True)
                     self.miCreateSelPreviews.setEnabled(True)
+                    self.miCreateSelDatas.setEnabled(True)
 
     def rf_thumbnailColumns(self):
         """ Refresh factory thumbnail columns """
@@ -106,14 +121,30 @@ class FactoryUi(QtGui.QMainWindow, factoryUI.Ui_factory, pQt.Style):
         for w in wList:
             self.factory.ud_thumbnailImages(w.node.nodePath, _type)
 
+    def on_createData(self, mode):
+        """ Command launched when 'Create Datas' menuItems are clicked
+            @param mode: (str) : 'sel' or 'all' """
+        if mode == 'sel':
+            wList = self.getSelThumbnails()
+        else:
+            wList = self.getAllThumbnails()
+        for w in wList:
+            self.factory.ud_thumbnailDatas(w.node.nodePath, w.node._tree.treeName)
+
     def on_switch(self):
         """ Command launched when treeSwitch QRadioButton is clicked """
+        tree = getattr(self.factory, self.getSelTree())
+        self.factory.parseTree(tree)
         self.rf_tree()
         self.rf_thumbnail()
 
     def on_showStorage(self):
         """ Command launched when 'Storage' QCheckBox is clicked """
         self.qfRightZone.setVisible(self.cbStorage.isChecked())
+
+    def on_storageItem(self, treeName):
+        """ Command launched when 'storage' QTreeWidgetItem is clicked """
+
 
     def getSelTree(self):
         """ Get selected tree
@@ -144,6 +175,26 @@ class FactoryUi(QtGui.QMainWindow, factoryUI.Ui_factory, pQt.Style):
                 selWidgets.append(w)
         return selWidgets
 
+    def getStorageTree(self):
+        """ Get storage QTreeWidget from selected tree
+            @return: (object) : QTreeWidget """
+        if self.getSelTree() == 'texture':
+            return self.twTexture
+        elif self.getSelTree() == 'shader':
+            return self.twShader
+        elif self.getSelTree() == 'stockShot':
+            return self.twStockShot
+
+    def getStorageItem(self, twTree, nodePath):
+        """ Get storage item from given storageTree and nodePath
+            @param twTree: (object) : QTreeWidgetItem
+            @param nodePath: (str) : Node absolute path
+            @return: (object) : QTreeWidgetItem """
+        allItems = pQt.getTopItems(twTree)
+        for item in allItems:
+            if item.node.nodePath == nodePath:
+                return item
+
     @staticmethod
     def _newTreeItem(node):
         """ Create new treeItem
@@ -160,6 +211,16 @@ class FactoryUi(QtGui.QMainWindow, factoryUI.Ui_factory, pQt.Style):
             @return: (object) : QTreeWidgetItem """
         newItem = QtGui.QTreeWidgetItem()
         newItem._widgets = []
+        return newItem
+
+    @staticmethod
+    def _newStorageItem(node):
+        """ Create new storage treeItem
+            @param node: (object) : Factory node
+            @return: (object) : QTreeWidgetItem """
+        newItem = QtGui.QTreeWidgetItem()
+        newItem.setText(0, node.nodeName)
+        newItem.node = node
         return newItem
 
 
@@ -209,9 +270,8 @@ class Thumbnail(QtGui.QWidget, wgtThumbnailUI.Ui_thumbnail):
 
     def rf_info(self):
         """ Refresh file info """
-        info = self.node.getFileInfo()
-        if info is not None:
-            self.mainUi.teInfo.setText(info)
+        if self.node.datas is not None:
+            self.mainUi.teInfo.setText(self.node.datasString)
         else:
             self.mainUi.teInfo.clear()
 
@@ -237,7 +297,13 @@ class Thumbnail(QtGui.QWidget, wgtThumbnailUI.Ui_thumbnail):
 
     def on_selBox(self):
         """ Command launched when thumbnail QCheckBox is clicked """
-        print 'sel'
+        twTree = self.mainUi.getStorageTree()
+        if self.cbPreview.isChecked():
+            newItem = self.mainUi._newStorageItem(self.node)
+            twTree.addTopLevelItem(newItem)
+        else:
+            storageItem = self.mainUi.getStorageItem(twTree, self.node.nodePath)
+            twTree.takeTopLevelItem(twTree.indexOfTopLevelItem(storageItem))
 
 
 class Preview(preview.Preview):

@@ -261,15 +261,16 @@ class Image(object):
             l = line.strip().replace('\n', '')
             if not l == '' or l == ' ':
                 datas = self._cleanResultLine(l)
-                info['_order'].append(datas[0])
-                info[datas[0]] = {'name': datas[0], 'path': path,
-                                  'width': datas[1].split(':')[0].split('x')[0],
-                                  'height': datas[1].split(':')[0].split('x')[1],
-                                  'ratio': datas[1].split(':')[1],
-                                  'channel': datas[2],
-                                  'depth': datas[3].replace('U', ''),
-                                  'duration': datas[4].split('@')[0],
-                                  'speed': datas[4].split('@')[1]}
+                name = os.path.splitext(datas[0])[0].split('.')[0]
+                info['_order'].append(name)
+                info[name] = {'name': datas[0], 'path': path,
+                              'width': datas[1].split(':')[0].split('x')[0],
+                              'height': datas[1].split(':')[0].split('x')[1],
+                              'ratio': datas[1].split(':')[1],
+                              'channel': datas[2],
+                              'depth': datas[3].replace('U', ''),
+                              'duration': datas[4].split('@')[0],
+                              'speed': datas[4].split('@')[1]}
         return info
 
     # noinspection PyTypeChecker

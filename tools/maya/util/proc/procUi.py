@@ -5,6 +5,7 @@ try:
 except:
     pass
 
+
 def getMayaMainWindow():
     """ Get maya main window
         @return: (object) : Maya main window """
